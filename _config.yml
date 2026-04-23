@@ -1,0 +1,21 @@
+title: Agentic Coding in Terminal
+description: Workshop materials — Apex Builders Collective × Info PC
+remote_theme: just-the-docs/just-the-docs
+
+plugins:
+  - jekyll-remote-theme
+
+permalink: pretty
+
+color_scheme: dark
+search_enabled: true
+
+aux_links:
+  "View on GitHub":
+    - "https://github.com/stcomiin/claude-notes"
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
