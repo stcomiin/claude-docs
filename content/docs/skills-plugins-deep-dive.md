@@ -1,9 +1,7 @@
 ---
 title: Skills & Plugins Deep Dive
-nav_order: 3
+weight: 3
 ---
-
-# Skills & Plugins Deep Dive
 
 > The sections above cover what skills and plugins *are*. The deep dive below covers *why specific ones matter* — walking through notable tools in the ecosystem, how they prevent vibe coding, and when to reach for which. This is a living list that grows as new tools emerge.
 
@@ -599,7 +597,7 @@ When it finishes, open `ocr_tech_scan.md` and skim it. You should have a genuine
 
 What it should look like:
 
-![OCR tech scan sample output](assets/images/ocr-tech-scan-sample.png)
+![OCR tech scan sample output](/images/ocr-tech-scan-sample.png)
 
 ### Phase 2 — Convert to Polished Deliverables (8 min)
 
@@ -702,4 +700,4 @@ Open the files GSD generated — `REQUIREMENTS.md`, `CONTEXT.md`, and the task p
 
 ---
 
-[← Back to main page](.)
+[← Back to main page](/docs/)

@@ -1,9 +1,7 @@
 ---
 title: Cheat Sheet for Claude Code
-nav_order: 4
+weight: 4
 ---
-
-# Cheat Sheet for Claude Code
 
 A printable reference attendees can take home. One page (ish), organized by "what problem am I solving right now."
 
@@ -152,4 +150,4 @@ git diff main | claude -p "security review" --model haiku --max-budget-usd 1.00
 
 ---
 
-[← Back to main page](.)
+[← Back to main page](/docs/)

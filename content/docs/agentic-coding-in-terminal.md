@@ -1,9 +1,7 @@
 ---
 title: Agentic Coding in Terminal
-nav_order: 1
+weight: 1
 ---
-
-# Agentic Coding in Terminal
 
 **Apex Builders Collective** × **Info PC • April** 2026
 
@@ -89,28 +87,28 @@ Before we go deeper, here are some commands / CLI flags that are useful.
     
     Line 1:  Model | Context Length | Context % (usable) | Git Branch | Skills | Thinking Effort 
     
-    ![cc-status-line sample](assets/images/statusline-sample.png)
+    ![cc-status-line sample](/images/statusline-sample.png)
     
     - Installation step by step:
         1. Run `npx -y ccstatusline@latest` and select `Edit Lines` option (via pressing enter)
             
-            ![Step 1](assets/images/statusline-step1.png)
+            ![Step 1](/images/statusline-step1.png)
             
         2. Select which line to add 
             
-            ![Step 2](assets/images/statusline-step2.png)
+            ![Step 2](/images/statusline-step2.png)
             
         3. Decide where to put (tip: use Separator to cleanly separate widgets)
             
-            ![Step 3](assets/images/statusline-step3.png)
+            ![Step 3](/images/statusline-step3.png)
             
         4. Press (a) to add via picker and start typing to search (e.g thinking)
             
-            ![Step 4](assets/images/statusline-step4.png)
+            ![Step 4](/images/statusline-step4.png)
             
         5. Press `Esc` to return to Main Menu and select enter on `Install to Claude Code` or `Save & Exit` option
             
-            ![Step 5](assets/images/statusline-step5.png)
+            ![Step 5](/images/statusline-step5.png)
             
 2. Windows Toast Notification 
     
@@ -120,7 +118,7 @@ Before we go deeper, here are some commands / CLI flags that are useful.
     
     Sample: 
     
-    ![Toast notification sample](assets/images/statusline-toast.png)
+    ![Toast notification sample](/images/statusline-toast.png)
     
 
 ## ✍️ But first, let's just make something (✍️Hands-on: 15 minutes)
@@ -532,7 +530,7 @@ Useful Claude Code + GitLab workflows:
 - In a **multi-agent setup**, the main claude code agent acts as the orchestrator (breaking down tasks, reviewing outputs) while dispatched agents act as workers (implementing specific pieces).
 - Keep inter-agent communication structured: have each sub-agent produce a clear output summary the orchestrator can evaluate.
 
-![Sub-agents diagram](assets/images/subagents-diagram.png)
+![Sub-agents diagram](/images/subagents-diagram.png)
 
 ### Worktrees & Working in Parallel
 
@@ -560,7 +558,7 @@ Useful Claude Code + GitLab workflows:
     - Once per turn: **`UserPromptSubmit`**, **`Stop`**, **`StopFailure`**
     - Once per tool call: **`PreToolUse`**, **`PostToolUse`**
 
-![Hooks diagram](assets/images/hooks-diagram.png)
+![Hooks diagram](/images/hooks-diagram.png)
 
 - Useful for keeping the agent "honest" — it can't claim it's done if the hook fails.
 - Configure hooks by adding them in your project `settings.json` file. Hooks are defined in the settings.json file in the same locations where CLAUDE.md also exists
@@ -609,7 +607,7 @@ If you see the confirmation prompt, your hook is working. If not, double-check y
 - Caveat: if both MCP and CLI version of the same tool exists, choose the CLI always (for eg, GitHub MCP and CLI both exist). Models are better trained for CLI-style tool use interaction.
     - Example of this: start a new Claude session and ask the model to list currently running Docker containers. For Opus, it will always use the Bash tool to run Docker commands, without the need of a Docker MCP, so long as there is a CLI for your particular tool of choice. This applies to all CLIs like gh, git, kubectl, curl, ssh, pip, npm, etc.
         
-        ![Docker CLI example](assets/images/docker-cli-example.png)
+        ![Docker CLI example](/images/docker-cli-example.png)
         
     
 - Examples:
