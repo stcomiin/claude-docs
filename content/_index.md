@@ -14,8 +14,6 @@ layout: hextra-home
 {{< hextra/hero-button text="Get Started" link="docs/agentic-coding-in-terminal/" >}}
 {{< hextra/hero-button text="Setup Guide" link="docs/setup-guide/" style="outline" >}}
 
-<div class="hx-mt-6">&nbsp;</div>
-
 {{< hextra/feature-grid >}}
   {{< hextra/feature-card
     title="Foundations"

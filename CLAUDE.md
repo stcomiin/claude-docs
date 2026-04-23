@@ -12,7 +12,7 @@ Hugo runs via Docker — not installed natively.
 docker run --rm -d --name hugo-preview -p 1313:1313 -v "$(pwd):/src" -w /src hugomods/hugo:exts hugo server --bind 0.0.0.0 --baseURL "http://localhost:1313" --disableFastRender --noHTTPCache
 
 # Restart (required after asset/config changes)
-docker stop hugo-preview && !!
+docker stop hugo-preview && docker run --rm -d --name hugo-preview -p 1313:1313 -v "$(pwd):/src" -w /src hugomods/hugo:exts hugo server --bind 0.0.0.0 --baseURL "http://localhost:1313" --disableFastRender --noHTTPCache
 
 # Build
 docker run --rm -v "$(pwd):/src" -w /src hugomods/hugo:exts hugo --gc --minify
