@@ -1,0 +1,71 @@
+baseURL: "https://claude-docs.devbionics.com/"
+title: "Agentic Coding in Terminal"
+description: "Workshop materials — Apex Builders Collective × Info PC"
+
+enableRobotsTXT: true
+enableGitInfo: true
+enableInlineShortcodes: true
+
+module:
+  hugoVersion:
+    extended: true
+    min: "0.146.0"
+  imports:
+    - path: github.com/imfing/hextra
+
+markup:
+  highlight:
+    noClasses: false
+  goldmark:
+    renderer:
+      unsafe: true
+
+menu:
+  main:
+    - identifier: documentation
+      name: Documentation
+      pageRef: /docs
+      weight: 1
+    - name: Search
+      weight: 2
+      params:
+        type: search
+    - name: GitHub
+      weight: 3
+      url: "https://github.com/stcomiin/claude-docs"
+      params:
+        icon: github
+
+params:
+  navbar:
+    displayTitle: true
+    displayLogo: false
+    width: wide
+
+  theme:
+    default: dark
+    displayToggle: true
+
+  footer:
+    enable: true
+    displayCopyright: true
+    displayPoweredBy: true
+
+  search:
+    enable: true
+    type: flexsearch
+    flexsearch:
+      index: content
+      tokenize: forward
+
+  editURL:
+    enable: true
+    base: "https://github.com/stcomiin/claude-docs/edit/main/content"
+
+  highlight:
+    copy:
+      enable: true
+      display: hover
+
+  page:
+    width: wide

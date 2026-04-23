@@ -1,0 +1,17 @@
+/* Hero section spacing — body prefix adds specificity to beat theme defaults */
+body main#content > div > h1:first-child {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+body main#content > div > p:nth-of-type(1) {
+  margin-bottom: 2rem;
+}
+
+body main#content > div > p:nth-of-type(2) {
+  margin-bottom: 1rem;
+}
+
+body .hextra-feature-grid {
+  margin-top: 2.5rem;
+}

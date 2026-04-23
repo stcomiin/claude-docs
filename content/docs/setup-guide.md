@@ -1,9 +1,7 @@
 ---
 title: Pre-Workshop Setup Guide
-nav_order: 2
+weight: 2
 ---
-
-# Pre-Workshop Setup Guide
 
 **Agentic Coding in Terminal** — Apex Builders Collective × Info PC
 
@@ -303,7 +301,7 @@ Verify by opening Claude Code in that folder and typing `/gsd:help`.
 
 > 💡 If you install via `npx get-shit-done-cc@latest` there is an open issue as follows: 
 > 
-> ![GSD install issue](assets/images/gsd-install-issue.png)
+> ![GSD install issue](/images/gsd-install-issue.png)
 
 ---
 
@@ -354,4 +352,4 @@ See you at the workshop! 🚀
 
 ---
 
-[← Back to main page](.)
+[← Back to main page](/docs/)
