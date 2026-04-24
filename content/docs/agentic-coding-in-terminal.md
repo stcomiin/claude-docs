@@ -5,9 +5,7 @@ weight: 1
 
 **Apex Builders Collective** × **Info PC • April** 2026
 
-[Pre-Workshop Setup Guide](setup-guide)
-
-> **Link to this site:** [https://tinyurl.com/abc-cc-workshop](https://tinyurl.com/abc-cc-workshop)
+[Pre-Workshop Setup Guide](/docs/setup-guide)
 
 > 💁 **Workshop materials** — Use the navigation to browse all sections.
 
@@ -29,7 +27,7 @@ Specs are the source of truth in an agent-led coding world. Clearly defined spec
 
 ## Installation & Configuration
 
-> For step-by-step installation instructions (API key setup, Claude Code, Codex, GSD), see the **[Pre-Workshop Setup Guide](setup-guide)**.
+> For step-by-step installation instructions (API key setup, Claude Code, Codex, GSD), see the **[Pre-Workshop Setup Guide](/docs/setup-guide)**.
 
 ### Claude Products Overview
 
