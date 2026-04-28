@@ -1,0 +1,187 @@
+<!-- Notion-style image lightbox + TOC auto-scroll -->
+<style>
+  article img {
+    cursor: zoom-in;
+    transition: opacity 0.15s;
+  }
+  article img:hover {
+    opacity: 0.85;
+  }
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+  }
+  .lightbox.is-open {
+    opacity: 1;
+    visibility: visible;
+  }
+  .lightbox-img {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    transform: scale(0.95);
+    transition: transform 0.2s ease;
+    cursor: zoom-out;
+  }
+  .lightbox.is-open .lightbox-img {
+    transform: scale(1);
+  }
+  .lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 2rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+    line-height: 1;
+    padding: 0.25rem 0.5rem;
+  }
+  .lightbox-close:hover {
+    opacity: 1;
+  }
+
+  /* Hide the entire TOC bottom section (edit link + scroll-to-top) */
+  .hextra-toc .hextra-scrollbar > div:has(#backToTop) {
+    display: none !important;
+  }
+
+  /* Floating scroll-to-top button */
+  .scroll-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 50;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    background: rgba(23, 23, 23, 0.85);
+    color: #a1a1aa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s, background 0.15s, color 0.15s;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .scroll-to-top.is-visible {
+    opacity: 1;
+    visibility: visible;
+  }
+  .scroll-to-top:hover {
+    background: rgba(38, 38, 38, 0.95);
+    color: #fff;
+    border-color: rgba(128, 128, 128, 0.5);
+  }
+  .scroll-to-top svg {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // --- Image lightbox ---
+  var overlay = document.createElement("div");
+  overlay.className = "lightbox";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-label", "Image preview");
+  overlay.innerHTML = '<button class="lightbox-close" aria-label="Close">&times;</button><img class="lightbox-img" alt="" />';
+  document.body.appendChild(overlay);
+
+  var lbImg = overlay.querySelector(".lightbox-img");
+
+  function openLightbox(src, alt) {
+    lbImg.src = src;
+    lbImg.alt = alt || "";
+    overlay.classList.add("is-open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeLightbox() {
+    overlay.classList.remove("is-open");
+    document.body.style.overflow = "";
+  }
+
+  document.addEventListener("click", function (e) {
+    var img = e.target.closest("article img");
+    if (img) {
+      e.preventDefault();
+      openLightbox(img.src, img.alt);
+    }
+  });
+
+  overlay.addEventListener("click", function (e) {
+    if (e.target === overlay || e.target === lbImg || e.target.classList.contains("lightbox-close")) {
+      closeLightbox();
+    }
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && overlay.classList.contains("is-open")) {
+      closeLightbox();
+    }
+  });
+
+  // --- Floating scroll-to-top button ---
+  var scrollBtn = document.createElement("button");
+  scrollBtn.className = "scroll-to-top";
+  scrollBtn.setAttribute("aria-label", "Scroll to top");
+  scrollBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>';
+  document.body.appendChild(scrollBtn);
+
+  scrollBtn.addEventListener("click", function () {
+    document.documentElement.scrollTop = 0;
+    window.scrollTo(0, 0);
+  });
+
+  window.addEventListener("scroll", function () {
+    if (window.scrollY > 300) {
+      scrollBtn.classList.add("is-visible");
+    } else {
+      scrollBtn.classList.remove("is-visible");
+    }
+  }, { passive: true });
+
+  // --- TOC auto-scroll to active item ---
+  var toc = document.querySelector(".hextra-toc");
+  if (!toc) return;
+
+  var scrollContainer = toc.querySelector(".hextra-scrollbar");
+  if (!scrollContainer) return;
+
+  var tocObserver = new MutationObserver(function () {
+    var active = toc.querySelector(".hextra-toc-active");
+    if (!active) return;
+
+    var containerRect = scrollContainer.getBoundingClientRect();
+    var activeRect = active.getBoundingClientRect();
+
+    if (activeRect.top < containerRect.top || activeRect.bottom > containerRect.bottom) {
+      active.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+  });
+
+  toc.querySelectorAll('a[href^="#"]').forEach(function (link) {
+    tocObserver.observe(link, { attributes: true, attributeFilter: ["class"] });
+  });
+});
+</script>

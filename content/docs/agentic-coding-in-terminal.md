@@ -806,14 +806,3 @@ Some thoughts about agentic coding.
 - [The AI Disruption We've Been Waiting For Has Arrived](https://www.nytimes.com/2026/02/18/opinion/ai-software.html), Paul Ford: 
 *"The simple truth is that I am less valuable than I used to be. It stings to be made obsolete, but it's fun to code on the train, too. And if this technology keeps improving, then all of the people who tell me how hard it is to make a report, place an order, upgrade an app or update a record — they could get the software they deserve, too. That might be a good trade, long term."*
 
----
-
-**Sections to add:**
-
-- [ ] using with Google stitch/Claude to replace Figma (UI design) (separate session perhaps in design oriented track)
-- [ ] LSPs
-- [ ] Offline features to be setup for claude code to work well with its ecosystem (plugins, skills, hooks)
-- [ ] more emphasis on actual use cases of hooks we should be using.
-- [ ] add skill chaining
-- [x] pdf and ppt skill by https://github.com/anthropics/skills
-    - [x] Add hands on section to try how to 1. read from pptx/pdf using the skills 2. convert from md to pdf or pptx or docs
