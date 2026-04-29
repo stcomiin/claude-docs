@@ -1,3 +1,15 @@
+<!-- Link-preview hints (Telegram, WhatsApp, Slack, X, Facebook, etc.).
+     The base og:* / twitter:* tags are emitted by Hextra's opengraph partial
+     and Hugo's internal twitter_cards partial using site.Params.images. -->
+{{- $ogImage := "images/og-cover.png" -}}
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{ site.Title }} — {{ site.Params.description | default site.Title }}">
+<meta property="og:image:type" content="image/png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image:alt" content="{{ site.Title }} — {{ site.Params.description | default site.Title }}">
+<link rel="image_src" href="{{ $ogImage | absURL }}">
+
 <!-- Notion-style image lightbox + TOC auto-scroll -->
 <style>
   article img {

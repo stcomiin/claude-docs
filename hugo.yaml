@@ -37,6 +37,12 @@ menu:
         icon: github
 
 params:
+  # Used by Hextra's opengraph partial and Hugo's internal twitter_cards
+  # partial to populate og:image / twitter:image for link previews
+  # (Telegram, WhatsApp, Slack, X, Facebook, etc.).
+  images:
+    - images/og-cover.png
+
   navbar:
     displayTitle: true
     displayLogo: false
