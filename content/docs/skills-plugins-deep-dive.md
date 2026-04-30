@@ -3,702 +3,614 @@ title: Skills & Plugins Deep Dive
 weight: 3
 ---
 
-> The sections above cover what skills and plugins *are*. The deep dive below covers *why specific ones matter* — walking through notable tools in the ecosystem, how they prevent vibe coding, and when to reach for which. This is a living list that grows as new tools emerge.
+This page is a practical guide to skills and plugins for Claude Code.
+
+Use it to answer three questions:
+
+- What does this tool add to the agent's workflow?
+- When is it worth installing?
+- When is it more process than the task needs?
+
+The examples below are intentionally selective. Star counts, launch claims, and popularity metrics change often, so this page focuses on behavior and tradeoffs.
 
 ---
 
-## The Core Problem: Why "Just Prompting" Fails at Scale
+## Why Skills and Plugins Matter
 
-When you use an agentic coding tool raw — just typing natural language and letting it go — you get what the community calls **vibe coding**: output that *looks* right on first glance but breaks down under scrutiny. The AI doesn't plan. It doesn't verify. It doesn't remember what it decided 50 messages ago. As the context window fills up, quality degrades — a phenomenon called **context rot**.
+Plain prompting works for small, clear tasks. It gets weaker when the task needs planning, repeated checks, project memory, or a specific output format.
 
-Skills and plugins solve this by injecting **structure, methodology, and constraints** into the agent's workflow. Instead of hoping the AI makes good decisions, you give it a system that *forces* good decisions.
+Skills and plugins help by narrowing the job. They can tell Claude which files to inspect, what questions to ask first, how to structure a plan, which checks to run, or how to produce a real document file instead of markdown text.
 
-Think of it this way: a talented junior developer can write code. But put that same developer inside a team with code reviews, TDD, sprint planning, and architectural guidelines — and the output quality is incomparable. Skills are the engineering culture you install into your AI agent.
+They do not make the model reliable by themselves. They give the model clearer rules and more chances to catch mistakes before you treat the output as finished.
 
 ---
 
-## What Are Skills vs Plugins?
+## Skills vs Plugins
 
-**Skills** are folders containing a `SKILL.md` file — instructions and methodology that Claude loads on demand via progressive disclosure. Only the metadata (~100 tokens) sits in context at all times; the full instructions load only when triggered.
+**Skills** are folders with a `SKILL.md` file. The file describes when the skill should load and what Claude should do once it loads. Larger examples, scripts, templates, or references can live beside it.
 
-**Plugins** are packaged collections of skills, commands, agents, and hooks that install into Claude Code as a unit. They're the distribution mechanism for more complex workflows.
-
-Both serve the same purpose: **teaching the agent how to work, not just what to build.**
+**Plugins** package skills, commands, agents, and hooks into one installable unit. Use a plugin when the workflow needs more than one skill or command.
 
 ```text
 skill-name/
-├── SKILL.md              # Core instructions (required)
-└── Bundled Resources/    # (optional)
-    ├── scripts/          # Executable code for deterministic tasks
-    ├── references/       # Docs loaded into context as needed
-    └── assets/           # Templates, icons, fonts
+  SKILL.md          # Required instructions and trigger description
+  references/       # Optional docs loaded only when needed
+  scripts/          # Optional deterministic helpers
+  assets/           # Optional templates or static files
 ```
 
 ---
 
-## 1. BMAD — Breakthrough Method for Agile AI-Driven Development
+## Creating Your Own Skills
 
-**What it is:** A full agile development framework with 12+ specialized AI agents, 50+ guided workflows, and scale-adaptive intelligence that adjusts from bug fixes to enterprise systems.
+Custom skills are often more useful than public ones because they encode your team's real habits.
 
-**GitHub:** [bmad-code-org/BMAD-METHOD](https://github.com/bmad-code-org/BMAD-METHOD) — 35k+ stars
+Good candidates include:
 
-**Docs:** [docs.bmad-method.org](https://docs.bmad-method.org/)
+- PR review rules
+- release checklists
+- database migration patterns
+- incident response steps
+- design system rules
+- security review requirements
+- report or document templates
 
-### The Idea in One Sentence
+### Skill Anatomy
 
-Instead of one AI doing everything, BMAD simulates a full agile team — PM, Architect, Developer, QA, Scrum Master — where each agent has a defined role, constraints, and deliverable format.
+Every skill is a folder. The required file is `SKILL.md`; supporting files are optional.
+
+```text
+pr-review/
+  SKILL.md
+  references/
+    security-checklist.md
+    performance-checklist.md
+  scripts/
+    collect-diff.sh
+```
+
+`SKILL.md` has three parts:
+
+1. **Frontmatter**: YAML between `---` markers. This tells Claude when the skill should load.
+2. **Instructions**: Markdown guidance Claude follows after the skill loads.
+3. **Resources**: Links to supporting files in the skill folder. Claude loads those files only when needed.
+
+Example:
+
+```yaml
+---
+name: pr-review
+description: Use when reviewing pull requests or code diffs, especially changes touching auth, payments, data access, migrations, or public APIs.
+when_to_use: The user asks for a PR review, code review, risk review, or wants a second pass before merging.
+---
+
+# PR Review
+
+Review the diff as a reviewer, not as the original implementer.
+
+Start with findings ordered by severity. Include file and line references when possible.
+Prioritize correctness, security, data loss, regressions, and missing tests.
+
+Use these resources when relevant:
+
+- For auth or payment changes, read `references/security-checklist.md`.
+- For database query changes, read `references/performance-checklist.md`.
+- To collect a local diff, run `scripts/collect-diff.sh`.
+```
+
+Keep the frontmatter short and specific. In Claude Code, the directory name becomes the slash command, and `description` helps Claude decide whether to load the skill automatically. `when_to_use` can add trigger examples, but the combined trigger text should stay concise.
+
+Use the instructions to say what to do, what to avoid, and what output shape to produce. Put long checklists, examples, API docs, or scripts in supporting files and reference them from `SKILL.md`.
+
+Use optional frontmatter only when it changes behavior:
+
+| Field | Use it for |
+| --- | --- |
+| `name` | Override the display name. If omitted, Claude uses the folder name. |
+| `description` | Say what the skill does and when Claude should use it. |
+| `when_to_use` | Add extra trigger context or example requests. |
+| `allowed-tools` | Restrict Claude to the listed tools while the skill is active. |
+| `disable-model-invocation` | Make the skill manual-only, useful for deploy or commit workflows. |
+| `context: fork` | Run the skill in an isolated subagent context. |
+
+Spend the most care on `description`. Write it as a trigger, not as a vague summary.
+
+Weak:
+
+```yaml
+description: How to review code
+```
+
+Better:
+
+```yaml
+description: Use when reviewing pull requests or code diffs. Pay special attention to tests, auth, payment paths, migrations, data access, and public API changes.
+```
+
+### Practical Rules
+
+- Keep `SKILL.md` short enough to scan.
+- Put long examples in `references/`.
+- Put repeatable scripts in `scripts/`.
+- Include gotchas the model has missed before.
+- Focus on instructions that change behavior.
+- Remove obvious guidance that Claude would already follow.
+
+### Where Skills Live
+
+| Audience | Location |
+| --- | --- |
+| Personal | `~/.claude/skills/` |
+| Project/team | `.claude/skills/` |
+| Organization | Managed team or enterprise provisioning |
+| Public distribution | Plugin marketplace or shared package |
+
+---
+
+## Quick Comparison
+
+| Tool | Use for | Avoid when |
+| --- | --- | --- |
+| Document skills | Real `.docx`, `.pdf`, `.pptx`, or `.xlsx` output | The user only needs inline text |
+| Superpowers | Always-on engineering habits like planning, TDD, debugging, and verification | You prefer explicit commands for every workflow step |
+| BMAD | Product-style planning with roles, PRDs, architecture, stories, and review gates | You only need a small fix or one obvious change |
+| GSD | Spec-driven work split into phases and executed with fresh context | The task does not need a project plan |
+| Codex plugin | A second model for review or delegated investigation | You need one model to own the whole task from start to finish |
+
+---
+
+## Document Skills - docx, pdf, pptx, xlsx
+
+**Project:** [anthropics/skills](https://github.com/anthropics/skills)
+
+The document skills help Claude create and edit real office files:
+
+- `docx` for Word documents
+- `pdf` for PDFs
+- `pptx` for slide decks
+- `xlsx` for spreadsheets
+
+Use these when the output needs to open cleanly in another application. If the user only needs a short answer or table in chat, do not add file generation.
 
 ### Install
 
-BMAD is a **per-project** installation — run it inside each project repo. It writes config files, agent definitions, and workflow stubs into the project directory so the AI tool picks them up when you open that folder.
+Inside Claude Code:
 
 ```bash
-# Navigate to your project first
-cd your-project
+/plugin marketplace add anthropics/skills
+/plugin install document-skills@anthropic-agent-skills
+```
 
-# Requires Node.js v20+
+Or from a terminal:
+
+```bash
+claude plugin marketplace add anthropics/skills
+claude plugin install document-skills@anthropic-agent-skills
+```
+
+### What Each Skill Adds
+
+| Skill | Use it for |
+| --- | --- |
+| `docx` | Reports, memos, letters, comments, tracked changes, tables of contents |
+| `pdf` | Extraction, merging, splitting, forms, watermarks, OCR, final distribution |
+| `pptx` | Slide decks, speaker notes, template-based presentations |
+| `xlsx` | Spreadsheet cleanup, formulas, charts, CSV/TSV conversion, tabular deliverables |
+
+### Example Prompt
+
+```text
+Using the docx skill, convert report.md into report.docx.
+Add a title page, table of contents, page numbers, and preserve tables.
+```
+
+The important check is simple: open the generated file and inspect it. Document skills reduce formatting work, but the final file still needs review.
+
+---
+
+## Superpowers
+
+**Project:** [obra/superpowers](https://github.com/obra/superpowers)
+
+Superpowers is a skills framework that loads engineering habits into Claude Code. Unlike BMAD and GSD, it is less command-driven. The skills activate based on the work you are doing.
+
+### Install
+
+```text
+/plugin install superpowers@claude-plugins-official
+```
+
+Restart Claude Code after installing.
+
+### Useful Skills
+
+| Skill | What it adds |
+| --- | --- |
+| `brainstorming` | Explore the approach before writing code |
+| `writing-plans` | Break the work into short tasks with files and checks |
+| `subagent-driven-development` | Use fresh agents for scoped tasks |
+| `test-driven-development` | Follow red, green, refactor when appropriate |
+| `systematic-debugging` | Form a hypothesis, gather evidence, then fix |
+| `verification-before-completion` | Run checks before calling the task done |
+| `using-git-worktrees` | Isolate larger work on a separate branch/worktree |
+
+### When to Use It
+
+Use Superpowers when you want better default behavior during normal Claude Code sessions. It pairs well with larger workflow tools, but it can also stand alone.
+
+Skip it if you want to keep your agent environment minimal or if automatic skill activation makes the session harder to predict.
+
+---
+
+## BMAD - Breakthrough Method for Agile AI-Driven Development
+
+**Project:** [bmad-code-org/BMAD-METHOD](https://github.com/bmad-code-org/BMAD-METHOD)
+
+**Docs:** [docs.bmad-method.org](https://docs.bmad-method.org/)
+
+BMAD gives Claude an agile-style workflow. Instead of one agent doing every job, it separates product, architecture, development, QA, UX, and other roles.
+
+That structure is useful when the work needs requirements, design decisions, task breakdowns, and review artifacts. It is usually too much for isolated fixes.
+
+### Install
+
+BMAD is usually installed per project:
+
+```bash
+cd your-project
 npx bmad-method install
 ```
 
-The interactive installer walks you through several steps:
+The installer asks where to install, which AI tools to support, and which BMAD modules to include. Most teams should start with the core BMad Method module and add specialized modules only when they need them.
 
-**Step 1 — Installation location:** Choose current directory (recommended — installs into `_bmad/` in your project root).
-
-**Step 2 — Select your AI tool(s):** Pick the tool you're using — Claude Code, Cursor, Windsurf, Copilot, etc. The installer creates the right integration files (slash commands, skill stubs) in the format your tool expects (e.g., `.claude/skills/` for Claude Code, `.cursor/skills/` for Cursor).
-
-**Step 3 — Select modules:** This is where you choose what capabilities to install. Most users just need the core module, but you can add domain-specific ones:
-
-| Module | What It Adds | When to Use It |
-| --- | --- | --- |
-| **BMad Method (BMM)** | Core framework — 34+ workflows, 12+ agents, the full planning-to-implementation pipeline | **Always install this.** It's the foundation everything else builds on. |
-| **BMad Builder (BMB)** | Tools to create your own custom BMAD agents, workflows, and domain-specific modules | When you want to extend BMAD with custom agents tailored to your team or domain |
-| **Test Architect (TEA)** | Risk-based test strategy, quality gates, release gates, 34 testing patterns | When your project needs enterprise-grade test planning — compliance, NFR assessment, automated quality gates |
-| **Game Dev Studio (BMGD)** | Game development workflows for Unity, Unreal, and Godot | Game projects specifically |
-| **Creative Intelligence Suite (CIS)** | Innovation, brainstorming, design thinking, problem-solving | When you want structured creative exploration — ideation workshops, design sprints, narrative development |
-
-> **Tip:** If you're unsure, just select **BMad Method (BMM)** and move on. You can always add more modules later by re-running `npx bmad-method install`.
-
-**Step 4 — Express Setup vs Customize:** For modules with configurable options, you can accept defaults (Express Setup) or fine-tune settings per module.
-
-After install, your project will look something like this:
-
-```text
-your-project/
-├── _bmad/              # Runtime — agents, workflows, tasks
-│   ├── core/           # Core agents and tasks
-│   ├── bmm/            # BMad Method module files
-│   └── _config/        # Manifests and help config
-├── _bmad-output/       # Where the AI writes PRDs, architecture docs, stories
-├── .claude/            # Claude Code integration (if selected)
-│   └── skills/
-│       ├── bmad-help/
-│       └── ...
-└── your existing code...
-```
-
-Verify it works by opening your AI tool in the project folder and running:
+After installation, open Claude Code in the project and run:
 
 ```text
 /bmad-help
 ```
 
-Not sure what to do first? Ask it:
+### Typical Flow
+
+For a small, scoped change, use the lightweight path:
 
 ```text
-/bmad-help I just installed, what should I do first?
-/bmad-help I have a SaaS idea, where should I start?
+/bmad-quick-spec
+/bmad-dev-story
+/bmad-code-review
 ```
 
-### Two Paths
-
-**Simple Path** — bug fixes, small features, clear scope:
-
-| Step | Command | What Happens |
-| --- | --- | --- |
-| 1 | `/bmad-quick-spec` | Analyzes your codebase, produces a tech-spec with stories |
-| 2 | `/bmad-dev-story` | Implements each story |
-| 3 | `/bmad-code-review` | QA agent validates quality |
-
-**Full Planning Path** — products, platforms, complex features:
-
-| Step | Command | What Happens |
-| --- | --- | --- |
-| 1 | `/bmad-brainstorming` | Initial brainstorming to cover various aspects |
-| 2 | `/bmad-product-brief` | Define problem, users, MVP scope |
-| 3 | `/bmad-create-prd` | Full requirements with personas, metrics, risks |
-| 4 | `/bmad-create-architecture` | Technical decisions and system design |
-| 5 | `/bmad-create-epics-and-stories` | Break work into prioritized stories |
-| 6 | `/bmad-sprint-planning` | Initialize sprint tracking |
-| 7 | `/bmad-create-story` → `/bmad-dev-story` → `/bmad-code-review` | Repeat per story |
-
-Every step tells you what's next. `/bmad-help` works at any point and adapts its guidance based on which modules you have installed.
-
-### The Agent Team
-
-Each agent has a defined persona, responsibilities, and constraints. The Architect agent won't write business logic; the QA agent won't modify architecture. They communicate through versioned markdown files (PRDs, story files, architecture docs), creating an auditable paper trail.
+For larger product work, use the planning path:
 
 ```text
- ANALYST             PROJECT MANAGER
- • Market research       • Roadmap & timeline
- • User research         • Resource planning
-          ↓                     ↓
-              ARCHITECT
-              • System design
-              • Tech stack decisions
-              • Patterns & constraints
-                    ↓
-       ┌────────────┴────────────┐
-   DEVELOPER              QA AGENT
-   • Story implementation    • Code review
-   • TDD (optional)         • Test coverage
-   • Self-validation        • Security checks
-
- + UX Designer, Scrum Master, DevOps, and more...
+/bmad-brainstorming
+/bmad-product-brief
+/bmad-create-prd
+/bmad-create-architecture
+/bmad-create-epics-and-stories
+/bmad-sprint-planning
+/bmad-create-story
+/bmad-dev-story
+/bmad-code-review
 ```
 
-### Party Mode
+### What to Look For
 
-Unique to BMAD: bring multiple agent personas into a single session to collaborate. Need the Architect and QA agent to debate your auth approach? Party Mode lets them argue it out — multiple perspectives, one conversation.
+BMAD is working well when each step produces a concrete artifact: a brief, PRD, architecture note, story, implementation, or review. Those artifacts make decisions easier to audit later.
 
-### Scale-Domain-Adaptive Intelligence
-
-BMAD adjusts planning depth based on what you're building. A SaaS dating app gets different treatment than a diagnostic medical system. You don't configure this — the system detects complexity and adapts.
-
-### Token Optimization via Document Sharding
-
-Instead of loading your entire PRD into context for every task, BMAD v6 shards documentation — each story file contains only the relevant specs, acceptance criteria, and architecture snippets. This reportedly achieves 74–90% token savings, which directly means better output quality because the signal-to-noise ratio stays high.
-
-### When to Use BMAD
-
-Best for teams that want enterprise-grade governance, audit trails, and multi-agent collaboration. If you need a PRD → Architecture → Epics → Stories pipeline with QA gates, this is the tool.
-
-For a typo fix or quick feature, the Simple Path (`/quick-spec` → `/dev-story` → `/code-review`) keeps it lightweight.
+BMAD is a poor fit when the overhead is larger than the change. If the task is "rename this label" or "fix this failing test," use a lighter workflow.
 
 ---
 
-## 2. GSD — Get Shit Done
+## GSD - Get Shit Done
 
-**What it is:** A spec-driven development system that solves context rot through context engineering, subagent orchestration, and a structured workflow. Lightweight by design — the complexity is in the system, not in your workflow.
+**Project:** [gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done)
 
-**GitHub:** [gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done) — 35k+ stars
+GSD is a spec-driven workflow for coding agents. It breaks work into project requirements, roadmap phases, discussion context, plans, execution, and verification.
 
-**Created by:** TÂCHES (Lex Christopherson)
-
-### The Idea in One Sentence
-
-Break your project into small phases, plan each one, then execute each plan in a fresh 200K-token subagent so context rot never degrades quality.
+The main benefit is context control. Each phase can be planned and executed with a smaller, fresher set of instructions instead of relying on one long chat.
 
 ### Install
 
+Interactive install:
+
 ```bash
-# Interactive — choose runtime and location
 npx get-shit-done-cc@latest
-
-# Non-interactive for Claude Code
-npx get-shit-done-cc --claude --global   # All projects
-npx get-shit-done-cc --claude --local    # Current project only
-
-# Verify — inside Claude Code:
-/gsd:help
 ```
 
-### The Workflow
+Claude Code only:
+
+```bash
+npx get-shit-done-cc --claude --global
+npx get-shit-done-cc --claude --local
+```
+
+Verify inside Claude Code:
 
 ```text
-/gsd:new-project             ← Questions → Research → Requirements → Roadmap
-       ↓
-/gsd:discuss-phase 1         ← Shape YOUR implementation preferences
-       ↓
-/gsd:plan-phase 1            ← Research + atomic task plans
-       ↓
-/gsd:execute-phase 1         ← Build in fresh subagents (wave execution)
-       ↓
-/gsd:verify-work 1           ← Automated + human verification
-       ↓
-/gsd:complete-milestone      ← Archive + tag release
+/gsd-help
 ```
 
-### Key Commands
-
-| Command | What It Does | When to Use |
-| --- | --- | --- |
-| `/gsd:new-project` | Full project init — questions, research, requirements, roadmap | Starting a new project or feature |
-| `/gsd:map-codebase` | Spawns parallel agents to analyze your existing stack | Before `/gsd:new-project` on existing code |
-| `/gsd:discuss-phase N` | Captures your preferences for gray areas | Before planning — visual choices, API design, etc. |
-| `/gsd:plan-phase N` | Research + atomic task plans with XML structure | After discussing — creates executable plans |
-| `/gsd:execute-phase N` | Runs plans in parallel waves with fresh context per plan | The actual building step |
-| `/gsd:verify-work N` | Automated checks + UAT | After execution — catches bugs |
-| `/gsd:quick` | Lightweight mode for small tasks | Typo fixes, minor changes — skip the full workflow |
-
-### What Makes `/gsd:discuss-phase` Special
-
-This is the step most people skip — and it's the one that makes GSD's output feel like *yours* instead of generic AI output.
-
-The system analyzes the phase and identifies **gray areas** — decisions that aren't in your requirements but matter for implementation:
-
-- **Visual features** → Layout density, interactions, empty states, responsive behavior
-- **APIs/CLIs** → Response format, flags, error handling, verbosity levels
-- **Content systems** → Structure, tone, depth, flow
-- **Data handling** → Grouping criteria, naming, duplicates, edge cases
-
-Your answers get saved to `CONTEXT.md`, which the researcher and planner read. Deeper input here = output that matches your vision. Skip it = reasonable defaults, but not *your* defaults.
-
-### Wave Execution
-
-Plans are grouped into dependency-based waves. Within each wave, plans run in parallel subagents. Waves run sequentially.
+### Typical Flow
 
 ```text
- WAVE 1 (parallel)           WAVE 2 (parallel)         WAVE 3
- ┌──────────┐ ┌──────────┐   ┌──────────┐ ┌──────────┐  ┌──────────┐
- │ Plan 01  │ │ Plan 02  │ → │ Plan 03  │ │ Plan 04  │→ │ Plan 05  │
- │ (schema) │ │ (config) │   │ (API)    │ │ (auth)   │  │ (UI)     │
- └──────────┘ └──────────┘   └──────────┘ └──────────┘  └──────────┘
-   fresh 200K   fresh 200K     fresh 200K   fresh 200K    fresh 200K
+/gsd-new-project
+/gsd-discuss-phase 1
+/gsd-plan-phase 1
+/gsd-execute-phase 1
+/gsd-verify-work 1
+/gsd-complete-milestone
 ```
 
-Each subagent starts clean — no prior conversation, no context rot. Just the plan, the relevant code, and the full token budget.
+### Why the Discussion Step Matters
 
-### When to Use GSD
+`/gsd-discuss-phase` asks about choices that requirements often leave open: UI density, API shape, error behavior, file naming, edge cases, and review expectations.
 
-Best for solo developers and small teams who want spec-driven quality without enterprise ceremony. If you want the system to handle the complexity while you focus on describing what you want, GSD is the pick.
+That step is useful because it captures your preferences before planning starts. Skipping it means the agent will use reasonable defaults, which may not match how you want the feature built.
 
-For tiny changes, use `/gsd:quick` or just prompt Claude directly — the full workflow spawns multiple agents, which is overkill for a typo fix.
+### When to Use It
+
+Use GSD when you want a project or feature built in deliberate phases. It is a good fit for solo developers and small teams that want structure without a full agile process.
+
+For quick changes, use `/gsd-quick` or plain Claude Code. A full phase workflow is not worth it for a typo, small copy edit, or obvious one-file change.
 
 ---
 
-## 3. Superpowers
+## Codex for Claude Code
 
-**What it is:** A composable skills framework that activates *automatically* — no commands needed. You just work, and the right engineering discipline kicks in.
+**Project:** [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 
-**GitHub:** [obra/superpowers](https://github.com/obra/superpowers) — by Jesse Vincent (Prime Radiant)
-
-### Install
-
-```text
-/plugin marketplace add obra/superpowers-marketplace
-/plugin install superpowers@superpowers-marketplace
-```
-
-Quit and restart Claude Code. You'll see a session-start hook that bootstraps the skills.
-
-### How It Works
-
-Where GSD and BMAD give you explicit commands to drive a workflow, Superpowers injects itself at session start and activates skills automatically based on what you're doing. You don't invoke `test-driven-development` — it fires when you're implementing features. `systematic-debugging` kicks in when you're debugging.
-
-The core pipeline it enforces: **brainstorm → plan → implement**, with engineering disciplines layered on top at each stage.
-
-### Key Skills (20+)
-
-| Skill | Fires When | What It Does |
-| --- | --- | --- |
-| `brainstorming` | Before writing code | Refines ideas, explores alternatives, presents design in sections |
-| `writing-plans` | After design approval | Creates 2–5 minute tasks with exact file paths and verification steps |
-| `subagent-driven-development` | With an approved plan | Fresh subagent per task, two-stage code review |
-| `test-driven-development` | During implementation | Enforces RED → GREEN → REFACTOR |
-| `systematic-debugging` | When debugging | Hypothesis → evidence → fix (not random code changes) |
-| `verification-before-completion` | Before claiming done | Actually runs and checks the output |
-| `using-git-worktrees` | After design approval | Isolates work on a new branch with clean baseline |
-
-### Composability
-
-Skills stack. During a feature build, you might have `test-driven-development` + `subagent-driven-development` + `verification-before-completion` all active simultaneously. Each adds a layer of discipline without conflicting.
-
-You can also create your own skills following the `writing-skills` skill guide and contribute them back.
-
-### When to Use Superpowers
-
-Best when you want engineering rigor on every task without remembering commands. Superpowers pairs well with GSD or BMAD — they handle orchestration (what to build in what order), Superpowers handles execution quality (how each piece is built properly).
-
----
-
-## 4. Creating Your Own Skills — Best Practices
-
-Skills aren't just for installing other people's work. The most impactful skills are often the ones you build for your team's specific workflows, conventions, and patterns.
-
-Think about the prompts your team copies and pastes repeatedly: code review checklists, deployment procedures, PR templates, data migration patterns, incident response playbooks. Every one of those is a skill waiting to be created.
-
-### The Anatomy of a Skill
-
-```text
-skill-name/
-├── SKILL.md              # Core instructions (required)
-└── Bundled Resources/    # (optional)
-    ├── scripts/          # Executable code for deterministic tasks
-    ├── references/       # Docs loaded into context as needed
-    └── assets/           # Templates, icons, fonts
-```
-
-Every skill needs a `SKILL.md` with two parts: YAML frontmatter (tells the agent *when* to use it) and markdown content (tells the agent *how*).
-
-### Using the Skill Creator
-
-Anthropic provides a built-in **Skill Creator** — a meta-skill that helps you create, evaluate, improve, and benchmark other skills.
-
-Invoke it with `/skill-creator` and choose a mode:
-
-| Mode | What It Does |
-| --- | --- |
-| **Create** | Build a new skill from a description — asks targeted questions, generates SKILL.md + test cases |
-| **Eval** | Run test cases against an existing skill, grade results |
-| **Improve** | Analyze eval failures and apply fixes |
-| **Benchmark** | Measure performance across multiple runs with variance analysis |
-
-### The #1 Mistake: Bad Descriptions
-
-Claude decides whether to load a skill based on its `description` field in the frontmatter. This is a **trigger**, not a summary. Anthropic's own docs warn that Claude tends to "undertrigger" — it won't use skills when it should unless the description is explicit.
-
-**Bad:**
-
-```yaml
-description: How to build a dashboard
-```
-
-**Good:**
-
-```yaml
-description: >
-  How to build a simple fast dashboard to display internal data.
-  Use this skill whenever the user mentions dashboards, data
-  visualization, internal metrics, or wants to display any kind
-  of data, even if they don't explicitly ask for a 'dashboard.'
-```
-
-### Key Best Practices
-
-- **Keep SKILL.md under 500 lines** — move reference material to `references/` subdirectories
-- **Skills are folders, not files** — use `references/`, `scripts/`, `examples/` for progressive disclosure
-- **Build a Gotchas section** — highest-signal content; add the agent's failure points over time
-- **Don't state the obvious** — focus on what pushes the agent *out of its default behavior*
-- **Test incrementally** — test after each significant change, not all at once
-- **Skills compose** — the agent can use multiple skills together automatically
-
-### Where to Put Your Skills
-
-| Audience | Location |
-| --- | --- |
-| Just you | `~/.claude/skills/` directory |
-| Your project/team | `.claude/skills/` in the repo (everyone who clones gets it) |
-| Your org | Team/Enterprise provisioning via Settings |
-| Everyone | ZIP upload to Claude.ai, or publish to a plugin marketplace |
-
-### Example: Creating a Team-Specific Skill
-
-```text
-You: /skill-creator
-
-    "Create a skill for our team's PR review process. We require:
-     - Security review for any auth/payment changes
-     - Performance review for database queries
-     - All PRs must have tests
-     - Commit messages follow Conventional Commits"
-
-Skill Creator: [asks 4-5 clarifying questions]
-             → Generates SKILL.md with review checklist
-             → Creates test cases (PR with auth changes, PR with no tests, etc.)
-             → Runs evals
-             → Presents results for your review
-```
-
----
-
-## 5. Codex for Claude Code
-
-**What it is:** An official OpenAI plugin that lets you invoke Codex CLI from inside Claude Code — get a second opinion from a different frontier model without leaving your workflow.
-
-**GitHub:** [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) — 3.4k stars
-
-**Requires:** ChatGPT subscription (including Free) or OpenAI API key, plus Node.js 18.18+.
+The Codex plugin lets Claude Code call Codex for review or delegated work. The useful part is not that another model is automatically correct. It is that a different model may notice different risks.
 
 ### Install
 
 ```bash
-# Add the marketplace
 /plugin marketplace add openai/codex-plugin-cc
-
-# Install the plugin
 /plugin install codex@openai-codex
-
-# Reload and run setup
 /reload-plugins
 /codex:setup
 ```
 
-`/codex:setup` checks if Codex CLI is installed and authenticated. If not, it can install it for you.
+`/codex:setup` checks whether Codex CLI is installed and authenticated.
 
-### Key Commands
+### Useful Commands
 
-| Command | What It Does |
+| Command | Use it for |
 | --- | --- |
-| `/codex:review` | Read-only code review of uncommitted changes or a branch diff. Same quality as running `/review` inside Codex directly. |
-| `/codex:adversarial-review` | Steerable review that challenges your implementation — questions design choices, tradeoffs, hidden assumptions. Add focus text like "look for race conditions." |
-| `/codex:rescue` | Hands a task to Codex as a background job — investigate a bug, try a fix, take a pass with a different model. |
-| `/codex:status` | Check progress on background Codex jobs. |
-| `/codex:result` | Show the final output of a completed Codex job. |
-| `/codex:cancel` | Cancel an active background job. |
-
-### Why Use It
-
-The value is simple: **a second pair of eyes from a different model.** Claude and Codex have different strengths and blind spots. Running `/codex:adversarial-review` after Claude finishes a feature is like having a second senior engineer challenge your assumptions before you ship.
-
-The `/codex:rescue` command is also handy when Claude is stuck on something — delegate it to Codex as a background job and keep working.
-
-### Typical Flows
-
-**Review before shipping:**
-
-```text
-/codex:review --base main --background
-/codex:status
-/codex:result
-```
-
-**Get a second opinion on design:**
-
-```text
-/codex:adversarial-review challenge whether this was the right caching strategy
-```
-
-**Delegate a stuck problem:**
-
-```text
-/codex:rescue investigate why the integration tests are flaky
-```
-
----
-
-## 6. Document Skills — docx, pdf, pptx, xlsx
-
-**What it is:** Anthropic's official document processing plugin — a bundle of four skills (`docx`, `pdf`, `pptx`, `xlsx`) that give Claude the ability to create, read, and edit Word, PDF, PowerPoint, and Excel files as first-class deliverables. These are the same skills that power [Claude's "create files" feature](https://www.anthropic.com/news/create-files) in production.
-
-**GitHub:** [anthropics/skills](https://github.com/anthropics/skills) — 117k+ stars
-
-### The Idea in One Sentence
-
-Stop asking Claude to "generate a report" as a wall of text — install the right skill and you get back a properly formatted `.docx`, `.pdf`, `.pptx`, or `.xlsx` that opens cleanly in the native application, not a markdown file with a misleading extension.
-
-### Install
-
-For Claude Code, install them as a plugin:
-
-**Option A — Slash commands (inside the Claude Code CLI)**
-
-```bash
-# Add the Anthropic marketplace
-/plugin marketplace add anthropics/skills
-
-# Install the document-skills bundle
-/plugin install document-skills@anthropic-agent-skills
-```
-
-**Option B — Terminal CLI** 
-
-```bash
-# Add the Anthropic marketplace
-claude plugin marketplace add anthropics/skills
-
-# Install the document-skills bundle
-claude plugin install document-skills@anthropic-agent-skills
-```
-
-Once installed, the skills activate automatically when you mention the relevant task — no slash command needed:
-
-- "Convert this markdown into a Word doc"
-- "Extract the tables from this PDF"
-- "Turn these notes into a slide deck"
-
-### The Four Skills
-
-| Skill | What It Does | Triggers On |
-| --- | --- | --- |
-| **docx** | Create, read, edit `.docx` files. Tables of contents, headings, page numbers, letterheads, tracked changes, comments, find-and-replace, image insertion. | "Word doc", `.docx`, formal reports, memos, letters, templates |
-| **pdf** | Read/extract text and tables, create new PDFs, merge/split, rotate pages, watermarks, fill forms, encrypt/decrypt, extract images, OCR. | Anything involving `.pdf` — reading or producing |
-| **pptx** | Create slide decks, read/extract text from slides, edit presentations, work with templates, layouts, speaker notes, comments. | "deck", "slides", "presentation", `.pptx` |
-| **xlsx** | Open/read/edit `.xlsx`, `.xlsm`, `.csv`, `.tsv`. Add columns, compute formulas, formatting, charting, clean messy tabular data. | Spreadsheets, any tabular file as the primary deliverable |
-
-### Why It Matters
-
-Without these skills, asking Claude to "make a PowerPoint" typically produces markdown pretending to be slides or a long text description of what the slides *would* contain. With the `pptx` skill, you get an actual `.pptx` file with real slide layouts, proper hierarchy, and formatting that opens in PowerPoint, Keynote, or Google Slides.
-
-The same principle holds across all four: the skill bundles the Python libraries, formatting conventions, and do/don't rules needed to produce a file that is **structurally correct**, not just textually plausible.
+| `/codex:review` | Read-only review of uncommitted changes or a branch diff |
+| `/codex:adversarial-review` | Review with a specific challenge, such as race conditions or caching assumptions |
+| `/codex:rescue` | Background investigation or an alternate fix attempt |
+| `/codex:status` | Check a background job |
+| `/codex:result` | Read the completed job output |
+| `/codex:cancel` | Stop a running job |
 
 ### When to Use It
 
-Always — if the deliverable is a document *file*. Skip only when the user explicitly wants content inline in chat (a quick table they'll read on screen, a brief summary, prose they'll copy-paste elsewhere).
+Use the plugin after a larger change, before shipping, or when Claude is stuck on a bug. Ask for a narrow review target:
+
+```text
+/codex:adversarial-review look for missed auth checks and unsafe database writes
+```
+
+Do not treat a second model as approval. Treat it as another review input.
 
 ---
 
-## ✍️ Workshop Exercise: Research and Report Generation Workflow
+## Workshop: Research to Deliverables
 
-**Time:** ~20 minutes
+**Time:** about 20 minutes
 
-This hands-on chains two capabilities end-to-end — the kind of pipeline you'd actually run in production:
+This exercise chains two capabilities:
 
-1. **Parallel research via sub-agents** — spawn multiple research agents to cover different angles of a topic simultaneously, then synthesize their findings into a single markdown report.
-2. **Multi-format publication via document-skills** — take that generated markdown and produce a Word doc, PDF, and slide deck from the same source.
-The example topic is a **technology scan of current OCR tools**, but the workflow generalizes to any research-heavy deliverable: competitive analyses, vendor evaluations, market briefings, literature reviews.
+1. Parallel research with subagents.
+2. File generation with document skills.
 
-### Setup (3 min)
+The example topic is a technology scan of current OCR tools. You can use a different topic if it fits your workshop.
+
+### Setup
 
 You need:
 
-- **Claude Code** with the `document-skills` plugin installed (see install block above)
-- **Web access:** web search must be enabled so the research sub-agents can actually look things up
-- A **working directory** for your outputs (anywhere you can write files), preferably in VSCode.
-Pick your topic. Stick with OCR if you want to follow along exactly, or swap in something relevant to your work (e.g., "vector databases in 2026", "open-source LLM serving frameworks", "cloud-native observability tools"). The prompts below will work for any tech-scan topic.
+- Claude Code
+- The `document-skills` plugin installed
+- Web search enabled
+- A working directory where Claude can write files
 
-### Phase 1 — Research with Sub-Agents (12 min)
+### Phase 1 - Research with Subagents
 
-The goal here is **breadth through parallelism**. Instead of asking Claude to research OCR in one long sequential pass (where context fills up and later searches degrade), we split the topic into independent slices that run in parallel sub-agents, each with its own fresh context window.
-
-Paste this into Claude (adjust the categories if you picked a different topic):
+Paste this into Claude Code:
 
 ```text
-I want a technology scan of the current state of OCR (Optical
-Character Recognition) tools as of 2026.
- 
+I want a technology scan of the current state of OCR tools.
+
 Run the work in three steps.
- 
-Step 1 — Decompose the landscape.
-Before searching anything, propose four meaningful slices of
-this topic that four parallel research agents could cover
-independently with minimal overlap. Slices could be by category
-(e.g., open-source vs. managed), by technical approach, by use
-case, by maturity, or any cut that divides the topic cleanly.
-Show me your four proposed slices in one short paragraph each,
-then proceed to Step 2.
- 
-Step 2 — Research in parallel.
-Spawn 4 sub-agents, one per slice. Each should run independent
+
+Step 1 - Decompose the landscape.
+Before searching anything, propose four useful slices of this topic
+that four parallel research agents could cover independently with minimal
+overlap. Slices can be by category, technical approach, use case,
+maturity, or another split that keeps the work separate.
+
+Show the four proposed slices in one short paragraph each, then continue
+to Step 2.
+
+Step 2 - Research in parallel.
+Spawn 4 subagents, one per slice. Each subagent should run independent
 web searches and return:
-  - The leading tools, products, or approaches in that slice
-  - For each: what it does well, known limitations, cost or
-    licensing model, maturity, any notable developments in the
-    last 6–12 months
- 
-Step 3 — Synthesize.
-Once all sub-agents return, produce a single markdown report:
-  - Executive summary (3–4 sentences)
-  - Landscape overview (one paragraph per slice)
-  - Comparison matrix (rows = leading tools; columns = the
-    dimensions you judged most important for this topic —
-    you pick which dimensions matter)
-  - Deep dive per slice, with short sub-sections per tool
-  - Recommendations by use case
-  - Sources and references
- 
-Save as ocr_tech_scan.md in the current directory.
+
+- leading tools, products, or approaches in that slice
+- what each one does well
+- known limitations
+- cost or licensing model
+- maturity
+- notable changes from the last 6 to 12 months
+
+Step 3 - Synthesize.
+Once all subagents return, produce a single markdown report with:
+
+- executive summary
+- landscape overview
+- comparison matrix
+- short deep dive per slice
+- recommendations by use case
+- sources and references
+
+Save the report as ocr_tech_scan.md in the current directory.
 ```
 
-**What to watch for while this runs:**
+Check the result before continuing:
 
-- Claude should explicitly announce each sub-agent spawn
-- Sub-agents run in **parallel**, not sequentially. Total time taken should be closer to the slowest agent than the sum of all four
-- Each sub-agent returns a structured chunk, and the final synthesis pass stitches them together
-When it finishes, open `ocr_tech_scan.md` and skim it. You should have a genuinely useful 4–8 page tech scan, far richer than what a single search-and-summarize prompt would produce.
+- Did Claude split the topic into distinct slices?
+- Did the subagents run in parallel?
+- Does the report cite sources?
+- Does the comparison matrix contain useful decision criteria?
+- Are there obvious gaps, stale claims, or unsupported recommendations?
 
-What it should look like:
+Treat `ocr_tech_scan.md` as a draft. Edit it before using it as a real deliverable.
 
-![OCR tech scan sample output](/images/ocr-tech-scan-sample.png)
+### Phase 2 - Convert to File Deliverables
 
-### Phase 2 — Convert to Polished Deliverables (8 min)
+Use the generated markdown as the source for several formats.
 
-Now the document-skills take over. Same source markdown, three different output formats, each one leaning into what that format does well.
-
-**Target 1 — Word document (`docx` skill)**
+#### Word Document
 
 ```text
-Using the docx skill, convert ocr_tech_scan.md into a
-professional Word document. Add a title page with the report
-title and today's date, a table of contents, page numbers in
-the footer, and preserve all comparison tables. Save as
-ocr_tech_scan.docx.
+Using the docx skill, convert ocr_tech_scan.md into a Word document.
+Add a title page, table of contents, page numbers, and preserve the
+comparison tables. Save it as ocr_tech_scan.docx.
 ```
 
-**Target 2 — PDF (`pdf` skill)**
+#### PDF
 
 ```text
-Using the pdf skill, produce ocr_tech_scan.pdf from
-ocr_tech_scan.md. Style it for executive distribution: running
-header with the report title, page numbers in the footer, and
-make sure the comparison matrix renders cleanly across pages.
+Using the pdf skill, produce ocr_tech_scan.pdf from ocr_tech_scan.md.
+Add a running header with the report title, page numbers in the footer,
+and make sure the comparison matrix renders cleanly across pages.
 ```
 
-**Target 3 — PowerPoint briefing (`pptx` skill)**
+#### PowerPoint Briefing
 
 ```text
-Using the pptx skill, create ocr_tech_scan.pptx — a 10-slide
-executive briefing based on ocr_tech_scan.md.
+Using the pptx skill, create ocr_tech_scan.pptx as a 10-slide executive
+briefing based on ocr_tech_scan.md.
 
 Slide plan:
-  1. Title slide
-  2. Executive summary
-  3. Landscape overview (the four categories)
-  4-7. One slide per category with top tools
-  8. Comparison matrix (as a slide-native table)
-  9. Recommendations by use case
-  10. Sources
 
-Keep bullets crisp — max 5 per slide, no wall-of-text.
+1. Title slide
+2. Executive summary
+3. Landscape overview
+4. One slide for slice 1
+5. One slide for slice 2
+6. One slide for slice 3
+7. One slide for slice 4
+8. Comparison matrix
+9. Recommendations by use case
+10. Sources
+
+Keep slides short. Use a slide-native table for the comparison matrix.
 ```
 
-**Bonus — Spreadsheet (`xlsx` skill)**
+#### Spreadsheet
 
 ```text
 Using the xlsx skill, extract the comparison matrix from
-ocr_tech_scan.md into ocr_tech_scan.xlsx. Add a second tab
-that groups tools by category with their pricing tier and
-best-fit use case.
+ocr_tech_scan.md into ocr_tech_scan.xlsx. Add a second tab that groups
+tools by category with pricing tier and use case.
 ```
 
-### Reflect (2 min)
+### Review
 
-Open all the generated files and compare them against the original `ocr_tech_scan.md`:
+Open each generated file and check:
 
-- **Sub-agents vs. solo search** — was the research meaningfully wider than what you'd get from a single search-and-summarize prompt? Did it catch tools you hadn't heard of?
-- **Format-specific value-add** — the docx gets a TOC and page numbers. The PDF gets running headers. The pptx distills dense paragraphs into slide bullets. The skill is doing work beyond "export" — it's translating intent into what each format does well.
-- **Pipeline compression** — end-to-end, how long would this have taken you manually? (Research the four categories → write the report → format for Word → lay out slides → build the spreadsheet.) Probably a full day. The workflow above compresses it to ~25 minutes and the outputs are starting points, not finished products — you still edit and own the final version.
+- Does the file open in the expected application?
+- Are tables readable?
+- Are headings and page breaks reasonable?
+- Did the slide deck reduce detail instead of copying paragraphs?
+- Are sources preserved?
+- What still needs human editing?
 
-> **The takeaway:** Sub-agents give you **breadth without context rot**; document-skills give you **polish without hand-formatting**. Chained together, they turn "I need a tech scan with exec-ready deliverables by end of day" from a day of work into a focused editing pass over Claude's draft. The model didn't get smarter — the workflow got better.
+The point of the exercise is not to produce a finished report in one pass. It is to show how a structured workflow can produce a usable first draft across several formats.
 
 ---
 
-## ✍️ Workshop Exercise: GSD Hands-On
+## Workshop: GSD on a Small App
 
-**Time:** ~20 minutes
+**Time:** about 20 minutes
 
-We've been building a CRUD app throughout this workshop. Now let's see what happens when we run a structured methodology on top of it, and compare it to going in raw.
+This exercise compares a structured workflow with a plain one-prompt build request.
 
-### Setup (5 min)
+### Setup
 
-Install GSD into a fresh project directory:
+Create a throwaway repo:
 
 ```bash
-mkdir gsd-workshop && cd gsd-workshop
+mkdir gsd-workshop
+cd gsd-workshop
 git init
-npx get-shit-done-cc --claude
+npx get-shit-done-cc --claude --local
 ```
 
 Open Claude Code in that directory.
 
-### Run the Workflow (10 min)
+### Run the Workflow
 
-1. **Start a new project** — type `/gsd:new-project` and describe a simple idea (e.g., "A Simple CRUD App").
-    1. You should use the same project idea as before to see the difference. 
-2. **Answer the system's questions** — notice how it asks until it understands your idea completely before doing anything else.
-3. **Review the output** — the system produces `PROJECT.md`, `REQUIREMENTS.md`, `ROADMAP.md`, and `STATE.md`. Skim through them.
-4. **Discuss a phase** — run `/gsd:discuss-phase 1` and answer the gray area questions. Notice how it asks about decisions you hadn't thought of (output format, error handling, edge cases).
-5. **Check CONTEXT.md** — open the generated context file. Your preferences are now captured and will feed into the planner.
+Start a new project:
 
-### Reflect (5 min)
+```text
+/gsd-new-project
+```
 
-Open the files GSD generated — `REQUIREMENTS.md`, `CONTEXT.md`, and the task plans. Now compare:
+Use a small app idea, such as:
 
-- "Vibe Coding": started coding immediately. What assumptions did it make that you didn't agree with?
-- "Spec-Driver": asked you 10+ questions before writing a single line. How many of those decisions would you have caught in code review instead?
-- Look at the task plans from `/gsd:plan-phase`. Each one runs in a fresh 200K-token subagent — no context rot. Compare that to a single long conversation where quality degrades as context fills up.
+```text
+A simple CRUD app for tracking books I want to read.
+```
 
-> **The takeaway:** The 15 minutes you spent specifying and discussing didn't slow you down, instead it front-loaded decisions that would otherwise surface as bugs, rework, and "that's not what I wanted." The difference between vibe coding and professional agentic development isn't the model. It's the methodology.
+Answer the setup questions. When GSD finishes, review the generated files:
+
+- `PROJECT.md`
+- `REQUIREMENTS.md`
+- `ROADMAP.md`
+- `STATE.md`
+
+Then discuss the first phase:
+
+```text
+/gsd-discuss-phase 1
+```
+
+Answer the implementation questions. Pay attention to decisions you might not have included in a plain prompt, such as:
+
+- output format
+- error behavior
+- empty states
+- validation rules
+- file naming
+- test expectations
+
+Open the generated `CONTEXT.md` file and check whether it captured your preferences.
+
+Then plan the phase:
+
+```text
+/gsd-plan-phase 1
+```
+
+Review the plan files before executing anything.
+
+### Compare
+
+Compare the GSD output with the prompt you would have written without a workflow.
+
+Ask:
+
+- What assumptions did the system surface before coding?
+- Which questions would otherwise have shown up during review?
+- Are the generated requirements specific enough to test?
+- Does the phase plan split work into reviewable steps?
+- Is this workflow worth the overhead for this size of task?
+
+The useful lesson is the tradeoff. GSD adds process. That process helps when it catches decisions early, but it is not needed for every task.
 
 ---
 
-[← Back to main page](/docs/)
+[Back to main page](/docs/)
