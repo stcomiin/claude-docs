@@ -115,20 +115,21 @@ Not sure what to do first? Ask it:
 
 | Step | Command | What Happens |
 | --- | --- | --- |
-| 1 | `/quick-spec` | Analyzes your codebase, produces a tech-spec with stories |
-| 2 | `/dev-story` | Implements each story |
-| 3 | `/code-review` | QA agent validates quality |
+| 1 | `/bmad-quick-spec` | Analyzes your codebase, produces a tech-spec with stories |
+| 2 | `/bmad-dev-story` | Implements each story |
+| 3 | `/bmad-code-review` | QA agent validates quality |
 
 **Full Planning Path** — products, platforms, complex features:
 
 | Step | Command | What Happens |
 | --- | --- | --- |
-| 1 | `/product-brief` | Define problem, users, MVP scope |
-| 2 | `/create-prd` | Full requirements with personas, metrics, risks |
-| 3 | `/create-architecture` | Technical decisions and system design |
-| 4 | `/create-epics-and-stories` | Break work into prioritized stories |
-| 5 | `/sprint-planning` | Initialize sprint tracking |
-| 6 | `/create-story` → `/dev-story` → `/code-review` | Repeat per story |
+| 1 | `/bmad-brainstorming` | Initial brainstorming to cover various aspects |
+| 2 | `/bmad-product-brief` | Define problem, users, MVP scope |
+| 3 | `/bmad-create-prd` | Full requirements with personas, metrics, risks |
+| 4 | `/bmad-create-architecture` | Technical decisions and system design |
+| 5 | `/bmad-create-epics-and-stories` | Break work into prioritized stories |
+| 6 | `/bmad-sprint-planning` | Initialize sprint tracking |
+| 7 | `/bmad-create-story` → `/bmad-dev-story` → `/bmad-code-review` | Repeat per story |
 
 Every step tells you what's next. `/bmad-help` works at any point and adapts its guidance based on which modules you have installed.
 
