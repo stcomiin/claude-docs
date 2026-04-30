@@ -98,7 +98,7 @@ Use these resources when relevant:
 - To collect a local diff, run `scripts/collect-diff.sh`.
 ```
 
-Keep the frontmatter short and specific. In Claude Code, the directory name becomes the slash command, and `description` helps Claude decide whether to load the skill automatically. `when_to_use` can add trigger examples, but the combined trigger text should stay concise.
+Keep the frontmatter short and specific. In Claude Code, the directory name becomes the slash command, such as `/pr-review`, and `description` helps Claude decide whether to load the skill automatically. `when_to_use` can add trigger examples, but the combined trigger text should stay concise.
 
 Use the instructions to say what to do, what to avoid, and what output shape to produce. Put long checklists, examples, API docs, or scripts in supporting files and reference them from `SKILL.md`.
 
@@ -269,14 +269,44 @@ After installation, open Claude Code in the project and run:
 /bmad-help
 ```
 
-### Typical Flow
+### Modules
 
-For a small, scoped change, use the lightweight path:
+BMAD installs modules. Start with BMad Method unless you know you need a specialized track.
+
+| Module | Use for |
+| --- | --- |
+| BMad Method (BMM) | Core planning, architecture, story, implementation, and review workflows |
+| BMad Builder (BMB) | Creating custom BMAD agents, workflows, or modules |
+| Test Architect (TEA) | Risk-based test strategy, traceability, and release review |
+| Creative Intelligence Suite (CIS) | Brainstorming, design thinking, and problem exploration |
+| Game Dev Studio (GDS) | Game design and development workflows |
+
+Install extra modules when they match the project. Extra modules add commands and agents, so installing everything can make BMAD harder to navigate.
+
+### Agent Team
+
+BMAD works through role-specific agents. Product and planning agents shape requirements. The architect handles system design. The developer turns stories into code. Review and testing agents check the work.
+
+The role split matters because each agent has a narrower job. It also creates artifacts other agents can read later, such as PRDs, architecture notes, story files, and review output.
+
+### Party Mode
+
+Party Mode puts several BMAD agents into one conversation:
 
 ```text
-/bmad-quick-spec
-/bmad-dev-story
-/bmad-code-review
+/bmad-party-mode
+```
+
+BMad Master routes each message to the agents whose perspective is relevant. Use it for architecture tradeoffs, planning discussions, retrospectives, or decisions where product, engineering, UX, and QA perspectives should be considered together.
+
+Party Mode is a discussion tool. It can surface tradeoffs, but you still decide what to accept.
+
+### Typical Flow
+
+For a small, scoped change, use Quick Dev:
+
+```text
+/bmad-quick-dev
 ```
 
 For larger product work, use the planning path:
@@ -330,6 +360,16 @@ Verify inside Claude Code:
 /gsd-help
 ```
 
+### Existing Code - Brownfield
+
+If the repo already has code, map it before starting a new project:
+
+```text
+/gsd-map-codebase
+```
+
+This gives GSD a first pass at the stack, architecture, conventions, and risk areas. It is more useful than asking project-init questions against an unknown codebase.
+
 ### Typical Flow
 
 ```text
@@ -341,11 +381,55 @@ Verify inside Claude Code:
 /gsd-complete-milestone
 ```
 
+GSD writes its working state into spec files, such as `PROJECT.md`, `REQUIREMENTS.md`, `ROADMAP.md`, `STATE.md`, and phase-specific files under `.planning/`. Treat these as the current source of truth for scope, requirements, and decisions. Review them before continuing, because later GSD agents read them to stay grounded in the project.
+
 ### Why the Discussion Step Matters
 
 `/gsd-discuss-phase` asks about choices that requirements often leave open: UI density, API shape, error behavior, file naming, edge cases, and review expectations.
 
 That step is useful because it captures your preferences before planning starts. Skipping it means the agent will use reasonable defaults, which may not match how you want the feature built.
+
+### Reducing Friction
+
+Many GSD commands support `--auto`. Use it when the task is clear and you are comfortable with GSD choosing defaults:
+
+```text
+/gsd-new-project --auto
+/gsd-discuss-phase 1 --auto
+/gsd-plan-phase 1 --auto
+```
+
+`--chain` can continue from discussion into the next steps:
+
+```text
+/gsd-discuss-phase 1 --chain
+```
+
+These flags save handoffs. They also reduce the number of places where you review assumptions before the next step starts. Use them for low-risk or well-specified work. For product, UX, API, data, or architecture decisions, stay manual until the important choices are written down.
+
+### Quick Work vs Phase Work
+
+Use the smallest workflow that fits the task:
+
+| Command | Use for |
+| --- | --- |
+| `/gsd-fast <text>` | Trivial edits that do not need planning |
+| `/gsd-quick` | Small tasks that still benefit from light tracking |
+| `/gsd-discuss-phase` -> `/gsd-plan-phase` -> `/gsd-execute-phase` | Scoped feature or project work |
+
+GSD also supports a minimal install for token-sensitive or throwaway setups:
+
+```bash
+npx get-shit-done-cc --claude --global --minimal
+```
+
+Use the full install when you expect to use the broader command set. Use `--minimal` when you only need the core loop.
+
+### Execution Model
+
+Execution is plan-based. GSD splits a phase into plans, groups independent plans into waves, and runs work in fresh subagents where possible. Dependent work waits for the earlier wave to finish.
+
+This is useful when a phase has several separable parts. It is less useful when the change is one file or one obvious bug fix.
 
 ### When to Use It
 
