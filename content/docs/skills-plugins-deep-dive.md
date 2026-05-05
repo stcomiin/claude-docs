@@ -493,221 +493,64 @@ Treat the second model's output as another review input, not as approval.
 
 ---
 
-## Optional workshop: research to deliverables
+## Hands-on workshops
 
-**Time:** about 20 minutes
+Use these exercises after the sections above. This page helps you pick a lab. The step-by-step commands live in the hands-on repo so this page does not go stale every time the labs change.
 
-This exercise chains two capabilities:
+**Workshop repo:** [stcomiin/claude-docs-workshop-handson](https://github.com/stcomiin/claude-docs-workshop-handson)
 
-1. Parallel research with subagents.
-2. File generation with document skills.
+| Workshop | Time | Good for | Guide |
+| --- | --- | --- | --- |
+| Research report generation | 20-30 minutes | Subagents, web research, and document skills | [Starter workspace](https://github.com/stcomiin/claude-docs-workshop-handson/tree/main/research-report-generation-workflow-starter) |
+| Existing app with GSD | 25-60 minutes | Codebase mapping, quick tasks, and full GSD phase flow | [GSD workshop](https://github.com/stcomiin/claude-docs-workshop-handson/tree/main/one-shot-task-dashboard-gsd-workshop) |
+| Existing app with BMAD | 35-75 minutes | Project context, quick-dev, planning files, and review | [BMAD workshop](https://github.com/stcomiin/claude-docs-workshop-handson/tree/main/one-shot-task-dashboard-bmad-workshop) |
 
-The example topic is a technology scan of current OCR tools. You can use a different topic if it fits your workshop.
+If you are running a live session, pin the workshop repo to a known commit or tag. If you want the newest version, follow the README in each workshop folder.
 
-### Setup
+<span id="-workshop-exercise-research-and-report-generation-workflow"></span>
 
-You need:
+### Research report generation
 
-- Claude Code
-- The `document-skills` plugin installed
-- Web search enabled
-- A working directory where Claude can write files
+This lab pairs parallel research with the `document-skills` plugin. Participants create one markdown report, then turn it into Word, PDF, PowerPoint, and Excel files.
 
-### Phase 1 - research with subagents
+Use it when you want to show that skills are more than prompt snippets. The useful part is the sequence: split the research, write one report, then turn that report into formats people can open and review.
 
-Paste this into Claude Code:
+Start with the [starter workspace](https://github.com/stcomiin/claude-docs-workshop-handson/tree/main/research-report-generation-workflow-starter). Use the [completed reference](https://github.com/stcomiin/claude-docs-workshop-handson/tree/main/research-report-generation-workflow-completed) after the exercise or when you need an answer key.
 
-```text
-I want a technology scan of the current state of OCR tools.
+Review the result by asking:
 
-Run the work in three steps.
+- Did the research slices cover different parts of the topic?
+- Does the markdown report cite sources and make real comparisons?
+- Do the generated files open cleanly?
+- Did the slide deck become a briefing, not a copied report?
 
-Step 1 - Decompose the topic.
-Before searching anything, propose four useful slices of this topic
-that four parallel research agents could cover independently with minimal
-overlap. Slices can be by category, technical approach, use case,
-maturity, or another split that keeps the work separate.
+### Existing app with GSD
 
-Show the four proposed slices in one short paragraph each, then continue
-to Step 2.
+This lab uses GSD on a small existing OSINT dashboard instead of a blank project.
 
-Step 2 - Research in parallel.
-Spawn 4 subagents, one per slice. Each subagent should run independent
-web searches and return:
+The feature is deliberately small: add a **Test** action to each collector row in Settings. The backend route and API helper already exist. The work is finding the right path through the codebase and exposing the missing UI without changing the backend or database.
 
-- leading tools, products, or approaches in that slice
-- what each one does well
-- known limitations
-- cost or licensing model
-- maturity
-- notable changes from the last 6 to 12 months
+The [GSD workshop](https://github.com/stcomiin/claude-docs-workshop-handson/tree/main/one-shot-task-dashboard-gsd-workshop) has two paths:
 
-Step 3 - Synthesize.
-Once all subagents return, produce a single markdown report with:
+| Path | Use when |
+| --- | --- |
+| Short path | You want a 20-25 minute exercise using `$gsd-quick`. |
+| Full path | You want to practice map, project init, spec, discuss, plan, execute, verify, and review. |
 
-- executive summary
-- landscape overview
-- comparison matrix
-- short deep dive per slice
-- recommendations by use case
-- sources and references
+The main lesson is scope control. GSD is useful here because it finds the existing project structure, captures assumptions, and keeps a small UI change from turning into a rewrite.
 
-Save the report as ocr_tech_scan.md in the current directory.
-```
+### Existing app with BMAD
 
-Check the result before continuing:
+This lab uses the same dashboard feature as the GSD workshop, but runs it through BMAD. That makes the comparison useful: same app, same feature, different workflow.
 
-- Did Claude split the topic into distinct slices?
-- Did the subagents run in parallel?
-- Does the report cite sources?
-- Does the comparison matrix contain useful decision criteria?
-- Are there obvious gaps, stale claims, or unsupported recommendations?
+Use the [BMAD workshop](https://github.com/stcomiin/claude-docs-workshop-handson/tree/main/one-shot-task-dashboard-bmad-workshop) when you want participants to see how BMAD uses project context, quick-dev, PRDs, architecture notes, stories, implementation, and review.
 
-Treat `ocr_tech_scan.md` as a draft. Edit it before using it as a real deliverable.
+| Path | Use when |
+| --- | --- |
+| Short path | You want a 30-40 minute exercise using `bmad-quick-dev`. |
+| Full path | You want to practice the fuller BMAD method: PRD, architecture, epics or stories, sprint planning, dev story, and code review. |
 
-### Phase 2 - convert to file deliverables
-
-Use the generated markdown as the source for several formats.
-
-#### Word document
-
-```text
-Using the docx skill, convert ocr_tech_scan.md into a Word document.
-Add a title page, table of contents, page numbers, and preserve the
-comparison tables. Save it as ocr_tech_scan.docx.
-```
-
-#### PDF
-
-```text
-Using the pdf skill, produce ocr_tech_scan.pdf from ocr_tech_scan.md.
-Add a running header with the report title, page numbers in the footer,
-and make sure the comparison matrix renders cleanly across pages.
-```
-
-#### PowerPoint briefing
-
-```text
-Using the pptx skill, create ocr_tech_scan.pptx as a 10-slide executive
-briefing based on ocr_tech_scan.md.
-
-Slide plan:
-
-1. Title slide
-2. Executive summary
-3. Landscape overview
-4. One slide for slice 1
-5. One slide for slice 2
-6. One slide for slice 3
-7. One slide for slice 4
-8. Comparison matrix
-9. Recommendations by use case
-10. Sources
-
-Keep slides short. Use a slide-native table for the comparison matrix.
-```
-
-#### Spreadsheet
-
-```text
-Using the xlsx skill, extract the comparison matrix from
-ocr_tech_scan.md into ocr_tech_scan.xlsx. Add a second tab that groups
-tools by category with pricing tier and use case.
-```
-
-### Review
-
-Open each generated file and check:
-
-- Does the file open in the expected application?
-- Are tables readable?
-- Are headings and page breaks reasonable?
-- Did the slide deck reduce detail instead of copying paragraphs?
-- Are sources preserved?
-- What still needs human editing?
-
-The point of the exercise is not to produce a finished report in one pass. It is to show how a structured workflow can produce a usable first draft across several formats.
-
----
-
-## Optional workshop: GSD on a small app
-
-**Time:** about 20 minutes
-
-This exercise compares a structured workflow with a plain one-prompt build request.
-
-### Setup
-
-Create a throwaway repo:
-
-```bash
-mkdir gsd-workshop
-cd gsd-workshop
-git init
-npx get-shit-done-cc --claude --local
-```
-
-Open Claude Code in that directory.
-
-### Run the workflow
-
-Start a new project:
-
-```text
-/gsd-new-project
-```
-
-Use a small app idea, such as:
-
-```text
-A simple CRUD app for tracking books I want to read.
-```
-
-Answer the setup questions. When GSD finishes, review the generated files:
-
-- `.planning/PROJECT.md`
-- `.planning/REQUIREMENTS.md`
-- `.planning/ROADMAP.md`
-- `.planning/STATE.md`
-
-Then discuss the first phase:
-
-```text
-/gsd-discuss-phase 1
-```
-
-Answer the implementation questions. Pay attention to decisions you might not have included in a plain prompt, such as:
-
-- output format
-- error behavior
-- empty states
-- validation rules
-- file naming
-- test expectations
-
-Open the generated phase context file, such as `.planning/1-CONTEXT.md`, and check whether it captured your preferences.
-
-Then plan the phase:
-
-```text
-/gsd-plan-phase 1
-```
-
-Review the plan files before executing anything.
-
-### Compare
-
-Compare the GSD output with the prompt you would have written without a workflow.
-
-Ask:
-
-- What assumptions did GSD ask you to decide before coding?
-- Which questions would otherwise have shown up during review?
-- Are the generated requirements specific enough to test?
-- Does the phase plan split work into reviewable steps?
-- Is this workflow worth the overhead for this size of task?
-
-The useful lesson is the tradeoff. GSD adds process. That process helps when it catches decisions early, but it is not needed for every task.
+BMAD is useful when you want product-team-style planning before code: PRD, architecture, stories, implementation, and review. GSD carries context too, but it is organized around phases, executable plans, parallel implementation, and verification.
 
 ---
 
