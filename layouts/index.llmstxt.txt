@@ -1,0 +1,15 @@
+{{- $base := .Site.BaseURL | strings.TrimRight "/" -}}
+# {{ .Site.Title }}
+
+> {{ with .Site.Params.description }}{{ . }}{{ else }}Documentation for {{ $.Site.Title }}.{{ end }}
+
+This file follows the [llms.txt convention](https://llmstxt.org). Browse the full site at {{ $base }}.
+
+## Documentation
+{{- range where .Site.RegularPages "Section" "docs" }}
+- [{{ .Title }}]({{ .Permalink }}){{ with .Description }}: {{ . }}{{ end }}
+{{- end }}
+
+## Optional
+
+- [Full content (llms-full.txt)]({{ "llms-full.txt" | absURL }}): Every documentation page concatenated as plain markdown for deep ingestion.

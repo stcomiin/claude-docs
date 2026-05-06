@@ -19,6 +19,24 @@ markup:
     renderer:
       unsafe: true
 
+# llms.txt convention (https://llmstxt.org) — curated index + full-content
+# dump rendered from the home page so LLM consumers can ingest the docs
+# without scraping HTML.
+outputFormats:
+  LlmsTxt:
+    mediaType: text/plain
+    baseName: llms
+    isPlainText: true
+    notAlternative: true
+  LlmsFullTxt:
+    mediaType: text/plain
+    baseName: llms-full
+    isPlainText: true
+    notAlternative: true
+
+outputs:
+  home: [HTML, RSS, LlmsTxt, LlmsFullTxt]
+
 menu:
   main:
     - identifier: documentation
