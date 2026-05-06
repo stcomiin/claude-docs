@@ -7,6 +7,14 @@ Use this when you already have an application and want Claude Code to make a cha
 
 The goal is to give the agent enough project context to follow existing patterns, then keep the requested change small enough to review.
 
+Official references worth reading alongside this page:
+
+| Tool | Reference |
+| --- | --- |
+| GSD v1 | [Brownfield Projects](https://mintlify.wiki/gsd-build/get-shit-done/guides/brownfield-projects) |
+| GSD 2 | [Brownfield Reality](https://getshitdone.help/solo-guide/brownfield/) |
+| BMAD | [Established Projects](https://docs.bmad-method.org/how-to/established-projects/) |
+
 ## Before Either Workflow
 
 1. Start from a clean git branch.
@@ -37,6 +45,8 @@ Follow the current table and button patterns. Verify with npm test and npm run l
 ## GSD Path
 
 Use GSD when you want the change to be tracked through requirements, phases, plans, execution, and verification.
+
+GSD command names vary by install and runtime. Some setups use `/gsd-map-codebase`; others expose the same command as `/gsd:map-codebase`. Run `/gsd-help` or `/gsd:help` and use the names shown in your session.
 
 ### 1. Map the Current Codebase
 
