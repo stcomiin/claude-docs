@@ -45,7 +45,7 @@ jobs:
         run: |
           hugo \
             --gc --minify \
-            --baseURL "/"
+            --baseURL "https://pr-${{ github.event.pull_request.number }}.claude-docs-preview.pages.dev/"
 
       - name: Deploy to Cloudflare Pages
         id: deploy
