@@ -1,10 +1,10 @@
-{{- $base := .Site.BaseURL | strings.TrimRight "/" -}}
-# {{ .Site.Title }}
+{{- $base := site.BaseURL | strings.TrimRight "/" -}}
+# {{ site.Title }}
 
-> {{ with .Site.Params.description }}{{ . }}{{ else }}Documentation for {{ $.Site.Title }}.{{ end }}
+> {{ with site.Params.description }}{{ . }}{{ else }}Documentation for {{ site.Title }}.{{ end }}
 
 This file contains the full content of every documentation page on {{ $base }}, formatted as plain markdown for LLM ingestion.
-{{ range where .Site.RegularPages "Section" "docs" }}
+{{ range where site.RegularPages "Section" "docs" }}
 ---
 
 # {{ .Title }}

@@ -1,12 +1,12 @@
-{{- $base := .Site.BaseURL | strings.TrimRight "/" -}}
-# {{ .Site.Title }}
+{{- $base := site.BaseURL | strings.TrimRight "/" -}}
+# {{ site.Title }}
 
-> {{ with .Site.Params.description }}{{ . }}{{ else }}Documentation for {{ $.Site.Title }}.{{ end }}
+> {{ with site.Params.description }}{{ . }}{{ else }}Documentation for {{ site.Title }}.{{ end }}
 
 This file follows the [llms.txt convention](https://llmstxt.org). Browse the full site at {{ $base }}.
 
 ## Documentation
-{{- range where .Site.RegularPages "Section" "docs" }}
+{{- range where site.RegularPages "Section" "docs" }}
 - [{{ .Title }}]({{ .Permalink }}){{ with .Description }}: {{ . }}{{ end }}
 {{- end }}
 
