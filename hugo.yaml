@@ -65,6 +65,12 @@ params:
   images:
     - images/og-cover.png
 
+  # Hextra's built-in banner. Inner content is supplied by
+  # layouts/partials/custom/banner.html. `key` is the localStorage flag
+  # tracking dismissal — bump it to force-re-show after content changes.
+  banner:
+    key: llms-banner-v1
+
   navbar:
     displayTitle: true
     displayLogo: false
