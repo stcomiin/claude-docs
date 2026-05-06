@@ -554,4 +554,4 @@ BMAD is useful when you want product-team-style planning before code: PRD, archi
 
 ---
 
-[Back to main page](/docs/)
+[Back to main page](/)
