@@ -1,0 +1,19 @@
+{{/* Custom banner content for Hextra's built-in banner shell.
+     The shell (with close × button + dark theming) is provided by
+     layouts/_partials/banner.html in the Hextra theme — we only emit the
+     inner message HTML here. */}}
+{{- $url := "llms-full.txt" | absURL -}}
+<div class="llms-banner-content">
+  <span>
+    <span aria-hidden="true">📄</span>
+    Built for AI assistants too — paste
+    <a href="{{ $url }}" class="llms-banner-link">/llms-full.txt</a>
+    into Claude or ChatGPT to ingest the whole workshop.
+  </span>
+  <button type="button"
+          class="llms-banner-copy"
+          data-llms-url="{{ $url }}"
+          aria-label="Copy llms-full.txt URL to clipboard">
+    Copy URL
+  </button>
+</div>

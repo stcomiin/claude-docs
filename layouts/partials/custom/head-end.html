@@ -1,3 +1,9 @@
+<!-- llms.txt discovery — manually emitted on every page (Hugo's
+     auto-alternate would only fire on the home page since that's the only
+     kind that lists these output formats). -->
+<link rel="alternate" type="text/plain" title="LLM-readable site index" href="{{ "llms.txt" | absURL }}">
+<link rel="alternate" type="text/plain" title="Full site content for LLM ingestion" href="{{ "llms-full.txt" | absURL }}">
+
 <!-- Link-preview hints (Telegram, WhatsApp, Slack, X, Facebook, etc.).
      The base og:* / twitter:* tags are emitted by Hextra's opengraph partial
      and Hugo's internal twitter_cards partial using site.Params.images. -->
@@ -107,6 +113,45 @@
     width: 1.1rem;
     height: 1.1rem;
   }
+
+  /* llms.txt banner — inner content styling. Hextra precompiles its
+     Tailwind bundle, so utility classes from this file would not be picked
+     up; we use semantic classes + plain CSS instead. */
+  .llms-banner-content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem 0.75rem;
+    padding: 0 2rem;
+  }
+  .llms-banner-link {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-weight: 600;
+  }
+  .llms-banner-link:hover {
+    opacity: 0.85;
+  }
+  .llms-banner-copy {
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: transparent;
+    color: inherit;
+    border-radius: 4px;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.7rem;
+    line-height: 1.4;
+    white-space: nowrap;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .llms-banner-copy:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+  .llms-banner-copy[disabled] {
+    opacity: 0.7;
+  }
 </style>
 
 <script>
@@ -172,6 +217,34 @@ document.addEventListener("DOMContentLoaded", function () {
       scrollBtn.classList.remove("is-visible");
     }
   }, { passive: true });
+
+  // --- llms.txt banner: copy URL to clipboard ---
+  // Registered via document-level delegation so it survives any future
+  // banner re-renders and works regardless of page kind. Must sit BEFORE
+  // the TOC block below, which early-returns on pages without a TOC.
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest(".llms-banner-copy");
+    if (!btn) return;
+    e.preventDefault();
+    var url = btn.getAttribute("data-llms-url");
+    if (!url) return;
+    var copy = navigator.clipboard
+      ? navigator.clipboard.writeText(url)
+      : Promise.reject(new Error("Clipboard API unavailable"));
+    copy.then(function () {
+      var original = btn.textContent;
+      btn.textContent = "Copied!";
+      btn.disabled = true;
+      setTimeout(function () {
+        btn.textContent = original;
+        btn.disabled = false;
+      }, 1500);
+    }).catch(function () {
+      // Fallback for non-secure contexts (no clipboard API): show a
+      // prompt the user can copy from manually.
+      window.prompt("Copy this URL", url);
+    });
+  });
 
   // --- TOC auto-scroll to active item ---
   var toc = document.querySelector(".hextra-toc");
