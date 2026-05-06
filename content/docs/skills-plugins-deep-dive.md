@@ -258,6 +258,8 @@ After installation, open Claude Code in the project and run:
 /bmad-help
 ```
 
+Newer BMAD installs may expose these as skills instead of slash commands. In that setup, type `bmad-help`; the workflow names are otherwise the same.
+
 ### Modules
 
 BMAD installs modules. Start with BMad Method unless you know you need a specialized track.
@@ -329,6 +331,8 @@ For larger product work, use the planning path:
 /bmad-code-review
 ```
 
+For a step-by-step brownfield workflow, see [Existing Codebase Workflows](/docs/existing-codebase-workflows/).
+
 ### What to look for
 
 BMAD is working well when each step produces a concrete artifact: a brief, PRD, architecture note, story, implementation, or review. Those artifacts make decisions easier to audit later.
@@ -373,6 +377,8 @@ If the repo already has code, map it before starting a new project:
 ```
 
 This gives GSD a first pass at the stack, architecture, conventions, and risk areas. It is more useful than asking project-init questions against an unknown codebase.
+
+For a step-by-step brownfield workflow, see [Existing Codebase Workflows](/docs/existing-codebase-workflows/).
 
 ### Typical flow for a phase
 
