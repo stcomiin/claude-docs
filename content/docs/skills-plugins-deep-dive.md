@@ -374,7 +374,7 @@ If the repo already has code, map it before starting a new project:
 
 This gives GSD a first pass at the stack, architecture, conventions, and risk areas. It is more useful than asking project-init questions against an unknown codebase.
 
-### Typical flow
+### Typical flow for a phase
 
 ```text
 /gsd-new-project
@@ -382,7 +382,6 @@ This gives GSD a first pass at the stack, architecture, conventions, and risk ar
 /gsd-plan-phase 1
 /gsd-execute-phase 1
 /gsd-verify-work 1
-/gsd-complete-milestone
 ```
 
 GSD writes its working state into `.planning/`, including `.planning/PROJECT.md`, `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, and phase-specific files. Treat these as the current source of truth for scope, requirements, and decisions. Review them before continuing, because later GSD agents read them to stay grounded in the project.
