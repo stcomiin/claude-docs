@@ -7,18 +7,16 @@ These are the two spec-driven frameworks we highly recommend for working with ex
 
 The goal is to give the agent enough project context to follow existing patterns, then keep the requested change small enough to review.
 
-Changing an existing app is different from starting with a blank repo. The agent has to preserve the code that is already there: architecture, naming patterns, tests, API contracts, database schema and migration rules, and team conventions. The more of those things a change touches, the more context and review you need before implementation.
+Existing apps already have architecture, naming patterns, tests, API contracts, database rules, and team habits. The agent needs those boundaries before it edits.
 
-There are four levels:
+Pick the lightest workflow that fits the task. Choose a heavier workflow as complexity grows: more brainstorming, larger features, more repo context, review, or verification:
 
 - **Plain session**: use Claude Code or Codex directly for a typo, copy edit, simple test update, or one-file fix where you already know the right file and expected diff.
 - **Quick workflow**: use `gsd-quick` or `bmad-quick-dev` when the change is small but still needs repo discovery, guardrails, or light tracking.
 - **Full GSD path**: use GSD's map, project, spec, discuss, plan, execute, verify, review, and ship flow when the work should be tracked through phases and verification.
-- **Full BMAD path**: use BMAD's project-context, brief, PRD, architecture, story, implementation, and review flow when the work needs product/team-style artifacts.
+- **Full BMAD path**: use BMAD's project-context, brief, PRD, architecture, story, implementation, and review flow when the work needs product planning and handoffs.
 
-For production incidents, auth, security, PII, billing, migrations, cross-repo changes, ambiguous requirements, or substantial business logic, do not use quick mode. Use the full GSD or full BMAD path and manually review the generated artifacts, planned commands, and final diff.
-
-This guide assumes GSD or BMAD is installed, you can run the repo's checks locally, and you have permission to change the code. It does not cover starting from a blank repo, tool installation troubleshooting, or full command references.
+This guide assumes GSD or BMAD is installed, you can run the repo's checks locally, and you have permission to change the code. It does not cover blank projects, install troubleshooting, or full command references.
 
 ## GSD or BMAD? Or Both?
 
@@ -32,7 +30,7 @@ Generally, we recommend BMAD for brainstorming, and GSD for the actual code exec
 
 ## Existing-Codebase Rule
 
-Mapping and project-context steps from the two frameworks can find existing patterns, but they cannot reliably infer hidden project rules such as "do not touch billing", "do not change the schema", or "preserve this legacy API contract". These rules that apply across the codebase should live in CLAUDE.md.
+Mapping and project-context steps can find existing patterns, but they cannot infer hidden project rules such as "do not touch IAM", "do not change the schema", or "preserve this legacy API contract". Rules that apply across the codebase should live in `CLAUDE.md`.
 
 Before either workflow, write a short task guardrail block. This is not a codebase map. It is the boundary for the current change:
 
@@ -45,24 +43,24 @@ For example:
 
 ```text
 Goal:
-Add a Pause Feed action to each source row on the News Sources page.
+Add a Refresh Feed button to each source row on the News Sources page.
 
 Likely area:
-News Sources table, source row actions, existing feed status API helper, related frontend tests.
+News Sources table, source row actions, existing feed refresh API helper, related frontend tests.
 
 Hard limits:
-Do not change RSS ingestion, social media connector logic, feed parsing, database schema, auth rules, or source configuration format.
+Do not change feed parsing, database schema, auth rules, or source configuration format.
 
 Patterns to follow:
-Use the existing table action pattern, button styling, confirmation behavior, and loading/error states.
+Use the existing table action pattern, button styling, loading state, and error handling.
 Use the existing API helper instead of creating a second fetch path.
 
 Verify:
 Run npm test and npm run lint.
-Manually check that pausing a source updates the row state and does not delete existing articles.
+Manually check that refreshing a source updates the row status and does not delete existing articles.
 ```
 
-Paste those guardrails into the workflow prompt or a small handoff file. After GSD or BMAD creates its own context artifacts, copy long-lived constraints into those artifacts and stop treating the handoff file as authoritative.
+Paste those guardrails into the workflow prompt or a small handoff file. After GSD or BMAD creates planning files, move any long-lived constraints there and stop treating the handoff file as authoritative.
 
 ## Before Starting with GSD or BMAD
 
@@ -77,7 +75,7 @@ If `git status --short` prints anything, commit, stash, or move the work to a se
 
 2. Check current project instructions and baseline docs that already exist (if any).
 
-Check files such as `CLAUDE.md`, `AGENTS.md`, `README.md`, architecture notes, and nearby feature docs. Keep persistent agent instructions short and specific; do not turn `CLAUDE.md` or `AGENTS.md` into a generated codebase summary.
+Check files such as `CLAUDE.md`, `AGENTS.md`, `README.md`, architecture notes, and nearby feature docs. Keep persistent agent instructions short and specific. Do not turn `CLAUDE.md` or `AGENTS.md` into a generated codebase summary. For examples, see [CLAUDE.md and AGENTS.md](agentic-coding-in-terminal#claudemd-and-agentsmd).
 
 3. Run the baseline checks.
 
@@ -95,7 +93,7 @@ Reusing a long or unrelated session makes it easier for old assumptions to leak 
 
 5. Write the task in one or two sentences.
 
-A useful existing-codebase task names the user-facing change, likely files or areas, constraints, and verification command.
+A good existing-codebase task names the user-facing change, likely files or areas, hard limits, and verification command.
 
 Use this shape:
 
@@ -107,21 +105,21 @@ Patterns to follow:
 Verify:
 ```
 
-For short changes, paste this text into the workflow prompt. For longer briefs or work that needs review before execution, write a small handoff file and reference it from the prompt. Do not keep treating `task.md` as authoritative after GSD or BMAD creates its own artifacts.
+For short changes, paste this text into the workflow prompt. For longer briefs, write a small handoff file and reference it from the prompt. Once GSD or BMAD creates planning files, update those files instead of keeping a separate `task.md`.
 
-## Choose GSD or BMAD
+## Choose the Workflow
 
-| Situation | Better fit |
+| Situation | Use |
 | --- | --- |
 | Typo, copy edit, obvious one-file fix | Plain Claude Code or Codex |
 | Small bug fix with light tracking | `gsd-quick` or `bmad-quick-dev` |
+| Feature idea still needs brainstorming or product shape | BMAD |
+| Product-heavy change needs a PRD, architecture notes, or stories | BMAD first, then GSD for execution |
 | Existing app needs phased delivery and verification | Full GSD path |
-| Product-heavy change with PRD, architecture, stories, and review | BMAD |
-| Team wants durable phase state in git | Full GSD path |
-| Team wants role-specific planning artifacts | BMAD |
-| Auth, security, PII, billing, migrations, incidents, or ambiguous requirements | Full GSD or full BMAD path plus manual review |
+| Team wants planning split by product, architect, and dev roles | BMAD |
+| Auth, security, PII, billing, migrations, incidents, or unclear requirements | Full GSD or full BMAD path plus manual review |
 
-For either tool, start with discovery, constrain the change, and review generated artifacts before allowing large edits.
+For either tool, start with discovery, set clear boundaries, and review the planning files it writes before allowing large edits.
 
 ## Command Names Vary
 
@@ -136,7 +134,9 @@ In Codex, GSD skills use `$` instead of `/`, such as `$gsd-help` or `$gsd-quick`
 
 ## Use GSD
 
-Use GSD when you want requirements, phases, plans, execution, and verification tracked in git.
+Use GSD when the change is defined and you want requirements, plans, execution, and verification tracked in git.
+
+If BMAD already produced a brief, PRD, architecture notes, or stories, use those as inputs to GSD. Do not brainstorm the same feature again.
 
 Start with help:
 
@@ -154,14 +154,14 @@ For a small bug fix or narrow UI/API change, use quick work. If you already know
 /gsd-quick
 ```
 
-If the change still needs stronger checks:
+When quick work still needs validation, add the relevant phase flag:
 
 ```text
 /gsd-quick --validate
 /gsd-quick --research --validate
 ```
 
-If you need a fast read on an unfamiliar area before quick work, use scan:
+When you need a fast read on an unfamiliar area before quick work, use scan:
 
 ```text
 /gsd-scan
@@ -170,13 +170,13 @@ If you need a fast read on an unfamiliar area before quick work, use scan:
 
 ### 2. Map Before Full Project Setup
 
-For larger existing-codebase work, map the repo before creating GSD project context:
+For larger work, map the repo before creating GSD project context:
 
 ```text
 /gsd-map-codebase
 ```
 
-Review the generated `.planning/codebase/` files. Check that the stack, major directories, test commands, and risk areas match the repo. Fix obvious wrong assumptions before planning from the map.
+Open `.planning/codebase/` and check the stack, major directories, test commands, and risk areas. Fix obvious wrong assumptions before planning from the map.
 
 ### 3. Initialize Project Context
 
@@ -203,7 +203,7 @@ Then use the full GSD path:
 /gsd-plan-phase 1
 ```
 
-### 4. Review Artifacts Before Code
+### 4. Review the Plan Before Code
 
 Before execution, inspect:
 
@@ -214,7 +214,7 @@ Before execution, inspect:
 .planning/phases/
 ```
 
-The plan should say what will change, what will not change, which tests will run, and which existing patterns it will follow.
+The plan should say what will change, what will not change, how the work is split across phases, which tests will run, and which existing patterns it will follow.
 
 After review, continue with implementation:
 
@@ -225,7 +225,7 @@ After review, continue with implementation:
 /gsd-ship 1
 ```
 
-This sequence is for the first GSD run in a repo. If `.planning/` already exists, refresh `/gsd-map-codebase` when needed, then continue with the next phase instead of running `/gsd-new-project` again.
+The sequence above is for the first GSD run in a repo. If GSD has already been initialized, refresh the map with `/gsd-map-codebase` when needed, then continue with the next phase. Do not run `/gsd-new-project` again unless the project state is missing or stale enough to rebuild.
 
 ### 5. Verify and Refresh Context
 
@@ -249,7 +249,7 @@ If the phase creates new route folders, migrations, module boundaries, or other 
 
 ## Use BMAD
 
-Use BMAD when you want role-specific planning artifacts: project context, PRDs, architecture notes, stories, implementation, and review.
+Use BMAD when the work needs product shaping and brainstorming before it needs code: project context, PRDs, architecture notes, and stories.
 
 Start with help:
 
@@ -275,9 +275,9 @@ Then generate the project context:
 /bmad-generate-project-context
 ```
 
-Review the configured BMAD output folder, commonly `_bmad-output/`. Its `project-context.md` should capture the stack, versions, folder conventions, test commands, styling rules, and implementation constraints that the agents should follow.
+Open the BMAD output folder, by default `_bmad-output/`, and read `project-context.md`. It should name the stack, versions, folder conventions, test commands, styling rules, and implementation constraints.
 
-Edit this file before implementation if it misses a rule the project depends on. Remove generic advice that does not change how this project should be built.
+Edit this file before implementation if it misses a rule the project depends on. Remove any generic advice that does not change how this project should be built.
 
 For a complex or poorly documented app, run:
 
@@ -287,7 +287,7 @@ For a complex or poorly documented app, run:
 
 Use that when BMAD needs a current-state project document before planning changes.
 
-### 2. Pick Quick Dev or the Full Method
+### 2. Pick Quick Dev or Product Flow
 
 For a small fix, refactor, or narrow feature:
 
@@ -298,12 +298,25 @@ For a small fix, refactor, or narrow feature:
 Give it the same kind of constrained existing-codebase task you would give a developer:
 
 ```text
-Use the existing Settings table patterns to add a Test action to each collector row.
-Do not change backend routes, database schema, or collector configuration format.
-Run the existing frontend checks before summarizing.
+Goal:
+Add a Refresh Feed button to each source row on the News Sources page.
+
+Likely area:
+News Sources table, source row actions, existing feed refresh API helper, related frontend tests.
+
+Hard limits:
+Do not change feed parsing, database schema, auth rules, or source configuration format.
+
+Patterns to follow:
+Use the existing table action pattern, button styling, loading state, and error handling.
+Use the existing API helper instead of creating a second fetch path.
+
+Verify:
+Run npm test and npm run lint.
+Manually check that refreshing a source updates the row status and does not delete existing articles.
 ```
 
-For larger product work, use the full BMAD path. In this page, that means generating project context first, then running the product/story flow:
+For larger product work, generate project context first, then run the product/story flow:
 
 ```text
 /bmad-brainstorming
@@ -317,9 +330,11 @@ For larger product work, use the full BMAD path. In this page, that means genera
 
 Skip `/bmad-brainstorming` when the change is already defined and you do not need idea exploration.
 
-### 3. Keep BMAD Grounded in Existing Patterns
+After BMAD has shaped the work, you can hand the reviewed brief, PRD, architecture notes, or story to GSD for implementation and verification.
 
-Before accepting a story or implementation, check that the artifact names the existing modules, contracts, and tests it will preserve.
+### 3. Keep BMAD Inside the Existing App
+
+Before accepting a story, check that it names the existing modules, contracts, and tests it will preserve.
 
 If BMAD proposes a modernization you did not ask for, stop and restate the boundary:
 
@@ -327,7 +342,7 @@ If BMAD proposes a modernization you did not ask for, stop and restate the bound
 Keep this as an existing-codebase change. Follow the existing service/component pattern even if a different architecture would be cleaner. Do not rewrite unrelated files.
 ```
 
-After review, continue with implementation:
+If you choose to stay in BMAD for implementation, review the story first, then run:
 
 ```text
 /bmad-dev-story
@@ -338,13 +353,13 @@ After review, continue with implementation:
 
 BMAD writes working files under its configured output folder, commonly `_bmad-output/`. Treat those files as working material, not permanent documentation by default.
 
-Promote or rewrite an artifact into your normal docs only when it records a long-term decision. Otherwise, review it, use it for the change, and keep the PR focused on the product/code diff.
+Move BMAD output into your normal docs only when it records a long-term decision. Otherwise, review it, use it for the change, and keep the PR focused on the product/code diff.
 
 ## Final Review Checklist
 
 Before shipping the change, confirm:
 
-- Generated context, plans, stories, or reviews were read and corrected.
+- Context files, plans, stories, or reviews were read and corrected.
 - Tests, lint, build, and manual checks from the guardrail block were rerun.
 - The diff is limited to the expected files and behavior.
 - No hard-limit files, schemas, APIs, or contracts changed without approval.
@@ -353,7 +368,7 @@ Before shipping the change, confirm:
 
 ## Official References
 
-Official references worth reading alongside this page:
+Read these alongside this page:
 
 | Tool | Reference |
 | --- | --- |
@@ -363,7 +378,7 @@ Official references worth reading alongside this page:
 | BMAD | [Commands and Skills](https://docs.bmad-method.org/reference/commands/) |
 | Claude Code | [Skills and Custom Commands](https://code.claude.com/docs/en/slash-commands) |
 
-Related GSD 2 reading: [Brownfield Reality](https://getshitdone.help/solo-guide/brownfield/) and [Context Engineering](https://getshitdone.help/solo-guide/context-engineering/). GSD 2 has useful brownfield concepts, but its command syntax and project structure differ from the GSD workflow shown above.
+Related GSD 2 reading: [Brownfield Reality](https://getshitdone.help/solo-guide/brownfield/) and [Context Engineering](https://getshitdone.help/solo-guide/context-engineering/). GSD 2 covers brownfield concepts, but its command syntax and project structure differ from the GSD workflow shown above.
 
 ---
 
