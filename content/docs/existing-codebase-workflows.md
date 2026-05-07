@@ -16,7 +16,7 @@ Changing an existing app is different from starting with a blank repo. The agent
 There are four levels:
 
 - **Plain session**: use Claude Code or Codex directly for a typo, copy edit, simple test update, or one-file fix where you already know the right file and expected diff.
-- **Quick workflow**: use GSD quick or BMAD quick-dev when the change is small but still needs repo discovery, guardrails, or light tracking.
+- **Quick workflow**: use `gsd-quick` or `bmad-quick-dev` when the change is small but still needs repo discovery, guardrails, or light tracking.
 - **Full GSD path**: use GSD's map, project, spec, discuss, plan, execute, verify, review, and ship flow when the work should be tracked through phases and verification.
 - **Full BMAD path**: use BMAD's project-context, brief, PRD, architecture, story, implementation, and review flow when the work needs product/team-style artifacts.
 
@@ -106,7 +106,7 @@ Manually check that pausing a source updates the row state and does not delete e
 | Situation | Better fit |
 | --- | --- |
 | Typo, copy edit, obvious one-file fix | Plain Claude Code or Codex |
-| Small bug fix with light tracking | GSD quick or BMAD quick-dev |
+| Small bug fix with light tracking | `gsd-quick` or `bmad-quick-dev` |
 | Existing app needs phased delivery and verification | Full GSD path |
 | Product-heavy change with PRD, architecture, stories, and review | BMAD |
 | Team wants durable phase state in git | Full GSD path |

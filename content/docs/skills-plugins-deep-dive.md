@@ -331,7 +331,7 @@ For larger product work, use the planning path:
 /bmad-code-review
 ```
 
-For a step-by-step brownfield workflow, see [Existing Codebase Workflows](/docs/existing-codebase-workflows/).
+For a step-by-step brownfield workflow, see [Existing Codebase Workflows](existing-codebase-workflows).
 
 ### What to look for
 
@@ -378,7 +378,7 @@ If the repo already has code, map it before starting a new project:
 
 This gives GSD a first pass at the stack, architecture, conventions, and risk areas. It is more useful than asking project-init questions against an unknown codebase.
 
-For a step-by-step brownfield workflow, see [Existing Codebase Workflows](/docs/existing-codebase-workflows/).
+For a step-by-step brownfield workflow, see [Existing Codebase Workflows](existing-codebase-workflows).
 
 ### Typical flow for a phase
 
