@@ -3,13 +3,9 @@ title: Existing Codebase Workflows
 weight: 5
 ---
 
-This page covers two existing-codebase workflows: GSD and BMAD.
-
-Use it when you already have an application and want an AI coding tool to change it without acting as if the repo is new.
+These are the two spec-driven frameworks we highly recommend for working with existing codebases using agentic coding tools.
 
 The goal is to give the agent enough project context to follow existing patterns, then keep the requested change small enough to review.
-
-Use the least process that still gives you enough control.
 
 Changing an existing app is different from starting with a blank repo. The agent has to preserve the code that is already there: architecture, naming patterns, tests, API contracts, database schema and migration rules, and team conventions. The more of those things a change touches, the more context and review you need before implementation.
 
@@ -24,9 +20,19 @@ For production incidents, auth, security, PII, billing, migrations, cross-repo c
 
 This guide assumes GSD or BMAD is installed, you can run the repo's checks locally, and you have permission to change the code. It does not cover starting from a blank repo, tool installation troubleshooting, or full command references.
 
+## GSD or BMAD? Or Both?
+
+From our experience using both frameworks, BMAD is very extensive for brainstorming, whether for initial brainstorming for a brand new project or to explore and discuss a new feature to be added. They have various methods for brainstorming ideas that use different brainstorming workflows and agent personas to add new POVs to build on your initial idea.
+
+The main friction with BMAD is the scoping down of workflows for the actual development parts that you have to do. This means that dev is slower as you have to manually invoke review after running the /bmad-create-story workflow, double check the story, then run /bmad-dev-story to get the agent to write the actual code, manually ask it to review, etc. The verification for each part of the workflow is manual (as of current version in Apr 2026).
+
+The frictional part of BMAD is what GSD gets right. Each step of the workflow is automatically verified and iterated by agents as part of the workflow. Code execution automatically gets verified by a code verifier agent, and it's sent back for fixes if the verification fails. This goes on in a loop until the verifier agent verifies that the code has fulfilled the requirements, where it will then proceed with the next flow.
+
+Generally, we recommend BMAD for brainstorming, and GSD for the actual code execution.
+
 ## Existing-Codebase Rule
 
-Discovery is useful, but it is not enough. Mapping and project-context steps can find existing patterns, but they cannot reliably infer project rules such as "do not touch billing", "do not change the schema", or "preserve this legacy API contract".
+Mapping and project-context steps from the two frameworks can find existing patterns, but they cannot reliably infer hidden project rules such as "do not touch billing", "do not change the schema", or "preserve this legacy API contract". These rules that apply across the codebase should live in CLAUDE.md.
 
 Before either workflow, write a short task guardrail block. This is not a codebase map. It is the boundary for the current change:
 
@@ -35,9 +41,30 @@ Before either workflow, write a short task guardrail block. This is not a codeba
 - Scope boundary: what the change should do, and what related cleanup or modernization is out of scope.
 - Verification: the exact test, lint, build, or manual checks that prove the change worked.
 
+For example:
+
+```text
+Goal:
+Add a Pause Feed action to each source row on the News Sources page.
+
+Likely area:
+News Sources table, source row actions, existing feed status API helper, related frontend tests.
+
+Hard limits:
+Do not change RSS ingestion, social media connector logic, feed parsing, database schema, auth rules, or source configuration format.
+
+Patterns to follow:
+Use the existing table action pattern, button styling, confirmation behavior, and loading/error states.
+Use the existing API helper instead of creating a second fetch path.
+
+Verify:
+Run npm test and npm run lint.
+Manually check that pausing a source updates the row state and does not delete existing articles.
+```
+
 Paste those guardrails into the workflow prompt or a small handoff file. After GSD or BMAD creates its own context artifacts, copy long-lived constraints into those artifacts and stop treating the handoff file as authoritative.
 
-## Before Either Workflow
+## Before Starting with GSD or BMAD
 
 1. Start from a clean branch.
 
@@ -48,7 +75,7 @@ git switch -c feature/my-change
 
 If `git status --short` prints anything, commit, stash, or move the work to a separate worktree before starting. Dirty changes follow you onto a new branch.
 
-2. Read the project instructions and baseline docs.
+2. Check current project instructions and baseline docs that already exist (if any).
 
 Check files such as `CLAUDE.md`, `AGENTS.md`, `README.md`, architecture notes, and nearby feature docs. Keep persistent agent instructions short and specific; do not turn `CLAUDE.md` or `AGENTS.md` into a generated codebase summary.
 
@@ -81,25 +108,6 @@ Verify:
 ```
 
 For short changes, paste this text into the workflow prompt. For longer briefs or work that needs review before execution, write a small handoff file and reference it from the prompt. Do not keep treating `task.md` as authoritative after GSD or BMAD creates its own artifacts.
-
-```text
-Goal:
-Add a Pause Feed action to each source row on the News Sources page.
-
-Likely area:
-News Sources table, source row actions, existing feed status API helper, related frontend tests.
-
-Hard limits:
-Do not change RSS ingestion, social media connector logic, feed parsing, database schema, auth rules, or source configuration format.
-
-Patterns to follow:
-Use the existing table action pattern, button styling, confirmation behavior, and loading/error states.
-Use the existing API helper instead of creating a second fetch path.
-
-Verify:
-Run npm test and npm run lint.
-Manually check that pausing a source updates the row state and does not delete existing articles.
-```
 
 ## Choose GSD or BMAD
 
