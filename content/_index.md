@@ -33,4 +33,10 @@ layout: hextra-home
     icon="clipboard-list"
     link="docs/cheat-sheet/"
   >}}
+  {{< hextra/feature-card
+    title="Cybersecurity & Hardening"
+    subtitle="OWASP web/API/LLM/Agentic Top 10s, agent-runtime CVEs, ready-to-paste hooks, and pre-merge guards."
+    icon="shield-check"
+    link="docs/security/"
+  >}}
 {{< /hextra/feature-grid >}}
