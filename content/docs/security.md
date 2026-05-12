@@ -120,7 +120,7 @@ Most of the wins here are upstream of code generation. Bake them into `CLAUDE.md
 | Skill | Purpose | Repo |
 | --- | --- | --- |
 | **OWASP Security** | OWASP Top 10:2025 + ASVS 5.0 + Agentic AI security + 20 language-specific quirks. Already in the [Skills list](/docs/agentic-coding-in-terminal/#skills). | [agamm/claude-code-owasp](https://github.com/agamm/claude-code-owasp) |
-| **SecLists & Agents** | Wordlists, injection payloads, pentest agents for authorised testing. Bundles `/injection`, `/client-side`, `/server-side`, `/api-security`, `/cloud-containers`, `/osint`, `/cve-poc-generator`, `/dfir` slash commands. | [awesome-claude-skills-security](https://github.com/Eyadkelleh/awesome-claude-skills-security) |
+| **SecLists & Agents** | Wordlists, injection payloads, pentest agents for authorised testing. Bundles `/sqli-test`, `/xss-test`, `/webshell-detect`, `/api-keys`, `/wordlist` slash commands plus `security-fuzzing` / `security-payloads` / `security-patterns` / `security-webshells` / `llm-testing` skills. | [awesome-claude-skills-security](https://github.com/Eyadkelleh/awesome-claude-skills-security) |
 | **Devil's Advocate** | Challenges design decisions and review findings — useful as a final pre-merge pass. | [claude-code-skills/devils-advocate](https://github.com/notmanas/claude-code-skills/tree/main/skills/devils-advocate) |
 | **Trail of Bits skills** | Audit-grade skills published by Trail of Bits: `static-analysis` (CodeQL + Semgrep + SARIF), `semgrep-rule-creator`, `insecure-defaults`, `sharp-edges`, `differential-review`, `variant-analysis`, `supply-chain-risk-auditor`, plus crypto-specific `constant-time-analysis` and `zeroize-audit`. | [trailofbits/skills](https://github.com/trailofbits/skills) |
 | **Security Fuzzing payloads** | Curated payload sets — SQL injection, command injection, NoSQL, LDAP/XPath, XXE, template injection, file-upload bypasses, XSS vectors. | [awesome-claude-skills-security](https://github.com/Eyadkelleh/awesome-claude-skills-security) |
@@ -147,9 +147,9 @@ For repeated / regulated work, the prompt above isn't enough — you want a vers
 
 | Tool | When | Install | Why this one |
 | --- | --- | --- | --- |
-| **OWASP Pytm** | Architecture-as-code; threat model lives next to your IaC | `pip install pytm` (needs `graphviz` + `plantuml`) | Python DSL — describe components and dataflows; `tm.report()` emits Markdown + DFD. Versioned in git. [github.com/OWASP/pytm](https://github.com/OWASP/pytm) |
+| **OWASP Pytm** | Architecture-as-code; threat model lives next to your IaC | `pip install pytm` (needs `graphviz` + `plantuml`) | Python DSL — describe components and dataflows; run with `python tm.py --report templates/dfd.md` to emit a Markdown threat model + DFD. Versioned in git. [github.com/OWASP/pytm](https://github.com/OWASP/pytm) |
 | **OWASP Threat Dragon** | Visual collaboration with non-engineers | Download desktop installer or `npm install && npm start` for the web app | GUI for STRIDE diagrams; exports JSON you can hand to Claude for mitigation synthesis. [threatdragon.com](https://www.threatdragon.com/) |
-| **STRIDE-GPT** | Fast first-draft on existing code | `docker run -p 8501:8501 mrwadams/stride-gpt` (Streamlit UI) | LLM-generated STRIDE model from an architecture description; pair with `--model claude-opus`. [github.com/mrwadams/stride-gpt](https://github.com/mrwadams/stride-gpt) |
+| **STRIDE-GPT** | Fast first-draft on existing code | `docker run -p 8501:8501 --env-file .env mrwadams/stridegpt:latest` (Streamlit UI; image is `stridegpt`, no hyphen) | LLM-generated STRIDE model from an architecture description; configure the model + API key in `.env`. [github.com/mrwadams/stride-gpt](https://github.com/mrwadams/stride-gpt) |
 | **MITRE ATLAS Navigator** | AI/ML systems specifically | Web-only, no install | Layer adversarial techniques (84+) onto a feature's data/model flow; export as a JSON layer for review. [atlas.mitre.org](https://atlas.mitre.org/) |
 | **LINDDUN GO** | Privacy-by-design / GDPR-heavy features | Card deck (physical) or [PILLAR](https://github.com/stfbk/PILLAR) for an LLM-assisted version | Surfaces *privacy* threats the security-focused frameworks tend to miss. [linddun.org/go](https://linddun.org/go/) |
 
@@ -167,7 +167,7 @@ Claude Code subagents are Markdown files in `.claude/agents/*.md` (per-project) 
 ---
 name: security-auditor
 description: Use proactively before every PR and whenever the user asks to "security review", "OWASP review", "audit", or "look for vulnerabilities". Read-only — finds issues, does not fix them.
-tools: Read, Grep, Glob, Bash
+tools: Read Glob Grep Bash
 model: opus
 ---
 
@@ -204,7 +204,7 @@ Hard rules:
 ---
 name: incident-triage
 description: Use when the user suspects a compromise of their Claude Code session, a leaked credential, or unexpected commits/files. Read-only triage — produces a timeline + blast-radius report.
-tools: Read, Grep, Glob, Bash
+tools: Read Glob Grep Bash
 model: sonnet
 ---
 
@@ -248,7 +248,7 @@ Constraints:
 | --- | --- | --- |
 | Quick scoped scan | `/security-review` | Before every PR. Built-in, scoped to recent diff. |
 | Multi-pass deep review | `/ultrareview` | Before merge to `main`. Multi-agent, includes security. |
-| 3-agent quality+security pass | `/simplify` | After a refactor or large change. |
+| 3-agent quality pass (not security-specific) | `/simplify` | After a refactor — checks reuse/quality/efficiency. Useful adjunct, not a security tool. |
 | General code review | `/review` | Pull-request review, not security-specific. |
 | Adversarial pass | Devil's Advocate skill | After `/security-review` looks clean. Forces "what did we miss?" |
 | Headless budget-capped scan | `git diff main \| claude -p "OWASP Top 10:2025 + OWASP LLM Top 10:2025 review of this diff. List findings by severity." --model haiku --max-budget-usd 1.00` | Cheap pre-PR check from CI or a Git hook. |
@@ -262,13 +262,12 @@ Instead of context-switching to a vendor UI, wire the scanner into Claude Code a
 | MCP server | What it gives Claude | Install | Auth |
 | --- | --- | --- | --- |
 | **Semgrep MCP** | `security_check`, `semgrep_scan`, `get_abstract_syntax_tree`, plus access to your AppSec Platform findings if you have a token. 5000+ built-in rules across 30+ languages. | `claude mcp add semgrep -- uvx semgrep-mcp` | Optional `SEMGREP_APP_TOKEN` |
-| **Snyk MCP** | Code (SAST), Open Source (SCA), Container, IaC scanning + Python AI-BOM. | `npx -y snyk@latest mcp configure --tool=claude-cli` or `claude mcp add snyk -- snyk mcp -t stdio --experimental` | `SNYK_TOKEN` (free tier OK) |
 | **GitHub MCP** (official) | `list_code_scanning_alerts`, `list_secret_scanning_alerts`, `list_dependabot_alerts`, plus all repo/PR/issue tooling. Lets Claude triage GHAS findings directly. | `claude mcp add github -- docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN ghcr.io/github/github-mcp-server` | PAT with `repo` + `security_events` scopes |
-| **Burp Suite MCP** (official PortSwigger) | Drives Repeater, Intruder, Collaborator, and proxy history from Claude — AI-assisted manual pentesting. | Load the JAR via Burp's Extender, then `claude mcp add burp --env BURP_URL=http://127.0.0.1:9876 -- java -jar mcp-proxy.jar` | Local Burp instance (Community edition OK) |
+| **Burp Suite MCP** (official PortSwigger) | Drives Repeater, Intruder, Collaborator, and proxy history from Claude — AI-assisted manual pentesting. | Load the BApp via Burp's Extender, then `claude mcp add burp --env BURP_URL=http://127.0.0.1:9876 -- java -jar /path/to/burp-mcp-all.jar` | Local Burp instance (Community edition OK) |
 | **SonarQube MCP** | Issue + security-hotspot retrieval + quality-gate checks across your SonarQube/SonarCloud org. | `claude mcp add sonarqube --env SONARQUBE_TOKEN --env SONARQUBE_ORG -- docker run -i --rm --pull=always -e SONARQUBE_TOKEN -e SONARQUBE_ORG mcp/sonarqube` | SonarQube/Cloud token |
-| **CVE MCP** | Live NVD + EPSS + CISA KEV lookups inside the session — useful when triaging a dep upgrade or a tool result. | `claude mcp add cve -- npx cve-mcp-server` | None (NVD is free; optional Shodan/VT keys) |
-| **Nuclei MCP** | Runs ProjectDiscovery's 8000+ DAST templates from a Claude session against staging URLs. | `claude mcp add nuclei -- nuclei-mcp` (community wrapper) | None |
-| **Aikido / Endor Labs / Wiz MCPs** | Vendor-specific risk feeds. Skip unless you already pay for the SaaS. | See each vendor's docs. | Vendor API key |
+| **CVE MCP** ([mukul975/cve-mcp-server](https://github.com/mukul975/cve-mcp-server)) | Live NVD + EPSS + CISA KEV lookups inside the session — useful when triaging a dep upgrade or a tool result. | `pip install cve-mcp-server && claude mcp add cve -- python -m cve_mcp.server` | None (NVD is free; optional Shodan/VT keys) |
+| **Nuclei MCP** | Runs ProjectDiscovery's 8000+ DAST templates from a Claude session against staging URLs. | Community wrapper — see [addcontent/nuclei-mcp](https://github.com/addcontent/nuclei-mcp) for the install pattern. | None |
+| **Snyk** | SCA, SAST, IaC, container scanning. Snyk has an official Claude-Code integration, but the exact install command moves around — fetch the current pattern from [docs.snyk.io](https://docs.snyk.io/) under "Claude Code". | (see docs) | `SNYK_TOKEN` |
 
 > ⚠️ **Treat MCP servers as Layer-2 attack surface.** Each server you add can read tool inputs and outputs in this session; a malicious or compromised server can prompt-inject Claude. Pin to official sources, prefer the `docker run -i --rm` invocations (no persistent state), and audit `~/.claude/mcp-servers.json` periodically.
 
@@ -364,7 +363,8 @@ repos:
     rev: v3.95.3
     hooks:
       - id: trufflehog
-        args: ["filesystem", "."]
+        # Default scans the git diff; add --only-verified locally for live-credential checks.
+        # See https://github.com/trufflesecurity/trufflehog#pre-commit-hook for the canonical config.
 
   # --- SAST per language (uncomment what applies) ---
   - repo: https://github.com/semgrep/pre-commit
@@ -505,7 +505,7 @@ Once you're shipping code that runs in production — containerised or otherwise
 | SBOM | **Syft** | `syft . -o cyclonedx-json > sbom.cyclonedx.json` | Universal SBOM generator (CycloneDX + SPDX); 20+ ecosystems |
 | SBOM | **cdxgen** — [cyclonedx/cdxgen](https://github.com/CycloneDX/cdxgen) | `npm i -g @cyclonedx/cdxgen && cdxgen -r . -o sbom.json` | OWASP-blessed multi-language CycloneDX generator |
 | SBOM ingestion | **Dependency-Track** — [github.com/DependencyTrack/dependency-track](https://github.com/DependencyTrack/dependency-track) | `docker run -p 8080:8080 dependencytrack/apiserver` | Self-hosted SBOM repo with continuous CVE re-scoring |
-| Sign | **Cosign** — [sigstore/cosign](https://github.com/sigstore/cosign) | `cosign sign --keyless myregistry/myapp:$SHA` | Keyless image signing via OIDC; verify with `cosign verify` |
+| Sign | **Cosign** — [sigstore/cosign](https://github.com/sigstore/cosign) | `cosign sign myregistry/myapp:$SHA` (keyless OIDC is the default since v2) | Keyless image signing; verify with `cosign verify` |
 | Pre-deploy | **kube-bench** — [aquasecurity/kube-bench](https://github.com/aquasecurity/kube-bench) | `kube-bench run` | CIS Kubernetes Benchmark for control-plane + nodes |
 | Runtime | **Falco** — [falcosecurity/falco](https://github.com/falcosecurity/falco) | Helm: `helm install falco falcosecurity/falco` | eBPF-based runtime detection: reverse shells, crypto-miners, exfil patterns |
 
@@ -567,7 +567,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/dependency-review-action@v4   # GH native; fails PR on new vuln deps
+      - uses: actions/dependency-review-action@v5   # GH native; fails PR on new vuln deps
       - uses: google/osv-scanner-action@v2
         with: { scan-args: --recursive --lockfile . }
 
@@ -575,8 +575,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/build-push-action@v5
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
         with: { tags: myapp:${{ github.sha }}, load: true, push: false }
       - uses: aquasecurity/trivy-action@0.36.0
         with: { image-ref: myapp:${{ github.sha }}, format: sarif, output: trivy-image.sarif, severity: CRITICAL,HIGH }
@@ -593,12 +593,134 @@ jobs:
         with: { path: ., format: cyclonedx-json, output-file: sbom.cyclonedx.json }
       - uses: actions/upload-artifact@v4
         with: { name: sbom, path: sbom.cyclonedx.json }
-      - uses: sigstore/cosign-installer@v3
+      - uses: sigstore/cosign-installer@v4
       - if: github.event_name == 'push'
-        run: cosign sign --yes myregistry/myapp:${{ github.sha }}
+        run: cosign sign --yes myregistry/myapp:${{ github.sha }}   # keyless is the default in cosign v3+
 ```
 
 Wire it into branch protection: in **Settings → Branches**, require these checks to pass before merge — `iac`, `deps`, `image`, plus `secrets`, `sast` from the earlier workflow. Add **Require signed commits** and **Require review from CODEOWNERS** for the security-relevant paths (`.github/`, `infra/`, anything under `auth/`).
+
+## 🪱 Open-source supply-chain worms — the wake-up call
+
+Three waves of self-propagating worms hit npm in eight months. **Treat this as the steady state**: package registries are now a routinely-exploited attack surface, advisories arrive sub-day, and the worms specifically target maintainer credentials to pivot to your other packages.
+
+### Mini Shai-Hulud (May 2026)
+
+Third wave of the [original Shai-Hulud](https://www.cisa.gov/news-events/alerts/2025/09/23/widespread-supply-chain-compromise-impacting-npm-ecosystem) worm, attributed to **TeamPCP**. Compromised **170+ packages across npm + PyPI** (~518M cumulative downloads), including 42 `@tanstack/*`, 65 `@uipath/*`, Mistral AI, OpenSearch JavaScript client, Guardrails AI, and several SAP `@cap-js/*` packages. First documented case of malicious npm packages carrying **valid SLSA provenance signatures** — provenance alone is no longer sufficient.
+
+| Aspect | Value |
+| --- | --- |
+| Initial vector | OIDC token theft via `pull_request_target` + GitHub Actions cache poisoning, against a maintainer's CI |
+| Persistence | Malicious `preinstall` / `postinstall` scripts named **`setup_bun.js`** and **`bun_environment.js`** |
+| Payload | ~11.6 MB obfuscated Bun runtime + credential stealer, downloaded at install time |
+| Harvests | SSH keys, AWS / Azure / GCP creds, kubeconfig, Vault tokens, npm tokens, GitHub PATs, AI-tool config files |
+| Self-propagation | Enumerates packages the stolen npm token can publish to, and pushes infected versions |
+| Exfil channel | Creates a public GitHub repo on the **victim's own account** matching `[0-9a-z]{18}` with description **"A Mini Shai-Hulud has Appeared"**, RSA-OAEP-4096 + AES-256-GCM encrypted payload |
+
+**Read:** [The Hacker News](https://thehackernews.com/2026/05/mini-shai-hulud-worm-compromises.html) · [StepSecurity technical breakdown](https://www.stepsecurity.io/blog/mini-shai-hulud-is-back-a-self-spreading-supply-chain-attack-hits-the-npm-ecosystem) · [Aikido package inventory](https://www.aikido.dev/blog/mini-shai-hulud-is-back-tanstack-compromised) · [Microsoft defense guidance](https://www.microsoft.com/en-us/security/blog/2025/12/09/shai-hulud-2-0-guidance-for-detecting-investigating-and-defending-against-the-supply-chain-attack/).
+
+**Am-I-affected right-now checks:**
+
+```bash
+# 1. Postinstall artefacts left by Mini Shai-Hulud specifically
+find node_modules \( -name 'setup_bun.js' -o -name 'bun_environment.js' \) -print
+grep -rE 'setup_bun|bun_environment' package.json package-lock.json node_modules/*/package.json 2>/dev/null
+
+# 2. Find recently-installed deps with lifecycle scripts (the general vector)
+grep -rE '"(pre|post)install"' node_modules/*/package.json | grep -v '/node_modules/.bin/'
+
+# 3. Search your own GitHub for the exfil-repo signature
+gh search repos --owner "@me" 'A Mini Shai-Hulud has Appeared' --json name,description,createdAt
+gh repo list "$(gh api user -q .login)" --limit 1000 --json name | jq -r '.[] | select(.name | test("^[0-9a-z]{18}$")) | .name'
+```
+
+If **any** hit: rotate npm tokens, GitHub PATs, SSH keys, and every cloud credential the host could have read; revoke recent `npm publish` events; rebuild CI runners; then run the `incident-triage` subagent.
+
+### Recent supply-chain incidents worth knowing
+
+| Date | Incident | Ecosystem | Scale | Read |
+| --- | --- | --- | --- | --- |
+| **May 2026** | Mini Shai-Hulud (above) | npm + PyPI | 170+ packages, ~518M downloads | [THN](https://thehackernews.com/2026/05/mini-shai-hulud-worm-compromises.html) |
+| **May 2026** | Poisoned Ruby Gems & Go Modules — "sleeper" packages from BufferZoneCorp masquerading as `activesupport-logger`, `devise-jwt`, `grpc-client`; RubyGems paused signups | RubyGems + Go | Hundreds of gems | [THN](https://thehackernews.com/2026/05/poisoned-ruby-gems-and-go-modules.html) |
+| **May 2026** | Fake "OpenAI Privacy Filter" model on Hugging Face — Rust infostealer, #1 trending repo | Hugging Face | 244K downloads in 18h | [THN](https://thehackernews.com/2026/05/fake-openai-privacy-filter-repo-hits-1.html) |
+| **Mar 2026** | Axios maintainer-account compromise — malicious v1.14.1 / v0.30.4 | npm | ~100M weekly downloads | [Trend Micro](https://www.trendmicro.com/en_us/research/26/c/axios-npm-package-compromised.html) |
+| **Dec 2025** | Jackson typosquat on Maven Central delivering Cobalt Strike loader | Maven Central | First sophisticated Maven payload | [Aikido](https://www.aikido.dev/blog/maven-central-jackson-typosquatting-malware) |
+| **Nov 2025** | Shai-Hulud 2.0 — worm hits `chalk` (299M weekly DL), `debug` (47M) and 500+ others | npm | 500+ packages | [Microsoft](https://www.microsoft.com/en-us/security/blog/2025/12/09/shai-hulud-2-0-guidance-for-detecting-investigating-and-defending-against-the-supply-chain-attack/) |
+| **Sep 2025** | Original Shai-Hulud worm | npm | Hundreds of packages | [CISA](https://www.cisa.gov/news-events/alerts/2025/09/23/widespread-supply-chain-compromise-impacting-npm-ecosystem) |
+| **Mar 2025** | `tj-actions/changed-files` — retroactively rewritten tags exfiltrated CI secrets to logs | GitHub Actions | 23K+ repos | [CISA](https://www.cisa.gov/news-events/alerts/2025/03/18/supply-chain-compromise-third-party-tj-actionschanged-files-cve-2025-30066-and-reviewdogaction) |
+| **2025** | Slopsquatting — attackers register hallucinated names that LLMs suggest (19.7% of LLM-suggested package names don't exist) | npm + PyPI | Tens of thousands of installs of phantom names | [Socket](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks) |
+| **Feb 2025** | `boltdb-go/bolt` typo cached indefinitely by the Go Module Mirror | Go | Persistent for 3 years | [THN](https://thehackernews.com/2025/02/malicious-go-package-exploits-module.html) |
+
+> ⚠️ **Slopsquatting is the AI-coding-specific one.** When Claude (or any LLM) confidently suggests a package name it half-invented, attackers may have already registered it. *Always* verify a suggested dep exists on the registry and has plausible download history before `npm install`-ing it.
+
+### Defensive workflow (stackable layers)
+
+These are additions to the layered pre-commit + CI you already have. Adopt at least the install-time guard and the CI gate.
+
+**1. Lock down install-time** — block lifecycle scripts unless explicitly allow-listed:
+
+```bash
+# .npmrc — applies to every install in this project
+ignore-scripts=true
+```
+
+Use `npm ci --ignore-scripts` in CI. For the handful of deps that *legitimately* need lifecycle scripts (`esbuild`, `node-pre-gyp`, `sharp`), gate them with the [LavaMoat allow-scripts](https://github.com/LavaMoat/LavaMoat) plugin so the allowlist is reviewable in git. Python equivalent: `pip install --require-hashes -r requirements.txt` after generating hashes with `pip-compile --generate-hashes`.
+
+**2. Pin every third-party GitHub Action by commit SHA, not tag** — `tj-actions/changed-files` taught us that tags get rewritten. Dependabot keeps SHA pins fresh.
+
+```yaml
+# DON'T
+- uses: actions/checkout@v4
+# DO
+- uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4.1.7
+```
+
+Reference: [GitHub Actions hardening guide](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions).
+
+**3. Add StepSecurity Harden-Runner as the first step of every job** — egress filtering on the runner. Catches the exfil call before the secret leaves the box.
+
+```yaml
+steps:
+  - uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176  # v2.17.0
+    with:
+      egress-policy: audit   # start with audit, then tighten to block after a week of clean runs
+  # ... your other steps
+```
+
+[github.com/step-security/harden-runner](https://github.com/step-security/harden-runner).
+
+**4. Pre-merge CI gate — Socket + OSV + `npm audit signatures`** — drop-in job:
+
+```yaml
+  supply-chain:
+    runs-on: ubuntu-latest
+    permissions: { contents: read }
+    steps:
+      - uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176
+        with: { egress-policy: audit }
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci --ignore-scripts
+      - uses: SocketDev/socket-security-action@v1  # signs in via socket.dev GitHub App
+      - run: npm audit signatures --audit-level=high   # GH Action runner has npm 10+
+      - run: npm audit --audit-level=high
+      - uses: google/osv-scanner-action@v2
+        with: { scan-args: --lockfile=package-lock.json }
+```
+
+Require this job to pass before merge in **Settings → Branches → Branch protection rules**, alongside the secrets / SAST / IaC / image jobs above.
+
+**5. Publishing your own packages** — turn on npm 2FA with WebAuthn (not TOTP, after Shai-Hulud 2.0 showed TOTP-phishing works against maintainers) and publish with provenance:
+
+```bash
+# One-time
+npm profile set two-factor-auth   # choose auth-and-writes
+# In CI (GitHub Actions with `permissions: id-token: write`)
+npm publish --provenance --access public
+```
+
+Consumers can then verify your provenance with `npm audit signatures --include-attestations`.
 
 ## 🎯 Dynamic testing & LLM red-teaming
 
@@ -694,7 +816,7 @@ Encryption: https://keys.openpgp.org/vks/v1/by-fingerprint/<fingerprint>
 
 Spec + validator: [securitytxt.org](https://securitytxt.org/).
 
-**3. Bookmark Anthropic's disclosure channel** — for bugs in Claude / Claude Code / MCP servers themselves: [anthropic.com/responsible-disclosure-policy](https://www.anthropic.com/responsible-disclosure-policy) · [hackerone.com/anthropic-vdp](https://hackerone.com/anthropic-vdp). Anthropic's commitment is 3-day acknowledgement and a 90-day patch window aligned with [Google Project Zero](https://googleprojectzero.blogspot.com/p/vulnerability-disclosure-policy.html).
+**3. Bookmark Anthropic's disclosure channel** — for bugs in Claude / Claude Code / MCP servers themselves: [anthropic.com/responsible-disclosure-policy](https://www.anthropic.com/responsible-disclosure-policy) · [hackerone.com/anthropic-vdp](https://hackerone.com/anthropic-vdp). Anthropic commits to 3-business-day acknowledgement and aims to share details publicly after 90 days or patch release, whichever comes first. The industry baseline for comparison is [Google Project Zero's 90+30 policy](https://googleprojectzero.blogspot.com/p/vulnerability-disclosure-policy.html).
 
 ### SECURITY.md skeleton
 
@@ -745,8 +867,8 @@ We credit valid reporters here (with your permission).
 
 ### IR frameworks to cite when you write the postmortem
 
-- **NIST SP 800-61r3** (April 2025) — updated incident-response standard, now with AI-specific detection and containment guidance.
-- **Coalition for Secure AI (CoSAI)** — [AI Incident Response Framework v1.0](https://www.coalitionforsecureai.org/). Specifically covers agent goal hijack, tool misuse, cascading failures (mirrors OWASP ASI01/02/08).
+- **NIST SP 800-61r3** (April 2025) — updated incident-response standard, refreshed against CSF 2.0. General-purpose IR (it doesn't deeply address AI-specific containment — pair with CoSAI for that).
+- **Coalition for Secure AI (CoSAI) — AI Incident Response Framework V1.0** (Nov 2025) — [coalitionforsecureai.org](https://www.coalitionforsecureai.org/). Covers agent goal hijack, tool misuse, cascading failures (mirrors OWASP ASI01/02/08).
 - **CISA AI guidance** — [cisa.gov/ai](https://www.cisa.gov/ai) for current advisories; the [Dec 2025 joint guidance](https://www.cisa.gov/news-events/alerts/2025/12/03/cisa-australia-and-partners-author-joint-guidance-securely-integrating-artificial-intelligence) on Secure AI Integration in OT is the most concrete recent reference.
 - **Google SRE Postmortem Template** — [sre.google/sre-book/postmortem-culture](https://sre.google/sre-book/postmortem-culture/) — the blameless template most of the industry has converged on.
 
@@ -761,7 +883,9 @@ Drop the markdown below into a `PULL_REQUEST_TEMPLATE.md` so it shows up on ever
 - [ ] Threat model updated (`docs/threat-models/<feature>.json`) if trust boundaries changed
 - [ ] Secrets scan clean: gitleaks + detect-secrets + trufflehog (--only-verified)
 - [ ] SAST clean: semgrep p/ci + language-specific (bandit/gosec/eslint-security)
-- [ ] SCA clean: osv-scanner + dependabot/renovate green
+- [ ] SCA clean: osv-scanner + dependabot/renovate green + Socket PR-check passed
+- [ ] No unexpected `preinstall`/`postinstall` scripts in new deps; `ignore-scripts=true` honoured in CI
+- [ ] All third-party GitHub Actions pinned by commit SHA (not tag); Harden-Runner is step 1
 - [ ] IaC clean: trivy config + checkov + kube-linter (if applicable)
 - [ ] Container clean: trivy image, signed with cosign keyless
 - [ ] SBOM generated (syft → CycloneDX) and uploaded as build artefact
