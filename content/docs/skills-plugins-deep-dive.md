@@ -15,17 +15,100 @@ The examples below are intentionally selective. Star counts, launch claims, and 
 
 ---
 
-## Why skills and plugins matter
+## Why *Good* skills and plugins matter
 
 Plain prompting works for small, clear tasks. It gets weaker when the task needs planning, repeated checks, project memory, or a specific output format.
 
-Skills and plugins help by narrowing the job. They can tell Claude what to inspect, what to ask, which checks to run, and what output format to produce.
+Skills and plugins help by *"spec-ing"* the job. They can tell Claude what to inspect, what to ask, which checks to run, and what output format to produce.
 
 They don't make the model reliable on their own, but they give it clearer rules and more chances to catch mistakes before you treat the output as finished.
 
+When using such agentic coding tools on both brownfield work (with existing codebases) and production-grade greenfield work (not just a POC), some common failures keep showing up:
+
+- **Attempts to refactor legacy code** that the agent was not tasked to refactor or touch in the current session.
+- **AI sloppy code**, including but not limited to:
+  - over-abstraction (e.g. wrapping a single function call in a factory plus interface):
+
+    ```python
+    from abc import ABC, abstractmethod
+
+    class GreeterInterface(ABC):
+        @abstractmethod
+        def greet(self, name: str) -> str: ...
+
+    class DefaultGreeter(GreeterInterface):
+        def greet(self, name: str) -> str:
+            return f"Hello, {name}"
+
+    class GreeterFactory:
+        @staticmethod
+        def create() -> GreeterInterface:
+            return DefaultGreeter()
+
+    greeting = GreeterFactory.create().greet("Alice")
+    # When `def greet(name): return f"Hello, {name}"` was all that was needed.
+    ```
+
+  - lasagna code (e.g. several thin pass-through layers between the handler and the real logic):
+
+    ```python
+    def handle_request(req):
+        return _process_request(req)
+
+    def _process_request(req):
+        return _execute_request(req)
+
+    def _execute_request(req):
+        return _run_request(req)
+
+    def _run_request(req):
+        return {"user_id": req["user_id"]}
+    # Four layers of pass-through to return one field.
+    ```
+
+  - defensive coding theater (e.g. null checks on values the type system already guarantees are non-null, try/catch around code that cannot throw):
+
+    ```python
+    def total(items: list[int]) -> int:
+        if items is None:           # type signature already guarantees list[int]
+            return 0
+        try:
+            return sum(items)       # sum() over list[int] cannot throw
+        except Exception:
+            return 0
+    ```
+
+  - boilerplate bloat (e.g. docstrings and getters/setters on trivial fields):
+
+    ```python
+    class User:
+        def __init__(self, name: str):
+            self._name = name
+
+        @property
+        def name(self) -> str:
+            """Return the user's name."""
+            return self._name
+
+        @name.setter
+        def name(self, value: str) -> None:
+            """Set the user's name."""
+            self._name = value
+    # A @dataclass or plain attribute would do the same work.
+    ```
+
+- **Vacuous or tautological tests** that mock every internal call, so the tests pass without actually checking anything.
+- **Scope failure** where the agent refuses an obvious boy-scout fix because it didn't cause the issue this session.
+
+These aren't smartness problems. They're enforcement gaps — nothing makes the agent push back on itself. The fix is friction: a checklist it has to run, a verifier it has to pass, a phase boundary it can't quietly skip.
+
+We call this *bounded autonomy*: enough room to do the work, with guardrails that catch the specific ways it drifts.
+
+Plain prompting is unbounded. A skill tightens the bound. A framework like BMAD or GSD tightens it more.
+
 ---
 
-## Skills vs plugins
+## Skills vs Plugins
 
 Skills are folders with a `SKILL.md` file. The file describes when the skill should load and what Claude should do once it loads. Larger examples, scripts, templates, or references can live beside it.
 
@@ -39,21 +122,41 @@ skill-name/
   assets/           # Optional templates or static files
 ```
 
+The difference matters for how much enforcement each one can carry. Think of it as a spectrum:
+
+- A **skill** is mostly instructions. It tells Claude what to do when it loads. The agent can still ignore parts of it or treat it as a hint.
+- A **plugin** can add hooks, subagents, and commands that run regardless of what the agent decides. Hooks in particular are enforcement: they fire whether or not the agent wanted them to.
+- A **framework** like BMAD or GSD goes further. It writes project state to disk (PRDs, plans, phases, verification reports), so each step leaves artifacts the next agent reads, and the workflow becomes hard to skip past.
+
 ---
 
 ## Creating your own skills
 
 Custom skills are often more useful than public ones because they encode your team's real habits.
 
-Good candidates include:
+Potentially Good skills include:
 
-- PR review rules
+- Specific Team PR review rules
 - release checklists
 - database migration patterns
-- incident response steps
 - design system rules
 - security review requirements
 - report or document templates
+
+### When should you create a skill
+
+Before writing a skill, the useful question to ask is: what is the lightest enforcement layer the agent cannot quietly skip past? There are roughly four to choose from, and a skill is only one of them.
+
+| Layer | What it is | What it catches |
+| --- | --- | --- |
+| **CLAUDE.md** | Always-on rules and conventions for the project | Background context loaded into every session — e.g. "this repo uses Bun, not Node" |
+| **Skill** | Folder that loads when triggered by a description match | Multi-step workflows or checklists that only matter for specific tasks |
+| **Hook** | Mechanical command that fires on tool use or session events | Anything you need enforced regardless of what the agent decides — formatters, type checks, secret scanning |
+| **Task scope** | Per-job instructions in the prompt or task brief | One-off constraints that do not generalize across sessions |
+
+The general drift we have found: if the rule must apply every time and the agent might rationalize skipping it, put it in a hook. If the rule needs context and only fires on certain tasks, put it in a skill. If the rule is project-wide background, put it in CLAUDE.md. If the rule is purely for the current job, keep it in the prompt.
+
+A skill is the right fit when the rule sits between always-on (too noisy for every session) and per-job (too easily forgotten across sessions).
 
 ### Skill anatomy
 
@@ -159,7 +262,7 @@ The document skills help Claude create and edit real office files:
 - `pptx` for slide decks
 - `xlsx` for spreadsheets
 
-Use these when the output needs to open cleanly in another application. If the user only needs a short answer or table in chat, do not add file generation.
+Use these when the stakeholder expects a Word doc, slide deck, or styled PDF. For internal docs (design notes, ADRs, runbooks, status reports), markdown is better: it reviews in PRs, diffs cleanly, and lives next to the code.
 
 ### Install
 
@@ -440,6 +543,16 @@ Execution is plan-based. GSD splits a phase into plans, groups independent plans
 
 This is useful when a phase has several separable parts. It is less useful when the change is one file or one obvious bug fix.
 
+### Two layers of verification
+
+GSD verifies work in two layers, not one.
+
+**Layer 1: in-loop code verifier (automatic).** During `/gsd-execute-phase`, a code verifier agent checks the work as it lands. If the implementation does not meet the plan, the execution loops — fix, re-verify, repeat — until the spec is met. This catches "agent claimed done but it isn't."
+
+**Layer 2: `/gsd-verify-work` (human UAT).** Once the in-loop verifier passes, `/gsd-verify-work` walks you through the feature to confirm it behaves the way you envisioned. The agent's "spec met" is not the user's "feature delivered."
+
+Together: **structured human-in-the-loop, not human-eliminated.** Layer 1 catches agent self-deception. Layer 2 catches the spec-vs-vision gap.
+
 ### When to use it
 
 Use GSD when you want a project or feature built in deliberate phases. It is a good fit for solo developers and small teams that want structure without a full agile process.
@@ -455,6 +568,15 @@ BMAD and GSD use their output folders differently.
 GSD treats `.planning/` as project state. By default, its planning docs are meant to be committed unless you choose a private setup. If `.planning/` contains secrets, private notes, or throwaway plans, set `planning.commit_docs: false` and add `.planning/` to `.gitignore`. Check `.planning/config.json` first if you configured search or API integrations.
 
 BMAD's `_bmad-output/` is more of a working folder. Keep files that still guide the project, especially `project-context.md`, but do not assume every PRD, story, or review artifact belongs in git forever. When an artifact becomes long-term project documentation, move or rewrite it into your normal docs folder.
+
+### Why this matters for production
+
+Treat `.planning/` and `_bmad-output/` as **the agentic decision log** — the audit trail for why the code looks the way it does. Six months from now, "Claude wrote it" is not a maintenance answer; the PRD, the discussion notes, the plan, and the verification report are.
+
+Two practical consequences:
+
+- Commit `.planning/` by default for production work — it survives team turnover, and the next engineer can read decisions instead of guessing them.
+- Include `.planning/` in PR review. The diff is half the change; the plan and verification report are the other half, and that is where scope, assumptions, and tradeoffs live.
 
 ---
 
@@ -488,7 +610,9 @@ The Codex plugin lets Claude Code call Codex for review or delegated work. A sec
 
 ### When to use it
 
-Use the plugin after a larger change, before shipping, or when Claude is stuck on a bug. Ask for a narrow review target:
+Use the plugin after a larger change, before shipping, or when Claude is stuck on a bug. Using a second model from another provider, which has different training data, can help to provide newer insights and find bugs that the same model checking itself might miss.
+
+Ask for a narrow review target:
 
 ```text
 /codex:adversarial-review look for missed auth checks and unsafe database writes
@@ -500,17 +624,17 @@ Treat the second model's output as another review input, not as approval.
 
 ## Hands-on workshops
 
-Use these exercises after the sections above. This page helps you pick a lab. The step-by-step commands live in the hands-on repo so this page does not go stale every time the labs change.
+Use these exercises after the sections above. Each lab is designed to make a specific insight *felt*, not just read. The step-by-step commands live in the hands-on repo so this page does not go stale every time the labs change.
 
 **Workshop repo:** [stcomiin/claude-docs-workshop-handson](https://github.com/stcomiin/claude-docs-workshop-handson)
 
-| Workshop | Time | Good for | Guide |
+| Workshop | Time | What it demonstrates | Guide |
 | --- | --- | --- | --- |
-| Research report generation | 20-30 minutes | Subagents, web research, and document skills | [Starter workspace](https://github.com/stcomiin/claude-docs-workshop-handson/tree/main/research-report-generation-workflow-starter) |
-| Existing app with GSD | 25-60 minutes | Codebase mapping, quick tasks, and full GSD phase flow | [GSD workshop](https://github.com/stcomiin/claude-docs-workshop-handson/tree/main/one-shot-task-dashboard-gsd-workshop) |
-| Existing app with BMAD | 35-75 minutes | Project context, quick-dev, planning files, and review | [BMAD workshop](https://github.com/stcomiin/claude-docs-workshop-handson/tree/main/one-shot-task-dashboard-bmad-workshop) |
+| Research report generation | 20-30 minutes | Subagents, web research, and document skills — skills are more than prompt snippets | [Starter workspace](https://github.com/stcomiin/claude-docs-workshop-handson/tree/main/research-report-generation-workflow-starter) |
+| Existing app with GSD | 25-60 minutes | Scope control on a real codebase via codebase mapping, phase boundaries, and auto-verification | [Hands-on Lab → GSD](existing-codebase-workflows#run-it-through-gsd) |
+| Existing app with BMAD | 35-75 minutes | Same app and feature as the GSD lab — feel where BMAD's brainstorming pays off and where the manual dev gates slow you down | [Hands-on Lab → BMAD](existing-codebase-workflows#run-it-through-bmad) |
 
-If you are running a live session, pin the workshop repo to a known commit or tag. If you want the newest version, follow the README in each workshop folder.
+The existing-app labs are run against [`fastapi/full-stack-fastapi-template`](https://github.com/fastapi/full-stack-fastapi-template) directly, fork or clone it before the session.
 
 <span id="-workshop-exercise-research-and-report-generation-workflow"></span>
 
@@ -529,33 +653,16 @@ Review the result by asking:
 - Do the generated files open cleanly?
 - Did the slide deck become a briefing, not a copied report?
 
-### Existing app with GSD
+### Existing app with GSD or BMAD
 
-This lab uses GSD on a small existing OSINT dashboard instead of a blank project.
+The hands-on lab for using GSD and BMAD on a real existing codebase — same sample app, same feature, both workflows — lives in [Existing Codebase Workflows: Hands-on Lab](existing-codebase-workflows#hands-on-lab-same-feature-both-workflows). It is structured as the practice counterpart to the GSD and BMAD step-by-step in that doc.
 
-The feature is deliberately small: add a **Test** action to each collector row in Settings. The backend route and API helper already exist. The work is finding the right path through the codebase and exposing the missing UI without changing the backend or database.
+The lab covers:
 
-The [GSD workshop](https://github.com/stcomiin/claude-docs-workshop-handson/tree/main/one-shot-task-dashboard-gsd-workshop) has two paths:
-
-| Path | Use when |
-| --- | --- |
-| Short path | You want a 20-25 minute exercise using `$gsd-quick`. |
-| Full path | You want to practice map, project init, spec, discuss, plan, execute, verify, and review. |
-
-The main lesson is scope control. GSD is useful here because it finds the existing project structure, captures assumptions, and keeps a small UI change from turning into a rewrite.
-
-### Existing app with BMAD
-
-This lab uses the same dashboard feature as the GSD workshop, but runs it through BMAD. That makes the comparison useful: same app, same feature, different workflow.
-
-Use the [BMAD workshop](https://github.com/stcomiin/claude-docs-workshop-handson/tree/main/one-shot-task-dashboard-bmad-workshop) when you want participants to see how BMAD uses project context, quick-dev, PRDs, architecture notes, stories, implementation, and review.
-
-| Path | Use when |
-| --- | --- |
-| Short path | You want a 30-40 minute exercise using `bmad-quick-dev`. |
-| Full path | You want to practice the fuller BMAD method: PRD, architecture, epics or stories, sprint planning, dev story, and code review. |
-
-BMAD is useful when you want product-team-style planning before code: PRD, architecture, stories, implementation, and review. GSD carries context too, but it is organized around phases, executable plans, parallel implementation, and verification.
+- The sample codebase pick ([`fastapi/full-stack-fastapi-template`](https://github.com/fastapi/full-stack-fastapi-template))
+- The feature scope (item categories with filter — touches frontend, backend, and a database migration)
+- Why this feature surfaces real brownfield discipline (scope control, AI slop prevention, pattern adherence, migration discipline)
+- Two paths per workflow (short via `/gsd-quick` or `/bmad-quick-dev`, full via the complete phase or product flow)
 
 ---
 

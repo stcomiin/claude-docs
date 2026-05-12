@@ -73,11 +73,11 @@ git switch -c feature/my-change
 
 If `git status --short` prints anything, commit, stash, or move the work to a separate worktree before starting. Dirty changes follow you onto a new branch.
 
-2. Check current project instructions and baseline docs that already exist (if any).
+1. Check current project instructions and baseline docs that already exist (if any).
 
 Check files such as `CLAUDE.md`, `AGENTS.md`, `README.md`, architecture notes, and nearby feature docs. Keep persistent agent instructions short and specific. Do not turn `CLAUDE.md` or `AGENTS.md` into a generated codebase summary. For examples, see [CLAUDE.md and AGENTS.md](agentic-coding-in-terminal#claudemd-and-agentsmd).
 
-3. Run the baseline checks.
+1. Run the baseline checks.
 
 ```bash
 # Examples only. Use the commands from the repo you are working in.
@@ -87,11 +87,11 @@ npm run lint
 
 If the baseline already fails, record the failure before asking the agent to work. That gives you something to compare against after implementation.
 
-4. Start a fresh agent session for the change.
+1. Start a fresh agent session for the change.
 
 Reusing a long or unrelated session makes it easier for old assumptions to leak into the work.
 
-5. Write the task in one or two sentences.
+1. Write the task in one or two sentences.
 
 A good existing-codebase task names the user-facing change, likely files or areas, hard limits, and verification command.
 
@@ -354,6 +354,65 @@ If you choose to stay in BMAD for implementation, review the story first, then r
 BMAD writes working files under its configured output folder, commonly `_bmad-output/`. Treat those files as working material, not permanent documentation by default.
 
 Move BMAD output into your normal docs only when it records a long-term decision. Otherwise, review it, use it for the change, and keep the PR focused on the product/code diff.
+
+## Hands-on Lab: Same Feature, Both Workflows
+
+Run the same feature through GSD and BMAD on the same sample app. The point is to experience the difference, not just read about it.
+
+### Sample Codebase
+
+Use [`fastapi/full-stack-fastapi-template`](https://github.com/fastapi/full-stack-fastapi-template). MIT-licensed, actively maintained, and feels like a real enterprise app instead of a starter shell:
+
+- **Frontend:** React + TypeScript + Vite + Tailwind + shadcn/ui
+- **Backend:** FastAPI + SQLModel + PostgreSQL
+- **Auth:** JWT, password recovery, role-based access
+- **Tests:** Pytest backend + Playwright frontend
+- **Tooling:** Docker Compose, GitHub Actions CI
+
+Different stack? The workflow lessons still transfer. Run the lab here first, then apply the same flow to your own repo.
+
+### Feature: Item Categories with Filter
+
+**Add item categories with a filter on the items list.** It touches:
+
+- **Frontend:** category dropdown on the create/edit form, filter dropdown on the list, category badge on each row
+- **Backend:** category model, CRUD endpoints, a query parameter to filter items
+- **Database:** migration for a `categories` table and a foreign key on `items`
+
+The spread is deliberate. This size of feature surfaces the common brownfield failure modes: scope myopia (don't refactor the items module), AI slop (no premature abstraction), pattern adherence (use the existing CRUD pattern), and migration discipline (handle existing rows).
+
+Write a guardrail block using the shape from [Existing-Codebase Rule](#existing-codebase-rule). Hard limits: don't touch the auth model, don't refactor the items module, don't change unrelated endpoints.
+
+### Run It Through GSD
+
+Two paths:
+
+| Path | Use when |
+| --- | --- |
+| Short path | 20-25 min via `/gsd-quick`. |
+| Full path | Practice map, project init, spec, discuss, plan, execute, verify, review, ship. |
+
+What you should notice:
+
+- The auto-verifier catches "compiles but doesn't satisfy spec" without re-prompting.
+- Phase boundaries and `.planning/` keep a category addition from sprawling into an items-module rewrite.
+- `/gsd-verify-work` is where you confirm the feature actually does what you wanted — not just that tests pass. Tests go green and the spec can still be wrong.
+
+### Run It Through BMAD
+
+Same feature, BMAD this time.
+
+| Path | Use when |
+| --- | --- |
+| Short path | 30-40 min via `/bmad-quick-dev`. |
+| Full path | Full method: PRD, architecture, epics, stories, sprint planning, dev story, code review. |
+
+What you should notice:
+
+- **Win:** brainstorming the category model surfaces decisions a solo prompt skips — per-user vs global, single vs multi-category, soft-delete vs hard-delete. The architecture step catches the migration tradeoff (default category vs nullable FK) before code locks it in.
+- **Cost:** manual verification gates between `/bmad-create-story`, `/bmad-dev-story`, and `/bmad-code-review`. After GSD's auto-verifier, doing it by hand at every step is slow.
+
+After running both, most people land in the same place: BMAD for upstream shaping, GSD for downstream execution.
 
 ## Final Review Checklist
 
