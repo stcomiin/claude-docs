@@ -120,8 +120,15 @@ Most of the wins here are upstream of code generation. Bake them into `CLAUDE.md
 | Skill | Purpose | Repo |
 | --- | --- | --- |
 | **OWASP Security** | OWASP Top 10:2025 + ASVS 5.0 + Agentic AI security + 20 language-specific quirks. Already in the [Skills list](/docs/agentic-coding-in-terminal/#skills). | [agamm/claude-code-owasp](https://github.com/agamm/claude-code-owasp) |
-| **SecLists & Agents** | Wordlists, injection payloads, pentest agents for authorised testing. | [awesome-claude-skills-security](https://github.com/Eyadkelleh/awesome-claude-skills-security) |
+| **SecLists & Agents** | Wordlists, injection payloads, pentest agents for authorised testing. Bundles `/injection`, `/client-side`, `/server-side`, `/api-security`, `/cloud-containers`, `/osint`, `/cve-poc-generator`, `/dfir` slash commands. | [awesome-claude-skills-security](https://github.com/Eyadkelleh/awesome-claude-skills-security) |
 | **Devil's Advocate** | Challenges design decisions and review findings — useful as a final pre-merge pass. | [claude-code-skills/devils-advocate](https://github.com/notmanas/claude-code-skills/tree/main/skills/devils-advocate) |
+| **Trail of Bits skills** | Audit-grade skills published by Trail of Bits: `static-analysis` (CodeQL + Semgrep + SARIF), `semgrep-rule-creator`, `insecure-defaults`, `sharp-edges`, `differential-review`, `variant-analysis`, `supply-chain-risk-auditor`, plus crypto-specific `constant-time-analysis` and `zeroize-audit`. | [trailofbits/skills](https://github.com/trailofbits/skills) |
+| **Security Fuzzing payloads** | Curated payload sets — SQL injection, command injection, NoSQL, LDAP/XPath, XXE, template injection, file-upload bypasses, XSS vectors. | [awesome-claude-skills-security](https://github.com/Eyadkelleh/awesome-claude-skills-security) |
+| **agentic-actions-auditor** | Specifically audits GitHub Actions workflows for AI-agent and supply-chain risks (pinning, secrets, third-party action provenance). | [trailofbits/skills](https://github.com/trailofbits/skills) |
+| **yara-rule-authoring** | Authors YARA detection rules — useful when triaging suspicious binaries dropped by a compromised agent session. | [trailofbits/skills](https://github.com/trailofbits/skills) |
+| **firebase-apk-scanner** | Scans Android APKs for Firebase misconfigs — relevant if Claude is generating mobile features. | [trailofbits/skills](https://github.com/trailofbits/skills) |
+
+> 🗒️ **Install order to start with:** `static-analysis` + `insecure-defaults` + `differential-review` from Trail of Bits, plus `OWASP Security` from agamm. That set covers SAST, secrets, diff-aware review, and OWASP-framework awareness for ~80% of feature work.
 
 ### One-line "threat-model first" prompt
 
@@ -133,6 +140,105 @@ Top 10:2025 + OWASP LLM Top 10:2025 categories. List trust boundaries,
 the data each side handles, and anything that needs untrusted-input
 handling. Stop and wait for me to confirm before implementing.
 ```
+
+### Threat-model tooling worth installing
+
+For repeated / regulated work, the prompt above isn't enough — you want a versioned, diffable artefact.
+
+| Tool | When | Install | Why this one |
+| --- | --- | --- | --- |
+| **OWASP Pytm** | Architecture-as-code; threat model lives next to your IaC | `pip install pytm` (needs `graphviz` + `plantuml`) | Python DSL — describe components and dataflows; `tm.report()` emits Markdown + DFD. Versioned in git. [github.com/OWASP/pytm](https://github.com/OWASP/pytm) |
+| **OWASP Threat Dragon** | Visual collaboration with non-engineers | Download desktop installer or `npm install && npm start` for the web app | GUI for STRIDE diagrams; exports JSON you can hand to Claude for mitigation synthesis. [threatdragon.com](https://www.threatdragon.com/) |
+| **STRIDE-GPT** | Fast first-draft on existing code | `docker run -p 8501:8501 mrwadams/stride-gpt` (Streamlit UI) | LLM-generated STRIDE model from an architecture description; pair with `--model claude-opus`. [github.com/mrwadams/stride-gpt](https://github.com/mrwadams/stride-gpt) |
+| **MITRE ATLAS Navigator** | AI/ML systems specifically | Web-only, no install | Layer adversarial techniques (84+) onto a feature's data/model flow; export as a JSON layer for review. [atlas.mitre.org](https://atlas.mitre.org/) |
+| **LINDDUN GO** | Privacy-by-design / GDPR-heavy features | Card deck (physical) or [PILLAR](https://github.com/stfbk/PILLAR) for an LLM-assisted version | Surfaces *privacy* threats the security-focused frameworks tend to miss. [linddun.org/go](https://linddun.org/go/) |
+
+**Recommended flow:** sketch with Threat Dragon → export JSON → paste into Claude with the threat-model prompt above → keep the JSON in `docs/threat-models/<feature>.json` so the next PR-review run can diff against it.
+
+### Custom security subagents
+
+Claude Code subagents are Markdown files in `.claude/agents/*.md` (per-project) or `~/.claude/agents/*.md` (global), declared with frontmatter and invoked via `/agents <name>` or auto-delegated by description match. See [docs.claude.com/en/docs/claude-code/sub-agents](https://docs.claude.com/en/docs/claude-code/sub-agents) for the official schema.
+
+> 🗒️ Why subagents (not skills) for security review? Subagents get their own context window, can be locked to read-only tools, and can use a different model. A locked-down `security-auditor` running on Opus inside a worktree where Claude is otherwise on Sonnet is the cheapest way to get a real second opinion.
+
+**Drop this into `.claude/agents/security-auditor.md`:**
+
+```markdown
+---
+name: security-auditor
+description: Use proactively before every PR and whenever the user asks to "security review", "OWASP review", "audit", or "look for vulnerabilities". Read-only — finds issues, does not fix them.
+tools: Read, Grep, Glob, Bash
+model: opus
+---
+
+You are a senior application security auditor. Review the diff (or the
+files the user names) for vulnerabilities across these frameworks:
+
+- **OWASP Top 10:2025** — focus on A01 Broken Access Control, A03 Software
+  Supply Chain, A05 Injection, A06 Insecure Design, A07 Auth Failures.
+- **OWASP API Top 10:2023** — BOLA / BOPLA / BFLA on every endpoint that
+  takes an id; SSRF (API7) on every outbound HTTP call.
+- **OWASP LLM Top 10:2025** — if the diff touches an LLM call: LLM01
+  Prompt Injection, LLM02 Sensitive Info Disclosure, LLM05 Improper
+  Output Handling, LLM06 Excessive Agency.
+- **CWE Top 25** as a "what did we miss" cross-check.
+
+For each finding, output:
+- **[Severity] [CWE-####] <one-line title>**
+- File:line
+- Why it's exploitable (one sentence)
+- Concrete fix (code snippet preferred)
+
+Hard rules:
+1. Do not edit files. You are read-only.
+2. Quote evidence verbatim — file path + line number.
+3. If the diff is large, prioritise auth, input-handling, and crypto
+   over style. Surface only Critical/High first.
+4. If you find a hard-coded secret, classify as Critical and stop —
+   ask the user to rotate before continuing.
+```
+
+**Drop this into `.claude/agents/incident-triage.md`** for the "something looks wrong" case:
+
+```markdown
+---
+name: incident-triage
+description: Use when the user suspects a compromise of their Claude Code session, a leaked credential, or unexpected commits/files. Read-only triage — produces a timeline + blast-radius report.
+tools: Read, Grep, Glob, Bash
+model: sonnet
+---
+
+You are a read-only incident-response analyst. You have one job: produce
+a triage report in under 15 minutes. Do NOT remediate.
+
+1. **Timeline** — reconstruct from `git log --oneline --all -50`,
+   `git reflog`, file mtimes on `.claude/`, `~/.claude/`, `.env*`. Quote
+   commit SHAs and timestamps.
+2. **IOCs** — search for: `curl ... | sh`, `eval`, base64-decoded
+   commands, unfamiliar SSH keys in `~/.ssh/`, new hooks in
+   `.claude/settings.json`, new MCP servers in `~/.claude/mcp-servers.json`,
+   unsigned skills in `~/.claude/skills/`.
+3. **Blast radius** — for each: clean / compromised / unknown:
+   `.env` files, SSH keys, GitHub PAT (check `gh auth status`),
+   cloud creds (`env | grep -iE 'AWS|GCP|AZURE|ANTHROPIC' | sed 's/=.*/=REDACTED/'`),
+   recent prod deploys.
+4. **Next steps** — output `SEVERITY: …`, `CONTAINMENT: …`, `NOTIFY: …`
+   in three lines so the user can act immediately.
+
+Constraints:
+- Read-only. Never modify, delete, or push.
+- Never echo secret values; show variable names only.
+- If you find evidence of active exfil (e.g. recent unfamiliar
+  `git push`), escalate to SEVERITY: CRITICAL on the first line.
+```
+
+**Curated community collections to draw from** (skim, then copy individual `.md` files into `.claude/agents/`):
+
+| Repo | What's in it | Install |
+| --- | --- | --- |
+| [wshobson/agents](https://github.com/wshobson/agents) | Production-grade subagent library incl. `security-auditor`, `code-reviewer`, multi-agent review chains | `cd ~/.claude && git clone https://github.com/wshobson/agents.git` |
+| [VoltAgent/awesome-claude-code-subagents](https://github.com/VoltAgent/awesome-claude-code-subagents) | 100+ agents organised by category; `04-quality-security/` is the relevant folder | `curl -O https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/categories/04-quality-security/security-auditor.md` |
+| [iannuttall/claude-agents](https://github.com/iannuttall/claude-agents) | Smaller hand-picked set; useful starter | `git clone ...` and copy the ones you want |
 
 ---
 
@@ -148,6 +254,25 @@ handling. Stop and wait for me to confirm before implementing.
 | Headless budget-capped scan | `git diff main \| claude -p "OWASP Top 10:2025 + OWASP LLM Top 10:2025 review of this diff. List findings by severity." --model haiku --max-budget-usd 1.00` | Cheap pre-PR check from CI or a Git hook. |
 
 For deeper external roundups: Snyk's [Top Claude Skills for Cybersecurity](https://snyk.io/articles/top-claude-skills-cybersecurity-hacking-vulnerability-scanning/) and the [OWASP GenAI Security Solutions Landscape](https://genai.owasp.org/) both keep curated tooling lists current.
+
+### Security-focused MCP servers (review without leaving Claude Code)
+
+Instead of context-switching to a vendor UI, wire the scanner into Claude Code as an MCP server. Claude can then query findings as part of `/security-review`, ask follow-up questions, and propose fixes inline.
+
+| MCP server | What it gives Claude | Install | Auth |
+| --- | --- | --- | --- |
+| **Semgrep MCP** | `security_check`, `semgrep_scan`, `get_abstract_syntax_tree`, plus access to your AppSec Platform findings if you have a token. 5000+ built-in rules across 30+ languages. | `claude mcp add semgrep -- uvx semgrep-mcp` | Optional `SEMGREP_APP_TOKEN` |
+| **Snyk MCP** | Code (SAST), Open Source (SCA), Container, IaC scanning + Python AI-BOM. | `npx -y snyk@latest mcp configure --tool=claude-cli` or `claude mcp add snyk -- snyk mcp -t stdio --experimental` | `SNYK_TOKEN` (free tier OK) |
+| **GitHub MCP** (official) | `list_code_scanning_alerts`, `list_secret_scanning_alerts`, `list_dependabot_alerts`, plus all repo/PR/issue tooling. Lets Claude triage GHAS findings directly. | `claude mcp add github -- docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN ghcr.io/github/github-mcp-server` | PAT with `repo` + `security_events` scopes |
+| **Burp Suite MCP** (official PortSwigger) | Drives Repeater, Intruder, Collaborator, and proxy history from Claude — AI-assisted manual pentesting. | Load the JAR via Burp's Extender, then `claude mcp add burp --env BURP_URL=http://127.0.0.1:9876 -- java -jar mcp-proxy.jar` | Local Burp instance (Community edition OK) |
+| **SonarQube MCP** | Issue + security-hotspot retrieval + quality-gate checks across your SonarQube/SonarCloud org. | `claude mcp add sonarqube --env SONARQUBE_TOKEN --env SONARQUBE_ORG -- docker run -i --rm --pull=always -e SONARQUBE_TOKEN -e SONARQUBE_ORG mcp/sonarqube` | SonarQube/Cloud token |
+| **CVE MCP** | Live NVD + EPSS + CISA KEV lookups inside the session — useful when triaging a dep upgrade or a tool result. | `claude mcp add cve -- npx cve-mcp-server` | None (NVD is free; optional Shodan/VT keys) |
+| **Nuclei MCP** | Runs ProjectDiscovery's 8000+ DAST templates from a Claude session against staging URLs. | `claude mcp add nuclei -- nuclei-mcp` (community wrapper) | None |
+| **Aikido / Endor Labs / Wiz MCPs** | Vendor-specific risk feeds. Skip unless you already pay for the SaaS. | See each vendor's docs. | Vendor API key |
+
+> ⚠️ **Treat MCP servers as Layer-2 attack surface.** Each server you add can read tool inputs and outputs in this session; a malicious or compromised server can prompt-inject Claude. Pin to official sources, prefer the `docker run -i --rm` invocations (no persistent state), and audit `~/.claude/mcp-servers.json` periodically.
+
+**Install these three first:** Semgrep MCP (free, broad SAST) + GitHub MCP (CodeQL/Dependabot/secret-scanning surface for your own repo) + CVE MCP (live NVD lookups during review).
 
 ---
 
@@ -201,9 +326,11 @@ Add to your `~/.claude/settings.json` or project `.claude/settings.json` — sam
 }
 ```
 
-### `.pre-commit-config.yaml` — gitleaks + semgrep
+### `.pre-commit-config.yaml` — layered defaults
 
-> 🗒️ Claude Code, Cursor, and Codex have all committed credentials to public repos in the past year. Pinning a `gitleaks` pre-commit hook closes that loop before the push, not after.
+> 🗒️ Claude Code, Cursor, and Codex have all committed credentials to public repos in the past year. Layered secret-scanning (entropy + pattern + verified credentials) closes that loop before the push, not after.
+
+Minimal version — secrets + Semgrep, the floor for any project:
 
 ```yaml
 repos:
@@ -219,7 +346,82 @@ repos:
         args: ["--config", "p/ci", "--error", "--quiet"]
 ```
 
-Tool homes: [gitleaks](https://github.com/gitleaks/gitleaks) · [semgrep](https://github.com/semgrep/semgrep). Local one-liners: `gitleaks detect --source . -v` · `semgrep scan --config p/ci`.
+Stacked version — three secret scanners (gitleaks fast/entropy, detect-secrets pattern-baseline, trufflehog live-credential verification), language SAST, IaC, Dockerfile, and K8s. Pick the rows that match your stack:
+
+```yaml
+repos:
+  # --- SECRETS (3-layer) ---
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+  - repo: https://github.com/trufflesecurity/trufflehog
+    rev: v3.95.3
+    hooks:
+      - id: trufflehog
+        args: ["filesystem", "."]
+
+  # --- SAST per language (uncomment what applies) ---
+  - repo: https://github.com/semgrep/pre-commit
+    rev: v1.162.0
+    hooks:
+      - id: semgrep
+        args: ["--config", "p/ci", "--error", "--quiet"]
+  - repo: https://github.com/PyCQA/bandit          # Python
+    rev: 1.9.4
+    hooks:
+      - id: bandit
+        args: ["-ll"]
+        types: [python]
+  - repo: https://github.com/securego/gosec        # Go
+    rev: v2.26.1
+    hooks:
+      - id: gosec
+        args: ["-exclude-dir=vendor"]
+        types: [go]
+  # - repo: https://github.com/presidentbeef/brakeman   # Rails
+  #   rev: 8.0.3
+  #   hooks: [{id: brakeman}]
+
+  # --- IaC + container + K8s ---
+  - repo: https://github.com/bridgecrewio/checkov
+    rev: 3.2.528
+    hooks:
+      - id: checkov
+        args: ["--quiet", "--severity=HIGH,CRITICAL"]
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.14.0
+    hooks:
+      - id: hadolint-docker
+        types: [dockerfile]
+  - repo: https://github.com/stackrox/kube-linter
+    rev: v0.8.3
+    hooks:
+      - id: kube-linter
+        types: [yaml]
+```
+
+> 💡 **eslint-plugin-security** doesn't ship as a `pre-commit` repo — install with `npm i -D eslint-plugin-security`, enable the recommended config in `eslint.config.js`, then add a local pre-commit hook that runs `npx eslint`.
+
+Local one-liners that mirror what these hooks do, useful when you want to scan before staging:
+
+```bash
+gitleaks detect --source . -v
+detect-secrets scan > .secrets.baseline
+trufflehog filesystem . --only-verified
+semgrep scan --config p/ci
+bandit -r -ll src/
+checkov -d infra/ --quiet
+hadolint Dockerfile
+kube-linter lint k8s/
+```
+
+> 🗒️ **TruffleHog's `--only-verified` flag is the differentiator** — it actually calls the upstream API (Stripe, AWS, GitHub, etc.) to check whether a candidate token is live. False-positive rate drops from ~40% (entropy-only) to near-zero.
 
 ### `.github/workflows/security.yml` — secrets + SAST + SCA on every PR
 
@@ -288,20 +490,287 @@ If your "AI feature" runs through self-hosted LMDeploy / vLLM / TensorRT-LLM / S
 
 ---
 
+## 📦 Containers, IaC, SBOM & dependencies
+
+Once you're shipping code that runs in production — containerised or otherwise — the attack surface widens to dependencies, base images, infrastructure config, and the supply chain that produced them. Stack these tools across the build pipeline:
+
+| Stage | Tool | One-liner | What it catches |
+| --- | --- | --- | --- |
+| Build (IaC) | **Checkov** — [github.com/bridgecrewio/checkov](https://github.com/bridgecrewio/checkov) | `checkov -d infra/ --quiet --severity=HIGH,CRITICAL` | 1000+ rules across Terraform / CloudFormation / K8s / Helm / Dockerfile / ARM |
+| Build (IaC) | **Trivy config** — [github.com/aquasecurity/trivy](https://github.com/aquasecurity/trivy) | `trivy config infra/ --severity CRITICAL,HIGH --exit-code 1` | Same surfaces as Checkov; absorbs the now-archived tfsec |
+| Build (image) | **Trivy image** | `trivy image --severity CRITICAL,HIGH --exit-code 1 myapp:$SHA` | CVEs in OS packages + language deps inside the container |
+| Build (image) | **Grype + Syft** — [anchore.com](https://github.com/anchore/grype) | `syft myapp:$SHA -o cyclonedx-json \| grype --fail-on critical` | SBOM-driven scan; comparable to Trivy, sometimes finds different CVEs |
+| Build (image) | **Docker Scout** | `docker scout cves myapp:$SHA` | Built into Docker Desktop; no install |
+| Build (K8s) | **kube-linter** — [stackrox/kube-linter](https://github.com/stackrox/kube-linter) | `kube-linter lint k8s/` | Pod Security Standards, missing resource limits, hostPath mounts |
+| SBOM | **Syft** | `syft . -o cyclonedx-json > sbom.cyclonedx.json` | Universal SBOM generator (CycloneDX + SPDX); 20+ ecosystems |
+| SBOM | **cdxgen** — [cyclonedx/cdxgen](https://github.com/CycloneDX/cdxgen) | `npm i -g @cyclonedx/cdxgen && cdxgen -r . -o sbom.json` | OWASP-blessed multi-language CycloneDX generator |
+| SBOM ingestion | **Dependency-Track** — [github.com/DependencyTrack/dependency-track](https://github.com/DependencyTrack/dependency-track) | `docker run -p 8080:8080 dependencytrack/apiserver` | Self-hosted SBOM repo with continuous CVE re-scoring |
+| Sign | **Cosign** — [sigstore/cosign](https://github.com/sigstore/cosign) | `cosign sign --keyless myregistry/myapp:$SHA` | Keyless image signing via OIDC; verify with `cosign verify` |
+| Pre-deploy | **kube-bench** — [aquasecurity/kube-bench](https://github.com/aquasecurity/kube-bench) | `kube-bench run` | CIS Kubernetes Benchmark for control-plane + nodes |
+| Runtime | **Falco** — [falcosecurity/falco](https://github.com/falcosecurity/falco) | Helm: `helm install falco falcosecurity/falco` | eBPF-based runtime detection: reverse shells, crypto-miners, exfil patterns |
+
+**Deps & SBOM workflow** — three tools is enough for most teams:
+
+1. **Dependabot** (GitHub-native, free) — drop a `.github/dependabot.yml`, get weekly PRs grouped by ecosystem; auto-merge patch updates via the `dependabot/fetch-metadata` action.
+2. **OSV-Scanner** ([github.com/google/osv-scanner](https://github.com/google/osv-scanner)) — `osv-scanner scan source -r .` in CI; queries OSV.dev (the authoritative open-source vuln DB) across 19+ ecosystems.
+3. **Syft** for SBOM, uploaded as a build artefact + (optionally) ingested into Dependency-Track for continuous monitoring after the build is done.
+
+Drop-in `.github/dependabot.yml` for a polyglot repo:
+
+```yaml
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule: { interval: weekly }
+    groups:
+      patch-and-minor:
+        update-types: ["patch", "minor"]
+  - package-ecosystem: pip
+    directory: "/"
+    schedule: { interval: weekly }
+  - package-ecosystem: docker
+    directory: "/"
+    schedule: { interval: weekly }
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule: { interval: monthly }
+```
+
+For teams beyond GitHub or wanting smarter grouping/automerge, **Renovate** (`renovate.json`) is the better fit. **Socket** ([socket.dev](https://socket.dev)) is worth adding on top of either — it catches typosquatted/malicious packages *before* publish hits, not just known CVEs.
+
+**End-to-end build → deploy reference pipeline** (one job per concern, all SARIF-uploaded so findings land in the GitHub Security tab):
+
+```yaml
+name: Build & deploy security
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  security-events: write
+  id-token: write  # for cosign keyless
+
+jobs:
+  iac:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/trivy-action@0.36.0
+        with: { scan-type: config, scan-ref: ., format: sarif, output: trivy-iac.sarif, severity: CRITICAL,HIGH }
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with: { sarif_file: trivy-iac.sarif, category: trivy-iac }
+
+  deps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4   # GH native; fails PR on new vuln deps
+      - uses: google/osv-scanner-action@v2
+        with: { scan-args: --recursive --lockfile . }
+
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v5
+        with: { tags: myapp:${{ github.sha }}, load: true, push: false }
+      - uses: aquasecurity/trivy-action@0.36.0
+        with: { image-ref: myapp:${{ github.sha }}, format: sarif, output: trivy-image.sarif, severity: CRITICAL,HIGH }
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with: { sarif_file: trivy-image.sarif, category: trivy-image }
+
+  sbom-and-sign:
+    needs: image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anchore/sbom-action@v0
+        with: { path: ., format: cyclonedx-json, output-file: sbom.cyclonedx.json }
+      - uses: actions/upload-artifact@v4
+        with: { name: sbom, path: sbom.cyclonedx.json }
+      - uses: sigstore/cosign-installer@v3
+      - if: github.event_name == 'push'
+        run: cosign sign --yes myregistry/myapp:${{ github.sha }}
+```
+
+Wire it into branch protection: in **Settings → Branches**, require these checks to pass before merge — `iac`, `deps`, `image`, plus `secrets`, `sast` from the earlier workflow. Add **Require signed commits** and **Require review from CODEOWNERS** for the security-relevant paths (`.github/`, `infra/`, anything under `auth/`).
+
+## 🎯 Dynamic testing & LLM red-teaming
+
+Static analysis catches what the code *says*; dynamic testing catches what it *does* once it's running. For Claude-built apps with both classic web routes and LLM features, three categories matter:
+
+### Web + API DAST
+
+| Tool | Install | Invocation | When |
+| --- | --- | --- | --- |
+| **OWASP ZAP baseline** | `docker pull zaproxy/zap-stable` | `docker run -t zaproxy/zap-stable zap-baseline.py -t https://staging.app` or `uses: zaproxy/action-baseline@v0.15.0` in CI | Staging gate; nightly |
+| **Nuclei** ([projectdiscovery/nuclei](https://github.com/projectdiscovery/nuclei)) | `go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest` | `nuclei -u https://staging.app -t ~/nuclei-templates/` | Nightly; pre-release |
+| **Schemathesis** ([github.com/schemathesis/schemathesis](https://github.com/schemathesis/schemathesis)) | `pip install schemathesis` | `schemathesis run https://staging.app/openapi.json --checks all --hypothesis-max-examples 500` | Every PR (fastest CI integration) |
+| **RESTler** by Microsoft | `python build-restler.py --dest_dir ./restler` | `restler.py fuzz --api_spec_path openapi.yaml` | Pre-release |
+
+### LLM-specific red-teaming
+
+These are the ones you actually need if your app has *any* AI feature — classic DAST won't probe prompt injection, jailbreak, or memory poisoning.
+
+| Tool | Install | Invocation | What it tests |
+| --- | --- | --- | --- |
+| **Garak** by NVIDIA — [github.com/NVIDIA/garak](https://github.com/NVIDIA/garak) | `pip install -U garak` | `garak --target_type openai --target_name gpt-4o --probes dan,promptinject,latentinjection` | 130+ probes: DAN-style jailbreak, prompt injection, latent injection, hallucination, toxicity, leakage |
+| **PyRIT** by Microsoft — [github.com/Azure/PyRIT](https://github.com/Azure/PyRIT) | `pip install pyrit` | Python API: build orchestrators that run multi-turn attack chains | Conversation-based red-teaming; first-party Microsoft tool used to test Copilot |
+| **Promptfoo** — [promptfoo.dev](https://github.com/promptfoo/promptfoo) | `npm i -g promptfoo` | `promptfoo eval -c promptfooconfig.yaml && promptfoo view` | Eval + red-team CLI with a web UI; built-in jailbreak + harmful-content plugins |
+
+Sample `promptfooconfig.yaml` for the LLM endpoint in your app:
+
+```yaml
+prompts:
+  - file://prompts/system.txt
+providers:
+  - id: https
+    config:
+      url: https://staging.app/api/chat
+      method: POST
+      headers: { "Content-Type": "application/json" }
+      body: '{"message": "{{prompt}}"}'
+redteam:
+  numTests: 50
+  plugins:
+    - harmful           # toxic / illegal outputs
+    - pii               # PII leakage
+    - prompt-injection  # direct & indirect injection
+    - jailbreak         # DAN, persona, encoding attacks
+```
+
+### CI integration (drop-in)
+
+```yaml
+  dast:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: zaproxy/action-baseline@v0.15.0
+        with: { target: ${{ secrets.STAGING_URL }} }
+      - run: pip install schemathesis && schemathesis run ${{ secrets.STAGING_URL }}/openapi.json --checks all --junit-xml=report.xml
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: schemathesis, path: report.xml }
+
+  llm-redteam:
+    if: contains(github.event.head_commit.modified, 'prompts/') || contains(github.event.head_commit.modified, 'llm/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -U garak && garak --target_type openai --target_name ${{ secrets.LLM_MODEL }} --probes promptinject,dan --output garak.jsonl
+      - uses: actions/upload-artifact@v4
+        with: { name: garak, path: garak.jsonl }
+```
+
+**Pick three:** **Schemathesis** (fastest API-fuzz wins for PR-time), **Garak** (LLM red-team baseline), and **ZAP baseline** (zero-config web DAST in CI).
+
+## 📣 Vulnerability disclosure & incident response
+
+When something bad ships, the difference between a footnote and a front-page incident is whether you set up the disclosure channels *before* you needed them.
+
+### Three steps the first time you ship
+
+**1. Enable GitHub Private Vulnerability Reporting** — *Repo → Settings → Code security and analysis → Private vulnerability reporting → Enable*. Researchers now see a "Report a vulnerability" button on your repo's Security tab; reports land as a private advisory you can triage and patch under embargo. [GitHub docs](https://docs.github.com/en/code-security/security-advisories/working-with-repository-security-advisories/configuring-private-vulnerability-reporting-for-a-repository).
+
+**2. Publish `/.well-known/security.txt`** — RFC 9116 standard. Ship this plaintext file from your web root:
+
+```
+Contact: mailto:security@your-company.com
+Contact: https://github.com/YOUR-ORG/YOUR-REPO/security/advisories/new
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://your-app.example.com/.well-known/security.txt
+Policy: https://github.com/YOUR-ORG/YOUR-REPO/blob/main/SECURITY.md
+Acknowledgments: https://github.com/YOUR-ORG/YOUR-REPO/blob/main/SECURITY.md#hall-of-fame
+Encryption: https://keys.openpgp.org/vks/v1/by-fingerprint/<fingerprint>
+```
+
+Spec + validator: [securitytxt.org](https://securitytxt.org/).
+
+**3. Bookmark Anthropic's disclosure channel** — for bugs in Claude / Claude Code / MCP servers themselves: [anthropic.com/responsible-disclosure-policy](https://www.anthropic.com/responsible-disclosure-policy) · [hackerone.com/anthropic-vdp](https://hackerone.com/anthropic-vdp). Anthropic's commitment is 3-day acknowledgement and a 90-day patch window aligned with [Google Project Zero](https://googleprojectzero.blogspot.com/p/vulnerability-disclosure-policy.html).
+
+### SECURITY.md skeleton
+
+Add `SECURITY.md` at the repo root so GitHub auto-links it:
+
+```markdown
+# Security policy
+
+## Supported versions
+| Version | Supported |
+| --- | --- |
+| 2.x | ✅ |
+| 1.x | ⚠️ critical fixes only until 2026-12-31 |
+| < 1.0 | ❌ |
+
+## Reporting a vulnerability
+Use **GitHub's "Report a vulnerability"** button on this repo's
+Security tab (Private Vulnerability Reporting). For end-to-end-encrypted
+reports, email security@your-company.com with PGP key
+`<fingerprint>` (https://keys.openpgp.org/...).
+
+We follow the Google Project Zero **90+30** disclosure standard:
+- Acknowledgement within 3 business days
+- Patch within 90 days
+- You may publicly disclose 30 days after the patch ships
+
+## Scope
+- ✅ This repository and its deployed services
+- ✅ Authentication / authorisation flaws, RCE, SQLi, SSRF, XSS, data exposure
+- ❌ Volumetric DoS, social engineering, physical attacks
+- ❌ Findings against third-party services we depend on (report to them directly)
+
+## Hall of fame
+We credit valid reporters here (with your permission).
+```
+
+### Maturity model — know where you are, know where you're going
+
+[OWASP DevSecOps Maturity Model (DSOMM)](https://owasp.org/www-project-devsecops-maturity-model/) — self-assess at [dsomm.owasp.org](https://dsomm.owasp.org/). Most teams shipping AI features land at L2–L3:
+
+| DSOMM Level | Hallmarks | Aim |
+| --- | --- | --- |
+| 1 — Initial | Manual review, no automation | OK for hobby / pre-prod |
+| 2 — Managed | SAST + SCA in CI; pre-commit secrets; basic threat models | Most early-stage teams |
+| 3 — Defined | OWASP Top 10 coverage gated; dep updates automated; threat models mandatory | **Aim here before shipping AI agents to paying users** |
+| 4 — Quantitative | Metric-driven gates; runtime monitoring (Falco); signed artefacts (cosign) | Regulated verticals |
+| 5 — Optimizing | Continuous red-team; chaos-engineering for security | Security-first orgs |
+
+### IR frameworks to cite when you write the postmortem
+
+- **NIST SP 800-61r3** (April 2025) — updated incident-response standard, now with AI-specific detection and containment guidance.
+- **Coalition for Secure AI (CoSAI)** — [AI Incident Response Framework v1.0](https://www.coalitionforsecureai.org/). Specifically covers agent goal hijack, tool misuse, cascading failures (mirrors OWASP ASI01/02/08).
+- **CISA AI guidance** — [cisa.gov/ai](https://www.cisa.gov/ai) for current advisories; the [Dec 2025 joint guidance](https://www.cisa.gov/news-events/alerts/2025/12/03/cisa-australia-and-partners-author-joint-guidance-securely-integrating-artificial-intelligence) on Secure AI Integration in OT is the most concrete recent reference.
+- **Google SRE Postmortem Template** — [sre.google/sre-book/postmortem-culture](https://sre.google/sre-book/postmortem-culture/) — the blameless template most of the industry has converged on.
+
+When an agent compromise is suspected, run the `incident-triage` subagent defined earlier in this page — it produces the timeline + IOCs + blast-radius report you'd otherwise spend the first hour assembling by hand.
+
 ## ✅ Pre-merge checklist
 
 Drop the markdown below into a `PULL_REQUEST_TEMPLATE.md` so it shows up on every PR.
 
 ```markdown
 ### Security checklist
-- [ ] Secrets scan clean (gitleaks pre-commit + GH secret scanning)
-- [ ] SAST clean (semgrep p/ci) and SCA clean (trivy/dependabot)
-- [ ] OWASP Top 10:2025 review run on the diff
-- [ ] OWASP LLM Top 10:2025 review run (if the diff touches an AI feature)
-- [ ] All MCP/tool/web-fetch outputs treated as untrusted in code paths added
+- [ ] Threat model updated (`docs/threat-models/<feature>.json`) if trust boundaries changed
+- [ ] Secrets scan clean: gitleaks + detect-secrets + trufflehog (--only-verified)
+- [ ] SAST clean: semgrep p/ci + language-specific (bandit/gosec/eslint-security)
+- [ ] SCA clean: osv-scanner + dependabot/renovate green
+- [ ] IaC clean: trivy config + checkov + kube-linter (if applicable)
+- [ ] Container clean: trivy image, signed with cosign keyless
+- [ ] SBOM generated (syft → CycloneDX) and uploaded as build artefact
+- [ ] `security-auditor` subagent run on the diff (or `/security-review`)
+- [ ] OWASP Top 10:2025 + API Top 10:2023 review for any new endpoint
+- [ ] OWASP LLM Top 10:2025 review (if the diff touches an AI feature) + Garak/Promptfoo probe added if new prompt surface
+- [ ] All MCP / tool / web-fetch outputs treated as untrusted in new code paths
 - [ ] No `--dangerously-skip-permissions` in any new scripts or CI jobs
 - [ ] No `--no-verify`, `git push --force`, or `chmod 777` introduced
-- [ ] Threat model updated if trust boundaries changed
 - [ ] Security tests added for the new code path
 - [ ] If self-hosting an inference server: latest CVE bulletins reviewed
 ```
