@@ -97,14 +97,53 @@ When using such agentic coding tools on both brownfield work (with existing code
     # A @dataclass or plain attribute would do the same work.
     ```
 
-- **Vacuous or tautological tests** that mock every internal call, so the tests pass without actually checking anything.
+- **Vacuous or tautological tests** (e.g. mocking every internal call so the test only verifies that the mocks were called):
+
+    ```python
+    def test_double():
+        calc = Mock()
+        calc.double.return_value = 10
+        assert calc.double(5) == 10
+    ```
+
 - **Scope failure** where the agent refuses an obvious boy-scout fix because it didn't cause the issue this session.
 
-These aren't smartness problems. They're enforcement gaps — nothing makes the agent push back on itself. The fix is friction: a checklist it has to run, a verifier it has to pass, a phase boundary it can't quietly skip.
+    ```python
+    # Task: "Return None for missing users instead of letting db.find_user throw exception."
+    
+    # Before
+    def get_user(user_id):
+        cached = cache.get(f"user:{user_id}")
+        if cached is not None:
+            return cached
+        
+        user = db.find_user(user_id)                       # raises UserNotFound if missing, to be fixed
+        cache.set(f"users:{user_id}", user, ttl=3600)
+        return user
+
+    # After
+    def get_user(user_id):
+        cached = cache.get(f"user:{user_id}")
+        if cached is not None:
+            return cached
+        
+        try:
+            user = db.find_user(user_id)
+        except UserNotFound:
+            return None                                    # changed by agent
+        cache.set(f"users:{user_id}", user, ttl=3600)      # typo, pre-existing: "users:" vs "user:"
+        return user
+    
+    # Agent: "The cache.set key looks off but it's pre-existing — out of scope."
+    # Result: the function appears to work perfectly. It just has a 0% cache hit rate,
+    # hammering the database on every call.
+
+    ```
+This is not a "model is not smart enough" problem. We need to build our "harness" or setup around the model with intentional guardrails that guide it toward what we want.
 
 We call this *bounded autonomy*: enough room to do the work, with guardrails that catch the specific ways it drifts.
 
-Plain prompting is unbounded. A skill tightens the bound. A framework like BMAD or GSD tightens it more.
+Plain prompting is unbounded. A skill tightens it, and frameworks like BMAD or GSD tighten it more.
 
 ---
 
