@@ -152,6 +152,14 @@
   .llms-banner-copy[disabled] {
     opacity: 0.7;
   }
+  /* Hextra pins the banner to the top on mobile (hx:max-md:sticky), where it
+     overlaps the hero on scroll. Match the desktop behavior and let it scroll
+     away with the page. */
+  @media (max-width: 767px) {
+    .hextra-banner {
+      position: static !important;
+    }
+  }
 </style>
 
 <script>
