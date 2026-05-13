@@ -52,7 +52,7 @@ Your content starts here.
 ```
 
 - **`title`** — Page title displayed in the sidebar and browser tab.
-- **`weight`** — Controls sidebar ordering. Lower numbers appear higher. Existing pages use 1–4.
+- **`weight`** — Controls sidebar ordering. Lower numbers appear higher. Existing pages use 1–5.
 
 **Do not** add a `# Title` heading in the body — Hextra renders the `title` from front matter automatically.
 
@@ -134,6 +134,7 @@ claude-docs/
 │       ├── _index.md                # Main workshop content
 │       ├── setup-guide.md           # Pre-workshop setup
 │       ├── skills-plugins-deep-dive.md
+│       ├── existing-codebase-workflows.md
 │       └── cheat-sheet.md
 ├── static/
 │   ├── images/                      # Content images
