@@ -39,4 +39,10 @@ layout: hextra-home
     icon="shield-check"
     link="docs/security/"
   >}}
+  {{< hextra/feature-card
+    title="Existing Codebases"
+    subtitle="Brownfield GSD and BMAD workflows for changing an app while preserving its current patterns."
+    icon="book-open"
+    link="docs/existing-codebase-workflows/"
+  >}}
 {{< /hextra/feature-grid >}}
