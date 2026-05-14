@@ -1,3 +1,10 @@
+/* ── Tables: full width, no horizontal scroll ──────────────────────── */
+.hextra-content table {
+  table-layout: fixed;
+  width: 100%;
+  word-break: break-word;
+}
+
 /* Hero section spacing — body prefix adds specificity to beat theme defaults */
 body main#content > div > h1:first-child {
   margin-top: 2rem;
