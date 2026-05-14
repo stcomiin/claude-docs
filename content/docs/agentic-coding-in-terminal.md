@@ -407,6 +407,61 @@ Good agentic prompts answer three questions:
 
 Including an explicit success condition (passing tests, a specific output, a diff that meets a criterion) lets the agent self-verify and reduces back-and-forth.
 
+## 🔧 Tools — What Claude Code Can Actually Do
+
+When Claude Code acts on your codebase, it calls **tools**. Tools that only read don't need permission; tools that modify things do (unless pre-approved or in auto mode).
+
+### Built-in Tools
+
+| Category | Tool | What it does | Permission? |
+| --- | --- | --- | --- |
+| **Read** | `Read` | Read files (also images, PDFs, notebooks) | No |
+| | `Glob` | Find files by name pattern (`**/*.ts`) | No |
+| | `Grep` | Search file contents (built on ripgrep) | No |
+| | `LSP` | Go-to-definition, find references, type errors | No |
+| **Write** | `Edit` | Targeted string replacement (must read file first) | Yes |
+| | `Write` | Create new files or full overwrite | Yes |
+| | `NotebookEdit` | Modify Jupyter notebook cells | Yes |
+| **Shell** | `Bash` | Run shell commands (2 min timeout, background mode available) | Yes |
+| | `PowerShell` | Native PowerShell (Windows) | Yes |
+| | `Monitor` | Background watcher — tail logs, poll CI, watch files | Yes |
+| **Web** | `WebFetch` | Fetch URL → markdown → extract via prompt | Yes |
+| | `WebSearch` | Web search (returns URLs, doesn't fetch pages) | Yes |
+| **Agentic** | `Agent` | Spawn sub-agent with own context window | No |
+| | `EnterPlanMode` | Switch to read-only planning mode | No |
+| | `EnterWorktree` | Create isolated git worktree | No |
+| | `Skill` | Execute a skill / slash command | Yes |
+| | `TaskCreate/Update/List` | Structured task management | No |
+| | `CronCreate/Delete/List` | Schedule recurring prompts in-session | No |
+| | `SendMessage` / `TeamCreate` | Agent team coordination (experimental) | No |
+
+- **Bash is the workhorse.** It's how Claude runs tests, git, gh, docker, npm, and any CLI. If a CLI exists, Claude prefers Bash over an MCP server.
+- **MCP tools** (Chrome DevTools, Playwright, Context7, etc.) show up alongside built-in tools. Check with `/mcp`.
+
+### Permission Rules
+
+Pre-approve tools via `/permissions` or `settings.json` to reduce prompts:
+
+```json
+{
+  "permissions": {
+    "allow": ["Bash(npm run *)", "Bash(git *)", "Edit(/src/**)"],
+    "deny": ["Read(~/.ssh/**)", "Bash(rm -rf *)"]
+  }
+}
+```
+
+| Rule format | Applies to |
+| --- | --- |
+| `Bash(npm run *)` | Bash, Monitor |
+| `Read(~/secrets/**)` | Read, Grep, Glob, LSP |
+| `Edit(/src/**)` | Edit, Write, NotebookEdit |
+| `WebFetch(domain:example.com)` | WebFetch |
+
+> 💡 An `Edit(...)` rule also grants read access to the same path.
+
+> 🔗 Full tool reference: [https://code.claude.com/docs/en/tools-reference](https://code.claude.com/docs/en/tools-reference)
+
 ## The Dev process for the Online Environment
 
 ### Working with GitHub
