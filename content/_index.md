@@ -34,6 +34,12 @@ layout: hextra-home
     link="docs/cheat-sheet/"
   >}}
   {{< hextra/feature-card
+    title="Cybersecurity & Hardening"
+    subtitle="OWASP web/API/LLM/Agentic Top 10s, agent-runtime CVEs, ready-to-paste hooks, and pre-merge guards."
+    icon="shield-check"
+    link="docs/security/"
+  >}}
+  {{< hextra/feature-card
     title="Existing Codebases"
     subtitle="Brownfield GSD and BMAD workflows for changing an app while preserving its current patterns."
     icon="book-open"

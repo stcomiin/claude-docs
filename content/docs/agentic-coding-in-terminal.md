@@ -720,6 +720,8 @@ The convenience of skills comes with real risk.
 4. **Pin versions** — clone or fork rather than referencing a live repo that can change under you
 5. **Use `--dangerously-skip-permissions` with caution** — this flag + a malicious skill = full access to your machine
 
+> 🔗 For securing the **apps Claude builds** (OWASP web/API/LLM/Agentic Top 10s, MCP & Claude Code CVEs, ready-to-paste pre-commit and CI guards, the LMDeploy 12h-to-exploit advisory), see [Cybersecurity & Production Hardening](/docs/security/).
+
 ## 🧩 Plugins
 
 Plugins extend Claude Code with additional capabilities — language intelligence, platform integrations, workflow automation, and more.

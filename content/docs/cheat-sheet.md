@@ -61,9 +61,9 @@ A printable reference attendees can take home. One page (ish), organized by "wha
 | --- | --- |
 | `/diff` | Interactive diff viewer |
 | `/review` | General code review |
-| `/security-review` | Scoped security scan |
+| `/security-review` | Scoped security scan — see [Cybersecurity & Hardening](/docs/security/) |
 | `/simplify` | 3-agent review on recent changes |
-| `/ultrareview` | Deep multi-pass pre-merge review |
+| `/ultrareview` | Deep multi-pass pre-merge review — see [Cybersecurity & Hardening](/docs/security/) |
 | `/batch <description>` | Parallel worktree agents for migrations |
 | `/autofix-pr` | Address PR review comments automatically |
 
