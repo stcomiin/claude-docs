@@ -286,10 +286,9 @@ Instead of context-switching to a vendor UI, wire the scanner into Claude Code a
 
 Three layers of guards: **PreToolUse hooks** in Claude Code itself, **pre-commit hooks** on the dev machine, and **GitHub Actions** in CI. Stack all three.
 
-### PreToolUse: block writes to secret files
-
 Add to your `~/.claude/settings.json` or project `.claude/settings.json` - same shape as the destructive-delete hook in [Foundations → Hooks](/docs/agentic-coding-in-terminal/#hooks).
 
+### PreToolUse: block writes to secret files
 ```json
 {
   "hooks": {
@@ -415,18 +414,12 @@ repos:
 
 > 💡 **eslint-plugin-security** doesn't ship as a `pre-commit` repo - install with `npm i -D eslint-plugin-security`, enable the recommended config in `eslint.config.js`, then add a local pre-commit hook that runs `npx eslint`.
 
-Local one-liners that mirror what these hooks do, useful when you want to scan before staging:
+### Local one-liners that mirror what those hooks do, useful when you want to scan before staging.
 
-```bash
-gitleaks detect --source . -v
-detect-secrets scan > .secrets.baseline
-trufflehog filesystem . --only-verified
-semgrep scan --config p/ci
-bandit -r -ll src/
-checkov -d infra/ --quiet
-hadolint Dockerfile
-kube-linter lint k8s/
-```
+**Secrets - hardcoded keys, tokens, passwords**
+
+Scan git history for committed secrets. `-v` prints each finding with file and line.
+
 
 > 🗒️ **TruffleHog's `--only-verified` flag is the differentiator** - it actually calls the upstream API (Stripe, AWS, GitHub, etc.) to check whether a candidate token is live. False-positive rate drops from ~40% (entropy-only) to near-zero.
 
@@ -568,6 +561,14 @@ Add this to your `CLAUDE.md`:
   install a package you haven't verified. Prefer well-known alternatives
   over obscure packages.
 ```
+
+### Minimum release age - the automated version of "wait and see"
+
+Real packages get hijacked too. An attacker takes over the publisher account and ships a malicious patch version under the legitimate name. The [LiteLLM PyPI compromise (March 2026)](https://blog.pypi.org/posts/2026-04-02-incident-report-litellm-telnyx-supply-chain-attack/) was live for 40 minutes and racked up 40k+ downloads; the [TanStack npm attack (May 2026)](https://tanstack.com/blog/npm-supply-chain-compromise-postmortem) pushed 84 malicious versions across 42 `@tanstack/*` packages in a 6-minute window.
+
+Tell your package manager to refuse versions newer than N days old. By the time you install, the bad release has typically been caught and removed. 7 days is a sensible default.
+
+**npm** (11+) - unit is *days*:
 
 ### Lifecycle scripts from Claude-installed packages
 
