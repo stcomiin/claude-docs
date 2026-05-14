@@ -289,6 +289,7 @@ Three layers of guards: **PreToolUse hooks** in Claude Code itself, **pre-commit
 Add to your `~/.claude/settings.json` or project `.claude/settings.json` - same shape as the destructive-delete hook in [Foundations → Hooks](/docs/agentic-coding-in-terminal/#hooks).
 
 ### PreToolUse: block writes to secret files
+
 ```json
 {
   "hooks": {
@@ -298,7 +299,7 @@ Add to your `~/.claude/settings.json` or project `.claude/settings.json` - same 
         "hooks": [
           {
             "type": "command",
-            "command": "path=\"$(jq -r '.tool_input.file_path // \"\"')\"; if echo \"$path\" | grep -qE '(\\.env($|\\.)|\\.pem$|/id_rsa($|\\.)|\\.key$|credentials\\.json$)'; then printf '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Blocked: write to a sensitive file (.env / .pem / id_rsa / .key / credentials.json). Move the secret to env vars or a vault.\"}}'; fi; exit 0",
+            "command": "path=\"$(jq -r '.tool_input.file_path // \"\"')\"; if printf '%s\\n' \"$path\" | grep -qE '(\\.env($|\\.)|\\.pem$|(^|/)id_rsa($|\\.)|\\.key$|credentials\\.json$)'; then printf '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Blocked: write to a sensitive file (.env / .pem / id_rsa / .key / credentials.json). Move the secret to env vars or a vault.\"}}'; fi; exit 0",
             "timeout": 5,
             "statusMessage": "Validating write target..."
           }
@@ -320,7 +321,7 @@ Add to your `~/.claude/settings.json` or project `.claude/settings.json` - same 
         "hooks": [
           {
             "type": "command",
-            "command": "cmd=\"$(jq -r '.tool_input.command // \"\"')\"; if echo \"$cmd\" | grep -qE '(rm -rf (/|~)|git push.*--force.*\\b(main|master)\\b|chmod 0?777|--no-verify|curl[^|]*\\| ?sh)'; then printf '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"ask\",\"permissionDecisionReason\":\"DANGEROUS PATTERN: rm -rf / or ~, force-push to main/master, chmod 777, --no-verify, or curl|sh detected. Confirm explicitly.\"}}'; fi; exit 0",
+            "command": "cmd=\"$(jq -r '.tool_input.command // \"\"')\"; if printf '%s\\n' \"$cmd\" | grep -qE '(rm -rf (/|~)|git push.*(--force.*\\b(main|master)\\b|\\b(main|master)\\b.*--force)|chmod 0?777|--no-verify|curl[^|]*\\| ?(sh|bash))'; then printf '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"ask\",\"permissionDecisionReason\":\"DANGEROUS PATTERN: rm -rf / or ~, force-push to main/master, chmod 777, --no-verify, or curl|sh|bash detected. Confirm explicitly.\"}}'; fi; exit 0",
             "timeout": 5,
             "statusMessage": "Scanning for dangerous patterns..."
           }
@@ -420,6 +421,55 @@ repos:
 
 Scan git history for committed secrets. `-v` prints each finding with file and line.
 
+```bash
+gitleaks detect --source . -v
+```
+
+Capture every secret already in the repo into `.secrets.baseline` so the scanner blocks new ones without forcing you to clean up the existing mess first.
+
+```bash
+detect-secrets scan > .secrets.baseline
+```
+
+Scan the working tree and actively call each candidate secret's upstream API (Stripe, AWS, GitHub, etc.) to confirm it's live. `--only-verified` is the differentiator - without it you get entropy-based guesses.
+
+```bash
+trufflehog filesystem . --only-verified
+```
+
+**Code - vulnerable patterns in source files (SAST)**
+
+Pattern-based static analysis using Semgrep's curated CI rule pack. Covers most languages out of the box.
+
+```bash
+semgrep scan --config p/ci
+```
+
+Python-only security linter. `-r` recurses into `src/`; `-ll` raises the severity floor to medium-and-higher. Skip if you're not on Python.
+
+```bash
+bandit -r -ll src/
+```
+
+**Infrastructure - Dockerfiles, Kubernetes, Terraform**
+
+Scan IaC (Terraform, CloudFormation, Helm, ARM, etc.) for misconfigs like public buckets or missing encryption. `--quiet` suppresses passing checks so logs stay readable.
+
+```bash
+checkov -d infra/ --quiet
+```
+
+Lint your Dockerfile for security and best-practice issues (running as root, unpinned `apt-get` packages, `ADD` vs `COPY` misuse).
+
+```bash
+hadolint Dockerfile
+```
+
+Lint Kubernetes manifests under `k8s/` for things like missing resource limits, privileged containers, or no readiness probe.
+
+```bash
+kube-linter lint k8s/
+```
 
 > 🗒️ **TruffleHog's `--only-verified` flag is the differentiator** - it actually calls the upstream API (Stripe, AWS, GitHub, etc.) to check whether a candidate token is live. False-positive rate drops from ~40% (entropy-only) to near-zero.
 
@@ -569,6 +619,30 @@ Real packages get hijacked too. An attacker takes over the publisher account and
 Tell your package manager to refuse versions newer than N days old. By the time you install, the bad release has typically been caught and removed. 7 days is a sensible default.
 
 **npm** (11+) - unit is *days*:
+
+```bash
+npm config set min-release-age 7
+```
+
+**pnpm** (10.16+) - unit is *minutes* (default already 1440):
+
+```ini
+# .npmrc
+minimumReleaseAge=10080
+```
+
+**Bun** - unit is *seconds*, set in `bunfig.toml`:
+
+```toml
+[install]
+minimumReleaseAge = 604800
+```
+
+**uv** (Python) - accepts a friendly duration string:
+
+```bash
+export UV_EXCLUDE_NEWER="7 days"
+```
 
 ### Lifecycle scripts from Claude-installed packages
 
