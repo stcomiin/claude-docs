@@ -14,6 +14,17 @@
      it would un-tighten reading lines on ultrawide screens. */
 }
 
+/* Re-center the home layout. Doc pages wrap <main> inside <article>, so
+   <main> as a direct child of .hextra-max-page-width is unique to the
+   hextra-home layout. Re-introducing a max-width here restores the
+   centered hero + feature grid look that the page-width cap used to give
+   us before we lifted it on the chrome above. */
+.hextra-max-page-width > main#content {
+  max-width: 90rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* ── Bookmark embed cards (Notion-style link previews) ──────────────── */
 .bookmark-card {
   display: flex;
