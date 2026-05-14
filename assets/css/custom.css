@@ -1,3 +1,19 @@
+/* ── Full-width layout overrides ────────────────────────────────────────
+   Hextra caps the navbar, page wrapper, content, and footer at fixed rem
+   widths (90/72/90/80rem) in variables.css. On wide monitors that leaves
+   large empty bands on either side. Drop the caps on the chrome (navbar,
+   page wrapper, footer) so the layout reaches the viewport edges, but
+   keep the prose column capped at 72rem (~80ch) for comfortable reading.
+   Override CSS variables (not the classes) so any other rule that
+   references them (e.g. Hextra's own layout helpers) sees the change. */
+:root {
+  --hextra-max-page-width: none;
+  --hextra-max-navbar-width: none;
+  --hextra-max-footer-width: none;
+  /* --hextra-max-content-width stays at Hextra default (72rem) — restoring
+     it would un-tighten reading lines on ultrawide screens. */
+}
+
 /* ── Bookmark embed cards (Notion-style link previews) ──────────────── */
 .bookmark-card {
   display: flex;
