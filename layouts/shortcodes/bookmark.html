@@ -1,0 +1,25 @@
+{{- $url := .Get "url" -}}
+{{- $title := .Get "title" | default $url -}}
+{{- $description := .Get "description" | default "" -}}
+{{- $icon := .Get "icon" | default "" -}}
+{{- $image := .Get "image" | default "" -}}
+
+<div class="bookmark-card">
+  <a href="{{ $url }}" target="_blank" rel="noopener noreferrer" class="bookmark-info">
+    <div class="bookmark-title">{{ $title }}</div>
+    {{- if $description }}
+    <div class="bookmark-description">{{ $description }}</div>
+    {{- end }}
+    <div class="bookmark-url">
+      {{- if $icon }}
+      <img src="{{ $icon }}" alt="" class="bookmark-icon" loading="lazy" />
+      {{- end }}
+      <span>{{ $url }}</span>
+    </div>
+  </a>
+  {{- if $image }}
+  <a href="{{ $image }}" target="_blank" class="bookmark-image">
+    <img src="{{ $image }}" alt="" loading="lazy" />
+  </a>
+  {{- end }}
+</div>

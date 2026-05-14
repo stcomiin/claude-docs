@@ -1,3 +1,126 @@
+/* ── Bookmark embed cards (Notion-style link previews) ──────────────── */
+.bookmark-card {
+  display: flex;
+  align-items: stretch;
+  text-decoration: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 1.25rem 0;
+  transition: background 0.15s ease;
+  color: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+.bookmark-card:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+/* Light mode overrides */
+:root:not(.dark) .bookmark-card {
+  border-color: rgba(0, 0, 0, 0.15);
+}
+:root:not(.dark) .bookmark-card:hover {
+  background: rgba(0, 0, 0, 0.025);
+}
+
+a.bookmark-info {
+  flex: 1;
+  min-width: 0;
+  padding: 16px 18px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-decoration: none !important;
+  color: inherit;
+}
+
+
+.bookmark-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bookmark-description {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  opacity: 0.55;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  margin-top: 1px;
+}
+
+.bookmark-url {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 6px;
+  font-size: 0.75rem;
+  opacity: 0.45;
+  overflow: hidden;
+}
+.bookmark-url span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bookmark-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.bookmark-image {
+  flex: 0 0 clamp(160px, 28%, 280px);
+  align-self: stretch;
+  position: relative;
+  text-decoration: none !important;
+  overflow: hidden;
+}
+.bookmark-image img {
+  /* Inset on all sides so the image sits "framed" by the card background
+     instead of bleeding to the edge.
+
+     We MUST size width/height explicitly with calc(): for absolutely-positioned
+     replaced elements (img), CSS computes width using the inline-replaced rules
+     first and then solves for offsets. Hextra's preflight sets `max-width:100%`,
+     which caps the intrinsic width to the parent's width — that over-constrains
+     `left+right+width = parent + 24px` and the browser silently drops `right`,
+     so `inset: 12px` alone leaves the image clipping the right edge. */
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: calc(100% - 24px);
+  height: calc(100% - 24px);
+  object-fit: cover;
+  display: block;
+  /* Reset Hextra's prose img defaults (.content :where(img) {...}) so the
+     image isn't pushed around by their margin. */
+  margin: 0;
+  border-radius: 6px;
+}
+
+/* Stack vertically on small screens */
+@media (max-width: 480px) {
+  .bookmark-card {
+    flex-direction: column-reverse;
+  }
+  .bookmark-image {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    height: 160px;
+  }
+}
+
 /* ── Tables: full width, no horizontal scroll ──────────────────────── */
 .hextra-content table {
   table-layout: fixed;

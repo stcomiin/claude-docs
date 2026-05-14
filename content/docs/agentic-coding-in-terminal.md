@@ -275,7 +275,7 @@ Model Drift (Models do get dumber sometimes, it's not just you)
 - [https://marginlab.ai/trackers/claude-code/](https://marginlab.ai/trackers/claude-code/) to track the average pass rate of Opus on SWE tasks
 - The issue with using cloud providers is that you never know what is the exact quant and inference quality of the model being served. Models can be silently replaced with much quantised versions, or there can be inference engine bugs. Read below for a postmortem by Anthropic on their quality degradation issues.
 
-[A postmortem of three recent issues](https://www.anthropic.com/engineering/a-postmortem-of-three-recent-issues)
+{{< bookmark url="https://www.anthropic.com/engineering/a-postmortem-of-three-recent-issues" title="A postmortem of three recent issues" description="This is a technical report on three bugs that intermittently degraded responses from Claude. Below we explain what happened, why it took time to fix, and what we're doing to prevent similar issues." icon="https://www.anthropic.com/favicon.ico" image="/images/anthropic-postmortem-og.png" >}}
 
 ## Giving Better Inputs
 
