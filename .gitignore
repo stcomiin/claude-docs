@@ -12,3 +12,6 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# Test/automation artifacts
+.playwright-mcp/
