@@ -275,7 +275,7 @@ Model Drift (Models do get dumber sometimes, it's not just you)
 - [https://marginlab.ai/trackers/claude-code/](https://marginlab.ai/trackers/claude-code/) to track the average pass rate of Opus on SWE tasks
 - The issue with using cloud providers is that you never know what is the exact quant and inference quality of the model being served. Models can be silently replaced with much quantised versions, or there can be inference engine bugs. Read below for a postmortem by Anthropic on their quality degradation issues.
 
-[A postmortem of three recent issues](https://www.anthropic.com/engineering/a-postmortem-of-three-recent-issues)
+{{< bookmark url="https://www.anthropic.com/engineering/a-postmortem-of-three-recent-issues" title="A postmortem of three recent issues" description="This is a technical report on three bugs that intermittently degraded responses from Claude. Below we explain what happened, why it took time to fix, and what we're doing to prevent similar issues." icon="https://www.anthropic.com/favicon.ico" image="/images/anthropic-postmortem-og.png" >}}
 
 ## Giving Better Inputs
 
@@ -406,6 +406,61 @@ Good agentic prompts answer three questions:
 > "Refactor `src/auth/session.ts` to use the new `UserSession` type from `@src/types/user.ts`. Do not change the public API. All existing tests in `auth.test.ts` must still pass. Add JSDoc comments to exported functions."
 
 Including an explicit success condition (passing tests, a specific output, a diff that meets a criterion) lets the agent self-verify and reduces back-and-forth.
+
+## 🔧 Tools — What Claude Code Can Actually Do
+
+When Claude Code acts on your codebase, it calls **tools**. Tools that only read don't need permission; tools that modify things do (unless pre-approved or in auto mode).
+
+### Built-in Tools
+
+| Category | Tool | What it does | Permission? |
+| --- | --- | --- | --- |
+| **Read** | `Read` | Read files (also images, PDFs, notebooks) | No |
+| | `Glob` | Find files by name pattern (`**/*.ts`) | No |
+| | `Grep` | Search file contents (built on ripgrep) | No |
+| | `LSP` | Go-to-definition, find references, type errors | No |
+| **Write** | `Edit` | Targeted string replacement (must read file first) | Yes |
+| | `Write` | Create new files or full overwrite | Yes |
+| | `NotebookEdit` | Modify Jupyter notebook cells | Yes |
+| **Shell** | `Bash` | Run shell commands (2 min timeout, background mode available) | Yes |
+| | `PowerShell` | Native PowerShell (Windows) | Yes |
+| | `Monitor` | Background watcher — tail logs, poll CI, watch files | Yes |
+| **Web** | `WebFetch` | Fetch URL → markdown → extract via prompt | Yes |
+| | `WebSearch` | Web search (returns URLs, doesn't fetch pages) | Yes |
+| **Agentic** | `Agent` | Spawn sub-agent with own context window | No |
+| | `EnterPlanMode` | Switch to read-only planning mode | No |
+| | `EnterWorktree` | Create isolated git worktree | No |
+| | `Skill` | Execute a skill / slash command | Yes |
+| | `TaskCreate/Update/List` | Structured task management | No |
+| | `CronCreate/Delete/List` | Schedule recurring prompts in-session | No |
+| | `SendMessage` / `TeamCreate` | Agent team coordination (experimental) | No |
+
+- **Bash is the workhorse.** It's how Claude runs tests, git, gh, docker, npm, and any CLI. If a CLI exists, Claude prefers Bash over an MCP server.
+- **MCP tools** (Chrome DevTools, Playwright, Context7, etc.) show up alongside built-in tools. Check with `/mcp`.
+
+### Permission Rules
+
+Pre-approve tools via `/permissions` or `settings.json` to reduce prompts:
+
+```json
+{
+  "permissions": {
+    "allow": ["Bash(npm run *)", "Bash(git *)", "Edit(/src/**)"],
+    "deny": ["Read(~/.ssh/**)", "Bash(rm -rf *)"]
+  }
+}
+```
+
+| Rule format | Applies to |
+| --- | --- |
+| `Bash(npm run *)` | Bash, Monitor |
+| `Read(~/secrets/**)` | Read, Grep, Glob, LSP |
+| `Edit(/src/**)` | Edit, Write, NotebookEdit |
+| `WebFetch(domain:example.com)` | WebFetch |
+
+> 💡 An `Edit(...)` rule also grants read access to the same path.
+
+> 🔗 Full tool reference: [https://code.claude.com/docs/en/tools-reference](https://code.claude.com/docs/en/tools-reference)
 
 ## The Dev process for the Online Environment
 
@@ -550,17 +605,19 @@ Useful Claude Code + GitLab workflows:
 
 ### Hooks
 
-- Hooks let you trigger actions automatically at specific points in the agent's workflow — e.g. run linting after every file write, run tests after a set of changes, run scripts, etc
-- Hooks are split into different categories with different trigger cadences:
-    - Once per session: **`SessionStart` , `SessionEnd`**
+- Hooks intercept Claude Code at lifecycle points — they receive JSON via stdin, run your logic, and return decisions (block, allow, or ask). Unlike CLAUDE.md rules, hooks are **enforced** — Claude can't skip them.
+- Hooks run **synchronously**, so keep them fast. Bash (~10-20ms) for one-liners, Node.js (~50-100ms) for frequent events, Python (~200-400ms) only for session-level hooks.
+- Hooks fire at different cadences:
+    - Once per session: **`SessionStart`**, **`SessionEnd`**
     - Once per turn: **`UserPromptSubmit`**, **`Stop`**, **`StopFailure`**
-    - Once per tool call: **`PreToolUse`**, **`PostToolUse`**
+    - Once per tool call: **`PreToolUse`**, **`PostToolUse`**, **`PostToolUseFailure`**
+    - Other: **`Notification`**, **`PreCompact`**, **`SubagentStart`**, **`SubagentStop`**, **`Setup`**
 
 ![Hooks diagram](/images/hooks-diagram.png)
 
-- Useful for keeping the agent "honest" — it can't claim it's done if the hook fails.
-- Configure hooks by adding them in your project `settings.json` file. Hooks are defined in the settings.json file in the same locations where CLAUDE.md also exists
-- **Hook to add:** Prevent destructive delete by requiring user approval by adding to PreToolUse in CC's settings.json
+- Configure hooks in `settings.json` — global (`~/.claude/`), project (`.claude/`), or local (`.claude/settings.local.json`, gitignored). Matchers are case-sensitive; use regex like `Edit|Write` to match multiple tools.
+- **How they work:** Your hook reads JSON from stdin (contains `tool_name`, `tool_input`, `cwd`, etc.) and writes JSON to stdout with a `permissionDecision` of `"allow"`, `"deny"`, or `"ask"`. Exit code 2 = blocking error (stderr gets sent to Claude as context).
+- **Hook to add:** Prevent destructive delete by requiring user approval:
 
 > ✏️ **Add this to your CC settings.json file**
 
@@ -584,19 +641,77 @@ Useful Claude Code + GitLab workflows:
 }
 ```
 
-#### ✍️ Hands-on: Add a Safety Hook (5 minutes)
+**Other high-value hooks to consider:**
 
-Let's add the destructive-delete hook so Claude can't silently `rm` your files.
+| Hook | Event | What It Does |
+|------|-------|--------------|
+| **Protect Secrets** | `PreToolUse` (matcher: `Read\|Edit\|Write\|Bash`) | Block access to `.env`, SSH keys, credentials files |
+| **Auto-Stage Changes** | `PostToolUse` (matcher: `Edit\|Write`) | `git add` every file Claude touches — `git diff --staged` becomes a live changelog |
+| **Slack Notifications** | `Notification` (matcher: `permission_prompt\|idle_prompt`) | Alert when Claude needs your input |
+| **Branch Protection** | `PreToolUse` | Prevent changes on `main`/`master` |
+| **Quality Gates** | `PostToolUse` | Run tests/linting after every edit |
+| **Rules Injection** | `UserPromptSubmit` | Re-inject CLAUDE.md rules to combat agent drift in long sessions |
 
-Open Claude Code's settings (`~\.claude\settings.json`) and add the above hook under `PreToolUse` . 
+> 💡 **Further reading:** For full implementations of these hooks, see [Karan Bansal's Claude Code Hooks deep dive](https://karanbansal.in/blog/claude-code-hooks/).
 
-Now **test it**: ask Claude Code to clean up a temp file or remove an unused component. You should see the hook fire and ask for confirmation before anything gets deleted.
+#### ✍️ Hands-on: Add Safety Hooks (10 minutes)
 
-```json
+**Step 1 — Destructive-delete hook.** Open Claude Code's settings (`~\.claude\settings.json`) and add the destructive-delete hook above under `PreToolUse`. Test it by asking Claude to delete a file:
+
+```
 Delete the file `src/components/OldComponent.tsx` — it's no longer used.
 ```
 
-If you see the confirmation prompt, your hook is working. If not, double-check your settings JSON syntax.
+You should see a confirmation prompt before anything gets deleted.
+
+**Step 2 — Protect-secrets hook.** Clone the hooks repo and add the secret-file protection hook:
+
+```bash
+git clone https://github.com/karanb192/claude-code-hooks.git ~/.claude/hooks-repo
+```
+
+Your `settings.json` should now have both hooks under `PreToolUse`:
+
+```json
+{
+    "hooks": {
+      "PreToolUse": [
+        {
+          "matcher": "Bash",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "jq -r '.tool_input.command // \"\"' | grep -qE '\\b(rm|rmdir|shred|unlink)\\b|-delete' && printf '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"ask\",\"permissionDecisionReason\":\"DESTRUCTIVE ACTION: delete command detected (rm/rmdir/shred/unlink/-delete). Please review and confirm.\"}}' || true",
+              "timeout": 5,
+              "statusMessage": "Checking for destructive delete commands..."
+            }
+          ]
+        },
+        {
+          "matcher": "Read|Edit|Write|Bash",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "node ~/.claude/hooks-repo/hook-scripts/pre-tool-use/protect-secrets.js",
+              "timeout": 5,
+              "statusMessage": "Checking for secret file access..."
+            }
+          ]
+        }
+      ]
+    }
+}
+```
+
+This hook blocks Claude from reading `.env`, SSH keys, AWS credentials, `.pem` files, and catches sneaky commands like `cat .env` or `printenv`. It has three safety levels (`critical`, `high`, `strict`) — defaults to `high`.
+
+**Test it** by asking Claude to read a secrets file:
+
+```
+Show me what's in the .env file
+```
+
+You should see the hook deny the request with a reason like `🛡️ [env-file] Cannot read: .env file contains secrets`.
 
 ## MCP
 
