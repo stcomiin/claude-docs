@@ -357,6 +357,8 @@ Move BMAD output into your normal docs only when it records a long-term decision
 
 ## Hands-on Lab: Same Feature, Both Workflows
 
+**Workshop repo:** [stcomiin/claude-docs-workshop-handson](https://github.com/stcomiin/claude-docs-workshop-handson)
+
 Run the same feature through GSD and BMAD on the same sample app. The point is to experience the difference, not just read about it.
 
 ### Sample Codebase

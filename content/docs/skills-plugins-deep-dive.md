@@ -670,8 +670,8 @@ Use these exercises after the sections above. Each lab is designed to make a spe
 | Workshop | Time | What it demonstrates | Guide |
 | --- | --- | --- | --- |
 | Research report generation | 20-30 minutes | Subagents, web research, and document skills — skills are more than prompt snippets | [Starter workspace](https://github.com/stcomiin/claude-docs-workshop-handson/tree/main/research-report-generation-workflow-starter) |
-| Existing app with GSD | 25-60 minutes | Scope control on a real codebase via codebase mapping, phase boundaries, and auto-verification | [Hands-on Lab → GSD](existing-codebase-workflows#run-it-through-gsd) |
-| Existing app with BMAD | 35-75 minutes | Same app and feature as the GSD lab — feel where BMAD's brainstorming pays off and where the manual dev gates slow you down | [Hands-on Lab → BMAD](existing-codebase-workflows#run-it-through-bmad) |
+| Existing app with GSD | 25-60 minutes | Scope control on a real codebase via codebase mapping, phase boundaries, and auto-verification | [Hands-on Lab → GSD](https://github.com/stcomiin/claude-docs-workshop-handson) |
+| Existing app with BMAD | 35-75 minutes | Same app and feature as the GSD lab — feel where BMAD's brainstorming pays off and where the manual dev gates slow you down | [Hands-on Lab → BMAD](https://github.com/stcomiin/claude-docs-workshop-handson) |
 
 The existing-app labs are run against [`fastapi/full-stack-fastapi-template`](https://github.com/fastapi/full-stack-fastapi-template) directly, fork or clone it before the session.
 
