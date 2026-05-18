@@ -47,7 +47,7 @@ Standard workflow:
 
 1. Make sure the dev server is up (see Commands above).
 2. Drive the rendered site at `http://localhost:1313/` with chrome-devtools tools — `navigate_page`, `evaluate_script`, `list_console_messages`, `list_network_requests`, `take_snapshot`, `take_screenshot`. Confirm the change visually and check console for errors after every meaningful edit.
-3. For internal-link changes, run an `evaluate_script` that enumerates `main a[href]`, fetches each destination, and verifies HTTP 200 plus that any `#fragment` matches a real `id` on the destination page. (See commit `c3e3150` for the script pattern — `DOMParser`-parsed docs inherit the running page's `baseURI`, so always resolve via `a.getAttribute('href')` against the source page URL, not via `a.href`.)
+3. For internal-link changes, run an evaluate_script that enumerates main a[href], fetches each destination, and verifies HTTP 200 plus that any #fragment matches a real id on the destination page. (See the script pattern in the Verification section — DOMParser-parsed docs inherit the running page's baseURI, so always resolve via a.getAttribute('href') against the source page URL, not via a.href.)
 4. Reload the page or restart the Docker container if changes don't appear — the file watcher across the Windows-Docker volume boundary is unreliable, and Hugo will sometimes serve stale HTML from its internal build cache. Cache-bust fetches with `?t=Date.now()` if you suspect staleness.
 
 Do not skip this step "because the change is small" — small CSS, layout, or link edits are exactly where regressions hide.
