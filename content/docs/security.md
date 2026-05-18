@@ -686,13 +686,13 @@ npm audit --audit-level=high
 osv-scanner scan source -r .
 ```
 
-If anything looks wrong, run the `incident-triage` subagent defined in [Layer 2](#-layer-2--securing-the-agent-itself) - it produces a timeline + IOCs + blast-radius report.
+If anything looks wrong, run the `incident-triage` subagent defined in [Layer 2](#-layer-2---securing-the-agent-itself) - it produces a timeline + IOCs + blast-radius report.
 
 ---
 
 ## 🎯 Testing what Claude builds - DAST and LLM red-teaming
 
-Static analysis (covered in [Pre-commit & CI hardening](#%EF%B8%8F-pre-commit--ci-hardening-ready-to-paste)) catches what the code *says*. Dynamic testing catches what it *does* once it's running. Use Claude Code to wire these tools into your workflow.
+Static analysis (covered in [Pre-commit & CI hardening](#-pre-commit--ci-hardening-ready-to-paste)) catches what the code *says*. Dynamic testing catches what it *does* once it's running. Use Claude Code to wire these tools into your workflow.
 
 ### Use Claude to set up DAST on your staging environment
 
