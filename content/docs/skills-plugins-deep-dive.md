@@ -473,7 +473,7 @@ For larger product work, use the planning path:
 /bmad-code-review
 ```
 
-For a step-by-step brownfield workflow, see [Existing Codebase Workflows](existing-codebase-workflows).
+For a step-by-step brownfield workflow, see [Existing Codebase Workflows](/docs/existing-codebase-workflows/).
 
 ### What to look for
 
@@ -520,7 +520,7 @@ If the repo already has code, map it before starting a new project:
 
 This gives GSD a first pass at the stack, architecture, conventions, and risk areas. It is more useful than asking project-init questions against an unknown codebase.
 
-For a step-by-step brownfield workflow, see [Existing Codebase Workflows](existing-codebase-workflows).
+For a step-by-step brownfield workflow, see [Existing Codebase Workflows](/docs/existing-codebase-workflows/).
 
 ### Typical flow for a phase
 
@@ -670,8 +670,8 @@ Use these exercises after the sections above. Each lab is designed to make a spe
 | Workshop | Time | What it demonstrates | Guide |
 | --- | --- | --- | --- |
 | Research report generation | 20-30 minutes | Subagents, web research, and document skills — skills are more than prompt snippets | [Starter workspace](https://github.com/stcomiin/claude-docs-workshop-handson/tree/main/research-report-generation-workflow-starter) |
-| Existing app with GSD | 25-60 minutes | Scope control on a real codebase via codebase mapping, phase boundaries, and auto-verification | [Hands-on Lab → GSD](existing-codebase-workflows#run-it-through-gsd) |
-| Existing app with BMAD | 35-75 minutes | Same app and feature as the GSD lab — feel where BMAD's brainstorming pays off and where the manual dev gates slow you down | [Hands-on Lab → BMAD](existing-codebase-workflows#run-it-through-bmad) |
+| Existing app with GSD | 25-60 minutes | Scope control on a real codebase via codebase mapping, phase boundaries, and auto-verification | [Hands-on Lab → GSD](https://github.com/stcomiin/claude-docs-workshop-handson) |
+| Existing app with BMAD | 35-75 minutes | Same app and feature as the GSD lab — feel where BMAD's brainstorming pays off and where the manual dev gates slow you down | [Hands-on Lab → BMAD](https://github.com/stcomiin/claude-docs-workshop-handson) |
 
 The existing-app labs are run against [`fastapi/full-stack-fastapi-template`](https://github.com/fastapi/full-stack-fastapi-template) directly, fork or clone it before the session.
 
@@ -694,7 +694,7 @@ Review the result by asking:
 
 ### Existing app with GSD or BMAD
 
-The hands-on lab for using GSD and BMAD on a real existing codebase — same sample app, same feature, both workflows — lives in [Existing Codebase Workflows: Hands-on Lab](existing-codebase-workflows#hands-on-lab-same-feature-both-workflows). It is structured as the practice counterpart to the GSD and BMAD step-by-step in that doc.
+The hands-on lab for using GSD and BMAD on a real existing codebase — same sample app, same feature, both workflows — lives in [Existing Codebase Workflows: Hands-on Lab](/docs/existing-codebase-workflows/#hands-on-lab-same-feature-both-workflows). It is structured as the practice counterpart to the GSD and BMAD step-by-step in that doc.
 
 The lab covers:
 

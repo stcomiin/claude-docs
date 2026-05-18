@@ -75,7 +75,7 @@ If `git status --short` prints anything, commit, stash, or move the work to a se
 
 1. Check current project instructions and baseline docs that already exist (if any).
 
-Check files such as `CLAUDE.md`, `AGENTS.md`, `README.md`, architecture notes, and nearby feature docs. Keep persistent agent instructions short and specific. Do not turn `CLAUDE.md` or `AGENTS.md` into a generated codebase summary. For examples, see [CLAUDE.md and AGENTS.md](agentic-coding-in-terminal#claudemd-and-agentsmd).
+Check files such as `CLAUDE.md`, `AGENTS.md`, `README.md`, architecture notes, and nearby feature docs. Keep persistent agent instructions short and specific. Do not turn `CLAUDE.md` or `AGENTS.md` into a generated codebase summary. For examples, see [CLAUDE.md and AGENTS.md](/docs/agentic-coding-in-terminal/#claudemd-and-agentsmd).
 
 1. Run the baseline checks.
 
@@ -356,6 +356,8 @@ BMAD writes working files under its configured output folder, commonly `_bmad-ou
 Move BMAD output into your normal docs only when it records a long-term decision. Otherwise, review it, use it for the change, and keep the PR focused on the product/code diff.
 
 ## Hands-on Lab: Same Feature, Both Workflows
+
+**Workshop repo:** [stcomiin/claude-docs-workshop-handson](https://github.com/stcomiin/claude-docs-workshop-handson)
 
 Run the same feature through GSD and BMAD on the same sample app. The point is to experience the difference, not just read about it.
 

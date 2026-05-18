@@ -887,13 +887,13 @@ To add a self-hosted LiteLLM as a plugin marketplace in Claude Code:
 
 The sections above cover what skills and plugins are, how they're structured, how to install them, and where to find them. The deep dive below covers *why specific ones matter*. It walks through notable tools in the ecosystem, explaining what each one does, how they prevent vibe coding, and when to reach for which.
 
-Deep Dive Doc: [Skills & Plugins Deep Dive](skills-plugins-deep-dive)
+Deep Dive Doc: [Skills & Plugins Deep Dive](/docs/skills-plugins-deep-dive/)
 
 # More Things
 
 ## Useful Resources
 
-[Cheat Sheet for Claude Code](cheat-sheet)
+[Cheat Sheet for Claude Code](/docs/cheat-sheet/)
 
 ## Good Resources
 
