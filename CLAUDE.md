@@ -1,5 +1,9 @@
 # Claude Code Context
 
+## Rules
+
+- **Always use the chrome-devtools MCP to verify any UI change.** Every change that could affect rendered HTML, CSS, layout, navigation, internal links, anchor resolution, console output, or page assets must be verified by driving the live dev server through chrome-devtools — never by curl, WebFetch, or eyeballing the source file alone. Curl confirms bytes; only the browser confirms the rendered page. No exceptions. Workflow details in the Verification section below.
+
 ## Stack
 
 Hugo static site with Hextra theme, deployed to GitHub Pages via Actions.
@@ -37,14 +41,16 @@ On Windows with Git Bash, prefix Docker commands with `MSYS_NO_PATHCONV=1` to pr
 
 ## Verification
 
-The repo ships with a project-scoped `.mcp.json` that wires up the [chrome-devtools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp). On first session start in this repo Claude Code will prompt to approve it — accept it. The standard verification workflow for any content or layout change:
+The repo ships with a project-scoped `.mcp.json` that wires up the [chrome-devtools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp). On first session start in this repo Claude Code will prompt to approve it — accept it. Per the Rules section above, this MCP is the **mandatory** verification path for any UI change.
+
+Standard workflow:
 
 1. Make sure the dev server is up (see Commands above).
-2. Use the chrome-devtools tools (`navigate_page`, `evaluate_script`, `list_console_messages`, `list_network_requests`) to drive the rendered site at `http://localhost:1313/` rather than relying on curl alone.
+2. Drive the rendered site at `http://localhost:1313/` with chrome-devtools tools — `navigate_page`, `evaluate_script`, `list_console_messages`, `list_network_requests`, `take_snapshot`, `take_screenshot`. Confirm the change visually and check console for errors after every meaningful edit.
 3. For internal-link changes, run an `evaluate_script` that enumerates `main a[href]`, fetches each destination, and verifies HTTP 200 plus that any `#fragment` matches a real `id` on the destination page. (See commit `c3e3150` for the script pattern — `DOMParser`-parsed docs inherit the running page's `baseURI`, so always resolve via `a.getAttribute('href')` against the source page URL, not via `a.href`.)
-4. Reload the page or restart the Docker container if changes don't appear — the file watcher across the Windows-Docker volume boundary is unreliable, and Hugo will sometimes serve stale HTML from its internal build cache.
+4. Reload the page or restart the Docker container if changes don't appear — the file watcher across the Windows-Docker volume boundary is unreliable, and Hugo will sometimes serve stale HTML from its internal build cache. Cache-bust fetches with `?t=Date.now()` if you suspect staleness.
 
-Use this MCP — don't substitute curl or WebFetch — when the change could affect rendered HTML, anchor resolution, console output, or layout. Curl confirms the bytes; the browser confirms the page.
+Do not skip this step "because the change is small" — small CSS, layout, or link edits are exactly where regressions hide.
 
 ## Structure
 
