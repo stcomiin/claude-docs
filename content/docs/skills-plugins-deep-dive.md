@@ -473,7 +473,7 @@ For larger product work, use the planning path:
 /bmad-code-review
 ```
 
-For a step-by-step brownfield workflow, see [Existing Codebase Workflows](existing-codebase-workflows).
+For a step-by-step brownfield workflow, see [Existing Codebase Workflows](/docs/existing-codebase-workflows/).
 
 ### What to look for
 
@@ -520,7 +520,7 @@ If the repo already has code, map it before starting a new project:
 
 This gives GSD a first pass at the stack, architecture, conventions, and risk areas. It is more useful than asking project-init questions against an unknown codebase.
 
-For a step-by-step brownfield workflow, see [Existing Codebase Workflows](existing-codebase-workflows).
+For a step-by-step brownfield workflow, see [Existing Codebase Workflows](/docs/existing-codebase-workflows/).
 
 ### Typical flow for a phase
 
@@ -694,7 +694,7 @@ Review the result by asking:
 
 ### Existing app with GSD or BMAD
 
-The hands-on lab for using GSD and BMAD on a real existing codebase — same sample app, same feature, both workflows — lives in [Existing Codebase Workflows: Hands-on Lab](existing-codebase-workflows#hands-on-lab-same-feature-both-workflows). It is structured as the practice counterpart to the GSD and BMAD step-by-step in that doc.
+The hands-on lab for using GSD and BMAD on a real existing codebase — same sample app, same feature, both workflows — lives in [Existing Codebase Workflows: Hands-on Lab](/docs/existing-codebase-workflows/#hands-on-lab-same-feature-both-workflows). It is structured as the practice counterpart to the GSD and BMAD step-by-step in that doc.
 
 The lab covers:
 

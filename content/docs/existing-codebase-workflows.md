@@ -75,7 +75,7 @@ If `git status --short` prints anything, commit, stash, or move the work to a se
 
 1. Check current project instructions and baseline docs that already exist (if any).
 
-Check files such as `CLAUDE.md`, `AGENTS.md`, `README.md`, architecture notes, and nearby feature docs. Keep persistent agent instructions short and specific. Do not turn `CLAUDE.md` or `AGENTS.md` into a generated codebase summary. For examples, see [CLAUDE.md and AGENTS.md](agentic-coding-in-terminal#claudemd-and-agentsmd).
+Check files such as `CLAUDE.md`, `AGENTS.md`, `README.md`, architecture notes, and nearby feature docs. Keep persistent agent instructions short and specific. Do not turn `CLAUDE.md` or `AGENTS.md` into a generated codebase summary. For examples, see [CLAUDE.md and AGENTS.md](/docs/agentic-coding-in-terminal/#claudemd-and-agentsmd).
 
 1. Run the baseline checks.
 
