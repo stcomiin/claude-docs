@@ -35,6 +35,17 @@ On Windows with Git Bash, prefix Docker commands with `MSYS_NO_PATHCONV=1` to pr
 - **`position: absolute; inset: Npx` doesn't auto-size `<img>`/`<video>`/`<iframe>`.** For non-replaced elements, all four insets auto-compute width/height. For replaced elements, CSS runs the inline-replaced width algorithm first (which honors `max-width: 100%` from Hextra preflight) and then solves for offsets — width gets locked to the parent, the box over-constrains, and the browser silently drops `right`/`bottom`. Use `top/left: Npx; width: calc(100% - 2*Npx); height: calc(100% - 2*Npx)` for replaced elements instead.
 - **Hextra's layout caps live in CSS variables, not classes.** `variables.css` defines `--hextra-max-page-width: 90rem`, `--hextra-max-content-width: 72rem`, `--hextra-max-navbar-width: 90rem`, `--hextra-max-footer-width: 80rem`, then the `.hextra-max-*-width` classes simply consume them. Override the **variables** in `:root` (not the classes) so every consumer — including Hextra's own internal helpers — sees the change. Useful asymmetric default: drop page/navbar/footer caps so chrome fills wide viewports, but keep the content cap so prose stays at ~80ch (`custom.css` already does this).
 
+## Verification
+
+The repo ships with a project-scoped `.mcp.json` that wires up the [chrome-devtools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp). On first session start in this repo Claude Code will prompt to approve it — accept it. The standard verification workflow for any content or layout change:
+
+1. Make sure the dev server is up (see Commands above).
+2. Use the chrome-devtools tools (`navigate_page`, `evaluate_script`, `list_console_messages`, `list_network_requests`) to drive the rendered site at `http://localhost:1313/` rather than relying on curl alone.
+3. For internal-link changes, run an `evaluate_script` that enumerates `main a[href]`, fetches each destination, and verifies HTTP 200 plus that any `#fragment` matches a real `id` on the destination page. (See commit `c3e3150` for the script pattern — `DOMParser`-parsed docs inherit the running page's `baseURI`, so always resolve via `a.getAttribute('href')` against the source page URL, not via `a.href`.)
+4. Reload the page or restart the Docker container if changes don't appear — the file watcher across the Windows-Docker volume boundary is unreliable, and Hugo will sometimes serve stale HTML from its internal build cache.
+
+Use this MCP — don't substitute curl or WebFetch — when the change could affect rendered HTML, anchor resolution, console output, or layout. Curl confirms the bytes; the browser confirms the page.
+
 ## Structure
 
 ```
