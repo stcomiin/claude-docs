@@ -485,7 +485,7 @@ BMAD is a poor fit when the overhead is larger than the change. If the task is "
 
 ## GSD - Get Shit Done
 
-**Project:** [gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done)
+**Project:** [opengsd/get-shit-done-redux](https://github.com/open-gsd/get-shit-done-redux)
 
 GSD splits a project into requirements, roadmap phases, discussion context, plans, execution, and verification, each with its own command. The point is keeping each phase small enough to plan and review on its own instead of leaning on one long chat to track everything.
 

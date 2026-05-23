@@ -293,11 +293,21 @@ We'll be using this during the hands-on exercise. Install it now so we don't spe
 mkdir workshop-project && cd workshop-project
 git init
 
-# Install GSD locally into this project
+# Install GSD locally into this project - Deprecated as of 2026-05-22
 npx get-shit-done-cc@v1.37.0 # correct as of 20/04/26
+
+# 2026-05-22 Original GSD no longer maintained 
+npx @opengsd/get-shit-done-redux@1.0.0
 ```
 
 Verify by opening Claude Code in that folder and typing `/gsd:help`.
+
+> 2026-05-22 Update
+> To verify install of open-gsd over original deprecated gsd-build run `/gsd-help` in your harness and verify to see the Update GSD section points to the `@opengsd/` project
+>
+> Output: 
+> ![open-gsd-verify-highlight](/images/open-gsd-verify-highlight.png)
+
 
 > 💡 If you install via `npx get-shit-done-cc@latest` there is an open issue as follows: 
 > 
