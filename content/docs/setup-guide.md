@@ -133,6 +133,9 @@ If your organization runs a LiteLLM proxy (or you self-host one):
         "ANTHROPIC_BASE_URL": "https://your-litellm-proxy.example.com",
         "ANTHROPIC_AUTH_TOKEN": "sk-your-api-key",
         "ANTHROPIC_MODEL": "claude-opus-4-6",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-opus-4-6",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-opus-4-6",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-4-6",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
         "CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe",
         "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
@@ -141,7 +144,8 @@ If your organization runs a LiteLLM proxy (or you self-host one):
         "ENABLE_LSP_TOOL": "1",
         "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
         "MAX_THINKING_TOKENS": "128000",
-        "DISABLE_AUTO_COMPACT": "1"
+        "DISABLE_AUTO_COMPACT": "1",
+        "CLAUDE_CODE_EFFORT_LEVEL": "max"
       },
       "alwaysThinkingEnabled": true,
       "cleanupPeriodDays": 365
@@ -156,6 +160,9 @@ If your organization runs a LiteLLM proxy (or you self-host one):
         "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
         "ANTHROPIC_AUTH_TOKEN": "sk-or-your-openrouter-key",
         "ANTHROPIC_MODEL": "anthropic/claude-opus-4-6",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-opus-4-6",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-opus-4-6",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-4-6",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
         "CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe",
         "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
@@ -164,7 +171,8 @@ If your organization runs a LiteLLM proxy (or you self-host one):
         "ENABLE_LSP_TOOL": "1",
         "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
         "MAX_THINKING_TOKENS": "128000",
-        "DISABLE_AUTO_COMPACT": "1"
+        "DISABLE_AUTO_COMPACT": "1",
+        "CLAUDE_CODE_EFFORT_LEVEL": "max"
       },
       "alwaysThinkingEnabled": true,
       "cleanupPeriodDays": 365
