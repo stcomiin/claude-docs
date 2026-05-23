@@ -303,7 +303,7 @@ npx @opengsd/get-shit-done-redux@1.0.0
 Verify by opening Claude Code in that folder and typing `/gsd:help`.
 
 > 2026-05-22 Update
-> To verify install of open-gsd over original deprecated gsd-build run `/gsd-help` in your harness and verify to see the Update GSD section points to the `@opengsd/` project
+> To verify the installation of open-gsd over the original deprecated gsd-build, run /gsd-help in your harness; the "Update GSD" section should point to the @opengsd/ project.
 >
 > Output: 
 > ![open-gsd-verify-highlight](/images/open-gsd-verify-highlight.png)
