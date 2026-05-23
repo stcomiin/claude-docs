@@ -852,7 +852,7 @@ Plugins extend Claude Code with additional capabilities — language intelligenc
 | Plugin | What it does | Link |
 | --- | --- | --- |
 | **Superpowers** | A collection of power-user enhancements for Claude Code | [https://github.com/obra/superpowers](https://github.com/obra/superpowers) |
-| **get-shit-done (GSD)** | Opinionated workflow plugin focused on shipping fast (SDD) | [https://github.com/gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done) |
+| **open-gsd/get-shit-done (GSD)** | Opinionated workflow plugin focused on shipping fast (SDD) | [https://github.com/open-gsd/get-shit-done-redux](https://github.com/open-gsd/get-shit-done-redux) |
 | **BMAD** | AI-driven agile development module (SDD) | [docs](https://docs.bmad-method.org/) / [GitHub](https://github.com/bmad-code-org/BMAD-METHOD) |
 | **Spec Kit** | SDD Framework | [https://github.com/github/spec-kit](https://github.com/github/spec-kit) |
 | **OpenSpec** | SDD Framework | [https://github.com/Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec) |
