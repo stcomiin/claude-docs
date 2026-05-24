@@ -42,7 +42,7 @@ On Windows with Git Bash, prefix Docker commands with `MSYS_NO_PATHCONV=1` to pr
 
 ## Verification
 
-The repo ships with a project-scoped `.mcp.json` that wires up the [chrome-devtools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp). On first session start in this repo Claude Code will prompt to approve it — accept it. Per the Rules section above, this MCP is the **mandatory** verification path for any UI change.
+The repo ships with a project-scoped `.mcp.json` that wires up the [chrome-devtools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp) (pinned to `chrome-devtools-mcp@1.0.1`), and `.claude/settings.json` pre-approves it via `enabledMcpjsonServers`, so it loads automatically at session start with no prompt. MCP servers only initialize at startup, so after a fresh clone or any `.mcp.json`/settings change, restart Claude Code once to bring it up. Per the Rules section above, this MCP is the **mandatory** verification path for any UI change.
 
 Standard workflow:
 
@@ -81,6 +81,8 @@ weight: 5
 ```
 
 For sub-sections, create a folder with `_index.md` inside it.
+
+**Always mirror a new page into the home landing grid.** Every page added under `content/docs/` must also get a matching `hextra/feature-card` inside the `hextra/feature-grid` in `content/_index.md`, so it's reachable from the landing page and not only the sidebar. Copy the existing card pattern (`title`, one-line `subtitle`, `icon`, `link="docs/<slug>/"`). The `icon` must be a valid name from Hextra's bundled `data/icons.yaml` — an unknown name fails the build with `icon %q not found` (errorf), it does not degrade gracefully.
 
 ## Shortcodes
 

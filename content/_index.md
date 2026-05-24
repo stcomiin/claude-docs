@@ -45,4 +45,10 @@ layout: hextra-home
     icon="book-open"
     link="docs/existing-codebase-workflows/"
   >}}
+  {{< hextra/feature-card
+    title="Offline & On-Prem"
+    subtitle="Run agentic coding with no Anthropic API — open-weight models on local GPUs, vLLM serving, npm mirroring, and a LiteLLM gateway."
+    icon="server"
+    link="docs/offline-deployment/"
+  >}}
 {{< /hextra/feature-grid >}}
