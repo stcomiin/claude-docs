@@ -853,6 +853,7 @@ Plugins extend Claude Code with additional capabilities — language intelligenc
 | --- | --- | --- |
 | **Superpowers** | A collection of power-user enhancements for Claude Code | [https://github.com/obra/superpowers](https://github.com/obra/superpowers) |
 | **Security Guidance** | Official plugin that automatically reviews code changes for vulnerabilities on edits, commits, or pushes | [Docs](https://code.claude.com/docs/en/security-guidance#on-each-commit-or-push-claude-makes)<br><code>/plugin install security-guidance@claude-plugins-official</code> |
+| **Codex Security** | OpenAI Codex plugin for authorized repository, deep, and diff-focused security scans, plus minimal fixes for validated findings | [Docs](https://developers.openai.com/codex/security/plugin)<br><code>$codex-security:security-scan</code> / <code>$codex-security:security-diff-scan</code> |
 | **open-gsd/get-shit-done (GSD)** | Opinionated workflow plugin focused on shipping fast (SDD) | [https://github.com/open-gsd/get-shit-done-redux](https://github.com/open-gsd/get-shit-done-redux) |
 | **BMAD** | AI-driven agile development module (SDD) | [docs](https://docs.bmad-method.org/) / [GitHub](https://github.com/bmad-code-org/BMAD-METHOD) |
 | **Spec Kit** | SDD Framework | [https://github.com/github/spec-kit](https://github.com/github/spec-kit) |
