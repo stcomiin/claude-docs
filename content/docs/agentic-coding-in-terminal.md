@@ -852,7 +852,7 @@ Plugins extend Claude Code with additional capabilities — language intelligenc
 | Plugin | What it does | Link |
 | --- | --- | --- |
 | **Superpowers** | A collection of power-user enhancements for Claude Code | [https://github.com/obra/superpowers](https://github.com/obra/superpowers) |
-| **Security Guidance** | Official plugin that automatically reviews Claude's code changes for vulnerabilities on each edit, end of turn, and commit or push, then prompts Claude to fix findings in-session | [Docs](https://code.claude.com/docs/en/security-guidance#on-each-commit-or-push-claude-makes) / install with `/plugin install security-guidance@claude-plugins-official` |
+| **Security Guidance** | Official plugin that automatically reviews code changes for vulnerabilities on edits, commits, or pushes | [Docs](https://code.claude.com/docs/en/security-guidance#on-each-commit-or-push-claude-makes)<br><code>/plugin install security-guidance@claude-plugins-official</code> |
 | **open-gsd/get-shit-done (GSD)** | Opinionated workflow plugin focused on shipping fast (SDD) | [https://github.com/open-gsd/get-shit-done-redux](https://github.com/open-gsd/get-shit-done-redux) |
 | **BMAD** | AI-driven agile development module (SDD) | [docs](https://docs.bmad-method.org/) / [GitHub](https://github.com/bmad-code-org/BMAD-METHOD) |
 | **Spec Kit** | SDD Framework | [https://github.com/github/spec-kit](https://github.com/github/spec-kit) |
