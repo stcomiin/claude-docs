@@ -11,7 +11,7 @@ Please complete these steps **before** the workshop so we can hit the ground run
 
 ## ✅ Checklist at a Glance
 
-- [ ] Node.js v18+ installed
+- [ ] Node.js v22+ installed (for npm/npx tooling like GSD)
 - [ ] Git installed
 - [ ] A terminal you're comfortable with
 - [ ] Claude Code installed and working
@@ -24,15 +24,15 @@ Please complete these steps **before** the workshop so we can hit the ground run
 
 These need to be in place before installing anything else.
 
-### Node.js (v18 or higher)
+### Node.js (v22 or higher)
 
-Download from [nodejs.org](https://nodejs.org/) — grab the LTS version. This also installs npm.
+Download from [nodejs.org](https://nodejs.org/) — grab the LTS version. This also installs npm. Claude Code itself no longer needs Node (its native installer ships a standalone binary), but the GSD installer and other npx tooling below do — and installing Claude Code via npm requires Node v22+ as of v2.1.198.
 
 Verify after install:
 
 ```bash
-node --version    # Should show v18.x.x or higher
-npm --version     # Should show 9.x.x or higher
+node --version    # Should show v22.x.x or higher
+npm --version     # Should show 10.x.x or higher
 ```
 
 ### Git
@@ -45,9 +45,9 @@ git --version
 
 ### Windows Users
 
-You'll need **WSL** (Windows Subsystem for Linux) or **Git Bash** (comes with Git for Windows). Claude Code and Codex don't run natively in CMD or PowerShell.
+Claude Code now runs natively on Windows in PowerShell or CMD — WSL is no longer required (WSL 2 is only needed if you want [sandboxing](https://code.claude.com/docs/en/sandboxing)). Installing **Git for Windows** is still recommended: it provides Git Bash, which Claude Code uses for its Bash tool (without it, Claude falls back to a PowerShell tool). Codex is still happiest inside WSL or Git Bash.
 
-If using Git Bash, note the path — you may need it later:
+Note the Git Bash path — you may need it later:
 
 ```text
 C:\Program Files\Git\bin\bash.exe
@@ -87,23 +87,32 @@ If your organization runs a LiteLLM proxy (or you self-host one):
 
 ### Claude Code
 
-1. **Installation Via npm** 
+1. **Installation via the native installer (recommended)**
     
-    **Prerequisites**
-    
-    - Node.js ≥ 18
-    - npm (comes with Node.js)
-    - WSL or Git Bash (for windows installation)
+    The native installer is now the officially recommended method — it needs no Node.js and auto-updates in the background.
     
     ```bash
-    # Install globally
-    npm install -g @anthropic-ai/claude-code
+    # macOS / Linux / WSL
+    curl -fsSL https://claude.ai/install.sh | bash
+    ```
     
+    ```powershell
+    # Windows (PowerShell)
+    irm https://claude.ai/install.ps1 | iex
+    ```
+    
+    ```bash
     # Verify
     claude --version
     
-    # Update claude version for latest features, works offline as well
+    # Force an update immediately (native installs also auto-update on their own)
     claude update
+    ```
+    
+    Installing via npm still works and delivers the same native binary (the `claude` command does not run on Node), but requires Node.js ≥ 22 as of v2.1.198:
+    
+    ```bash
+    npm install -g @anthropic-ai/claude-code
     ```
     
 2. **Skipping Onboarding via `.claude.json` (offline setup only, skip this step if doing online)**
@@ -132,10 +141,11 @@ If your organization runs a LiteLLM proxy (or you self-host one):
       "env": {
         "ANTHROPIC_BASE_URL": "https://your-litellm-proxy.example.com",
         "ANTHROPIC_AUTH_TOKEN": "sk-your-api-key",
-        "ANTHROPIC_MODEL": "claude-opus-4-6",
-        "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-opus-4-6",
-        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-opus-4-6",
-        "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-4-6",
+        "ANTHROPIC_MODEL": "claude-opus-4-8",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-8",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-opus-4-8",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-opus-4-8",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-4-8",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
         "CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe",
         "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
@@ -144,11 +154,11 @@ If your organization runs a LiteLLM proxy (or you self-host one):
         "ENABLE_LSP_TOOL": "1",
         "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
         "MAX_THINKING_TOKENS": "128000",
-        "DISABLE_AUTO_COMPACT": "1",
         "CLAUDE_CODE_EFFORT_LEVEL": "max",
         "CLAUDE_CODE_NO_FLICKER": "1"
       },
       "alwaysThinkingEnabled": true,
+      "autoCompactEnabled": false,
       "cleanupPeriodDays": 365
     }
     ```
@@ -160,10 +170,11 @@ If your organization runs a LiteLLM proxy (or you self-host one):
       "env": {
         "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
         "ANTHROPIC_AUTH_TOKEN": "sk-or-your-openrouter-key",
-        "ANTHROPIC_MODEL": "anthropic/claude-opus-4-6",
-        "ANTHROPIC_DEFAULT_SONNET_MODEL": "anthropic/claude-opus-4-6",
-        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-opus-4-6",
-        "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-opus-4-6",
+        "ANTHROPIC_MODEL": "anthropic/claude-opus-4-8",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic/claude-opus-4-8",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "anthropic/claude-opus-4-8",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-opus-4-8",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-opus-4-8",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
         "CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe",
         "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
@@ -172,16 +183,16 @@ If your organization runs a LiteLLM proxy (or you self-host one):
         "ENABLE_LSP_TOOL": "1",
         "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
         "MAX_THINKING_TOKENS": "128000",
-        "DISABLE_AUTO_COMPACT": "1",
         "CLAUDE_CODE_EFFORT_LEVEL": "max",
         "CLAUDE_CODE_NO_FLICKER": "1"
       },
       "alwaysThinkingEnabled": true,
+      "autoCompactEnabled": false,
       "cleanupPeriodDays": 365
     }
     ```
     
-4. `claude` to launch the CLI in terminal. Select model with `/model` , `/effort`  for reasoning effort
+4. `claude` to launch the CLI in terminal. Select model with `/model` — current lineup (July 2026): `claude-opus-4-8` (recommended for agentic coding), `claude-fable-5` (top-end, 1M context), `claude-sonnet-5` (faster/cheaper, 1M context). Aliases: `opus`, `sonnet`, `fable`. Use `/effort` for reasoning depth — it now defaults to `high` on Opus 4.8 and Sonnet 5, with `xhigh` and `max` above it.
 
 ### Codex (ChatGPT's Claude Code Competitor)
 
@@ -199,7 +210,7 @@ If your organization runs a LiteLLM proxy (or you self-host one):
     
     # Verify
     codex --version
-    # codex-cli 0.116.0
+    # codex-cli 0.142.5 (as of 07/07/26)
     ```
     
 2. First-time login 
@@ -290,7 +301,7 @@ If your organization runs a LiteLLM proxy (or you self-host one):
     model_context_window = 1000000
     ```
     
-5. In Codex, select model with `/model` , select latest frontier model (`gpt-5.4)`  with highest reasoning (`xhigh`)
+5. In Codex, select model with `/model` , select latest frontier model (`gpt-5.5`) with highest reasoning (`xhigh`). OpenAI's docs now recommend starting with `gpt-5.5` for most tasks (`gpt-5.4` remains available; `gpt-5.4-mini` covers lighter subagent work).
 
 ---
 
@@ -306,8 +317,12 @@ git init
 # Install GSD locally into this project - Deprecated as of 2026-05-22
 npx get-shit-done-cc@v1.37.0 # correct as of 20/04/26
 
-# 2026-05-22 Original GSD no longer maintained 
+# 2026-05-22 Original GSD no longer maintained - Deprecated, renamed on npm
 npx @opengsd/get-shit-done-redux@1.0.0
+
+# 2026-07-07 Current: the redux package was renamed to @opengsd/gsd-core
+# (npm shows: "Renamed to @opengsd/gsd-core - reinstall: npx @opengsd/gsd-core@latest")
+npx @opengsd/gsd-core@1.6.1
 ```
 
 Verify by opening Claude Code in that folder and typing `/gsd:help`.

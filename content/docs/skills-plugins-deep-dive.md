@@ -491,17 +491,17 @@ GSD splits a project into requirements, roadmap phases, discussion context, plan
 
 ### Install
 
-Interactive install:
+Interactive install (the package was renamed twice: `get-shit-done-cc` -> `@opengsd/get-shit-done-redux` -> `@opengsd/gsd-core`, current as of July 2026):
 
 ```bash
-npx get-shit-done-cc@latest
+npx @opengsd/gsd-core@1.6.1
 ```
 
 Claude Code only:
 
 ```bash
-npx get-shit-done-cc --claude --global
-npx get-shit-done-cc --claude --local
+npx @opengsd/gsd-core@1.6.1 --claude --global
+npx @opengsd/gsd-core@1.6.1 --claude --local
 ```
 
 Verify inside Claude Code:
@@ -571,7 +571,7 @@ Use the smallest workflow that fits the task:
 GSD also supports a minimal install for token-sensitive or throwaway setups:
 
 ```bash
-npx get-shit-done-cc --claude --global --minimal
+npx @opengsd/gsd-core@1.6.1 --claude --global --minimal
 ```
 
 Use the full install when you expect to use the broader command set. Use `--minimal` when you only need the core loop.

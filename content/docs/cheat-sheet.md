@@ -22,9 +22,9 @@ A printable reference attendees can take home. One page (ish), organized by "wha
 | `/cost` | Token spend (API users) |
 | `/stats` | Plan usage (Pro/Max) |
 | `/insights` | Monthly HTML usage report |
-| `/model [name]` | Switch model: opus, sonnet, haiku |
-| `/effort [level]` | low / medium / high / xhigh / max |
-| `/fast [on\|off]` | Toggle speed-optimized API settings |
+| `/model [name]` | Switch model: opus, sonnet, fable, haiku |
+| `/effort [level]` | low / medium / high (default) / xhigh / max — plus `ultracode` (xhigh + auto-orchestrated workflows) |
+| `/fast [on\|off]` | Fast mode on Opus 4.8: 2x the rate for 2.5x the speed (same model, faster output) |
 
 ## 🧠 Memory & project setup
 
@@ -60,10 +60,10 @@ A printable reference attendees can take home. One page (ish), organized by "wha
 | Command | Description |
 | --- | --- |
 | `/diff` | Interactive diff viewer |
-| `/review` | General code review |
+| `/review <pr>` | Fast single-pass PR review (reverted to single-pass in v2.1.202) |
 | `/security-review` | Scoped security scan — see [Cybersecurity & Hardening](/docs/security/) |
-| `/simplify` | 3-agent review on recent changes |
-| `/ultrareview` | Deep multi-pass pre-merge review — see [Cybersecurity & Hardening](/docs/security/) |
+| `/code-review <level>` | Multi-agent bug-hunting review (renamed from `/simplify` in v2.1.147). `ultra` level runs the deep cloud review; `/ultrareview` is its deprecated alias |
+| `/simplify` | Cleanup-only pass (reuse, simplification, efficiency) — reintroduced in v2.1.154 alongside `/code-review` |
 | `/batch <description>` | Parallel worktree agents for migrations |
 | `/autofix-pr` | Address PR review comments automatically |
 
@@ -71,8 +71,11 @@ A printable reference attendees can take home. One page (ish), organized by "wha
 
 | Flag / Command | Description |
 | --- | --- |
-| `--enable-auto-mode` | CLI flag to enable auto mode |
-| `--permission-mode auto` | Auto mode for `-p` headless runs |
+| `--permission-mode auto` | Start in auto mode (works with `-p` headless too). The old `--enable-auto-mode` flag is gone — auto joins the Shift+Tab cycle automatically when your account qualifies |
+| `claude auto-mode defaults` | Print the classifier's default allow/deny rules (also: `config`, `critique`) |
+| `ultracode` (in prompt) or `/effort ultracode` | Dynamic multi-agent workflows: orchestrate tens-to-hundreds of background agents (v2.1.154+) |
+| `/workflows` | List, watch, pause, resume, save, stop workflow runs |
+| `/deep-research <question>` | Built-in research workflow: fan-out search, adversarial claim verification, cited report |
 | `/loop <interval> <prompt>` | Recurring task within session (max 3 days) |
 | `/schedule` | Cloud routine (scheduled/API/webhook triggered) |
 | `/sandbox` | Opt into file/network isolation runtime |
@@ -135,7 +138,7 @@ git diff main | claude -p "security review" --model haiku --max-budget-usd 1.00
 | --- | --- |
 | `Esc` | Stop generation |
 | `Esc Esc` | Rewind menu |
-| `Shift+Tab` | Cycle: normal → auto-accept → plan mode |
+| `Shift+Tab` | Cycle: manual → auto-accept → plan (→ auto, once your account qualifies) |
 | `Ctrl+S` | Stash current draft |
 | `Ctrl+B` | Background the current bash command |
 | `Ctrl+R` | Interactive history search |
