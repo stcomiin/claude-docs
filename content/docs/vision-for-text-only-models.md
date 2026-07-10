@@ -3,17 +3,17 @@ title: Vision for Text-Only Models
 weight: 6
 ---
 
-Running Claude Code against a custom endpoint whose main model is **text-only** (running example: `minimax-m2.7` behind a LiteLLM gateway) works fine — until an image shows up. This page adds a small `analyze-image` tool that gives your text-only model working eyes by delegating vision to a **multimodal model on the same gateway** (running example: `gemma4-31b`). Substitute your own gateway URL and model names throughout.
+If you run Claude Code on a custom endpoint with a **text-only** model (example here: `minimax-m2.7` on a LiteLLM gateway), everything works until someone sends a screenshot. The model can't see it. The fix on this page: a small `analyze-image` tool that passes images to a **multimodal model on the same gateway** (example: `gemma4-31b`) and returns what it sees as plain text. Swap in your own gateway URL and model names throughout.
 
 ## The problem
 
-- Claude Code doesn't interpret images itself. A pasted screenshot (`Alt + v`) — or an image file opened with the `Read` tool — is forwarded to **your model** as an image content block in the API request.
-- A text-only model can't consume those blocks: depending on the backend, the gateway rejects the request outright, or the model ignores the image and bluffs from the surrounding text.
-- That kills the [Visual Inputs](/docs/agentic-coding-in-terminal/#visual-inputs) workflows — "make it look like this mockup", "why is this layout broken?" — and any UI-verification loop where the agent screenshots the app to check its own work.
+- Claude Code doesn't process images itself. Pasted screenshots (`Alt + v`) and images opened with the `Read` tool go to **your model** as image blocks in the API request.
+- A text-only model can't do anything with those blocks. Depending on the backend, the request errors out at the gateway, or the model ignores the image and guesses from the text around it.
+- So the [Visual Inputs](/docs/agentic-coding-in-terminal/#visual-inputs) workflows are dead: "make it look like this mockup", "why is this layout broken?", and any loop where the agent screenshots the app to check its own work.
 
 ## The fix at a glance
 
-Keep your text-only model in charge; give it a tool that can look. The tool sends the image plus a question to a multimodal model already on your gateway and returns a plain-text answer.
+Your text-only model stays in charge. It just gets a tool it can call when it needs to look at something:
 
 ```text
 you ── screenshot.png + question ──▶ Claude Code (minimax-m2.7, text-only)
@@ -26,13 +26,13 @@ you ── screenshot.png + question ──▶ Claude Code (minimax-m2.7, text-o
                       plain-text answer flows back into the conversation
 ```
 
-> 💡 The vision model doesn't need to be a great coder — it only has to describe what it sees. Even a small multimodal model gives a strong text-only coder usable eyes.
+> 💡 The vision model doesn't have to be good at coding. It only describes what it sees, so even a small multimodal model is enough.
 
 ## Prerequisites
 
-- A LiteLLM gateway with at least one **multimodal model** deployed alongside your main model. Any vision-capable model works; we use `gemma4-31b` as the running example.
+- A LiteLLM gateway with at least one **multimodal model** deployed alongside your main model. Any vision-capable model works; `gemma4-31b` is the example here.
 - A LiteLLM **virtual key** — the same kind you created in the [setup guide](/docs/setup-guide/#option-a-litellm-proxy-self-hosted--org-provided).
-- Python 3 on your machine. The tool uses only the standard library — nothing to `pip install`.
+- Python 3 on your machine. The tool uses only the standard library, so there's nothing to `pip install`.
 
 ## The tool: `analyze-image`
 
@@ -40,18 +40,16 @@ Save this as `~/.claude/tools/analyze-image` (no file extension):
 
 ```python
 #!/usr/bin/env python3
-"""analyze-image — ask a multimodal model about an image, from a text-only session.
+"""Ask a multimodal model about an image, from a text-only Claude Code session.
 
-Sends an image + question to a vision model behind your LiteLLM gateway and
-prints the answer. Configure with env vars:
+Sends the image and a question to a vision model behind a LiteLLM gateway and
+prints the answer. Config comes from env vars:
 
   LITELLM_BASE_URL   e.g. https://your-litellm-proxy.example.com
   LITELLM_API_KEY    your LiteLLM virtual key
-  VISION_MODEL       multimodal model name on the gateway (default: gemma4-31b)
+  VISION_MODEL       vision model to use (default: gemma4-31b)
 
-Usage:
-  analyze-image screenshot.png "Is the nav bar overlapping the hero section?"
-  analyze-image mockup.jpg          # no question = detailed general description
+Example: analyze-image screenshot.png "Is the nav overlapping the hero?"
 """
 
 import argparse
@@ -94,7 +92,7 @@ def main():
 
     mime = mimetypes.guess_type(args.image)[0] or "image/png"
     with open(args.image, "rb") as f:
-        b64 = base64.b64encode(f.read()).decode("ascii")
+        b64 = base64.b64encode(f.read()).decode()
 
     payload = {
         "model": model,
@@ -110,7 +108,7 @@ def main():
     }
     req = urllib.request.Request(
         f"{base_url}/v1/chat/completions",
-        data=json.dumps(payload).encode("utf-8"),
+        data=json.dumps(payload).encode(),
         headers={"Content-Type": "application/json",
                  "Authorization": f"Bearer {api_key}"},
     )
@@ -119,21 +117,21 @@ def main():
         with urllib.request.urlopen(req, timeout=120) as resp:
             body = json.load(resp)
     except urllib.error.HTTPError as e:
-        fail(f"gateway returned HTTP {e.code}: {e.read().decode('utf-8', 'replace')[:500]}")
+        fail(f"gateway returned HTTP {e.code}: {e.read().decode(errors='replace')[:300]}")
     except urllib.error.URLError as e:
         fail(f"cannot reach gateway: {e.reason}")
 
     try:
         print(body["choices"][0]["message"]["content"].strip())
     except (KeyError, IndexError, TypeError):
-        fail(f"unexpected response shape: {json.dumps(body)[:500]}")
+        fail(f"unexpected response shape: {json.dumps(body)[:300]}")
 
 
 if __name__ == "__main__":
     main()
 ```
 
-Make it executable, then wire up your shell profile (`~/.zshrc` or `~/.bashrc`):
+Make it executable, then add the config to your shell profile (`~/.zshrc` or `~/.bashrc`):
 
 ```bash
 mkdir -p ~/.claude/tools
@@ -146,19 +144,19 @@ export LITELLM_API_KEY="sk-your-litellm-virtual-key"
 export VISION_MODEL="gemma4-31b"   # any multimodal model on your gateway
 ```
 
-Test the plumbing by hand before involving the agent:
+Run it once by hand to make sure the plumbing works:
 
 ```bash
 analyze-image some-screenshot.png "What text is on the primary button?"
 ```
 
-> 💡 **Why the OpenAI-style endpoint?** The script posts to `/v1/chat/completions` in OpenAI multimodal format because that's LiteLLM's lingua franca — the gateway translates it for whatever backend serves your vision model. Your main Claude Code session keeps using the Anthropic-format endpoint from the [setup guide](/docs/setup-guide/); both coexist on the same gateway and key.
+> 💡 **Why `/v1/chat/completions`?** That's the OpenAI-style endpoint. LiteLLM accepts it for every model it serves and translates the request for whatever backend runs your vision model. Claude Code itself keeps talking to the Anthropic-style endpoint from the [setup guide](/docs/setup-guide/) — both work on the same gateway and key.
 
-> 🧩 Nothing here is Claude Code-specific — the same script works from Codex or any terminal agent that can run shell commands.
+> 🧩 None of this is Claude Code-specific: the script works from Codex or any agent that can run shell commands.
 
 ## Teach your model to use it
 
-Two pieces: a standing instruction so the model *knows* it has eyes, and a permission rule so using them never prompts.
+Two pieces: a CLAUDE.md instruction so the model knows the tool exists, and a permission rule so calls don't prompt every time.
 
 **1. Add to your user-level `~/.claude/CLAUDE.md`:**
 
@@ -187,7 +185,7 @@ Two pieces: a standing instruction so the model *knows* it has eyes, and a permi
 
 ## Getting images into the loop
 
-The tool reads images **from disk**, so build one habit: images enter the conversation as **file paths, not pastes**.
+The tool reads files from disk, so the one habit to build: give the model **file paths, not pastes**.
 
 | Instead of… | Do this |
 | --- | --- |
@@ -195,9 +193,7 @@ The tool reads images **from disk**, so build one habit: images enter the conver
 | "Look at this image" + paste | `analyze the UI in ./shots/login.png — are the fields aligned?` |
 | Letting a browser MCP return a screenshot into context | Save it to a file instead (chrome-devtools' `take_screenshot` takes a `filePath` argument that writes to disk rather than attaching the image), then `analyze-image` that file |
 
-A pasted image becomes an image block your model can't read; a file path is just text — and the tool takes it from there.
-
-**The payoff — a self-closing UI-verification loop:** the agent edits CSS → screenshots the page to a file via the browser MCP → runs `analyze-image page.png "Is the modal centered? Does any text overflow?"` → reads the verdict → fixes → repeats. Your text-only model can now check its own visual work.
+**Where this pays off:** UI verification. The agent edits CSS, screenshots the page to a file, runs `analyze-image page.png "Is the modal centered? Does any text overflow?"`, reads the answer, fixes, repeats — a text-only model checking its own visual work.
 
 ## ✍️ Hands-on: give your model eyes (10 minutes)
 
@@ -215,7 +211,7 @@ A pasted image becomes an image block your model can't read; a file path is just
 
 ## Appendix: the same tool as an MCP server
 
-Prefer a first-class registered tool — visible in `/mcp`, with its own permission entry, shareable via a plugin? Wrap the same script as an MCP server. Recall the [general guidance](/docs/agentic-coding-in-terminal/#mcp): models handle CLIs better than MCP tools, and that goes double for smaller local models — measure with *your* model before switching.
+If you'd rather have a registered tool — shows up in `/mcp`, gets its own permission entry, can ship in a plugin — wrap the same script as an MCP server. Keep the [general guidance](/docs/agentic-coding-in-terminal/#mcp) in mind, though: models tend to handle CLIs better than MCP tools, smaller local models especially. Test with your model before switching.
 
 Save as `~/.claude/tools/vision_server.py`:
 
@@ -254,4 +250,4 @@ claude mcp add --scope user vision -- python ~/.claude/tools/vision_server.py
 ```
 
 - The server shells out to the `analyze-image` CLI, so the `PATH` and `LITELLM_*` exports from your shell profile must be present in the environment Claude Code launches from.
-- Wire up **one** of the two, not both — if you register the MCP tool, drop the CLAUDE.md bullet about running the CLI so the model isn't told two ways to do the same thing.
+- Set up **one** of the two, not both. If you register the MCP tool, remove the CLAUDE.md line about the CLI so the model isn't told two ways to do the same thing.

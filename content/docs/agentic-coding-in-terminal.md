@@ -370,7 +370,7 @@ Double-tap `Esc` on an empty input to open the rewind menu. Scroll back with `�
 - Great for: "Make this component look like this", "Why is this layout broken?", "Reproduce this UI".
 - Combine with `@` file references to point at the code you want changed alongside the visual.
 
-> 🖼️ Running Claude Code on a **text-only custom model** (e.g. `minimax-m2.7` behind a LiteLLM gateway)? Pasted screenshots won't reach your model — see [Vision for Text-Only Models](/docs/vision-for-text-only-models/) for a small tool that gives it eyes.
+> 🖼️ Running Claude Code on a **text-only custom model** (e.g. `minimax-m2.7` behind a LiteLLM gateway)? Pasted screenshots won't reach your model. [Vision for Text-Only Models](/docs/vision-for-text-only-models/) shows how to fix that with a small image-analysis tool.
 
 ### `@` File / Folder References & `#` Shortcut
 
@@ -739,7 +739,7 @@ You should see the hook deny the request with a reason like `🛡️ [env-file] 
 | codebase-memory-mcp | [https://github.com/DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) | [Quick start guide](https://github.com/DeusData/codebase-memory-mcp?tab=readme-ov-file#quick-start) | Similar to CodeGraphContext above |
 | Awesome MCP servers | [https://github.com/punkpeye/awesome-mcp-servers](https://github.com/punkpeye/awesome-mcp-servers) | | List of MCP servers for just about any function |
 
-> 🖼️ Want a **build-your-own-tool** walkthrough? [Vision for Text-Only Models](/docs/vision-for-text-only-models/) adds an image-analysis tool for text-only custom models — CLI-first, with an MCP variant at the end.
+> 🖼️ For a **build-your-own-tool** example, [Vision for Text-Only Models](/docs/vision-for-text-only-models/) walks through adding an image-analysis tool for text-only custom models — CLI first, MCP variant at the end.
 
 **How to Install MCP Servers**
 
