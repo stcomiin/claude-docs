@@ -58,7 +58,9 @@ Claude Code, like every agent runtime, sits between the public internet (web fet
 
 ### Skill / supply-chain attacks
 
-Already covered in detail in [Foundations → On Skill Security](/docs/agentic-coding-in-terminal/#on-skill-security). Required reading: Snyk's [ClawHavoc](https://snyk.io/articles/skill-md-shell-access/) writeup (three-line `SKILL.md` → full shell) and Sondera's [hidden-PDF skill hijack](https://blog.sondera.ai/p/claude-skill-hijack-invisible-sentence).
+Already covered in detail in [Foundations → On Skill Security](/docs/agentic-coding-in-terminal/#on-skill-security). Required reading: Snyk's [ClawHavoc](https://snyk.io/articles/skill-md-shell-access/) writeup (three-line `SKILL.md` → full shell), Sondera's [hidden-PDF skill hijack](https://blog.sondera.ai/p/claude-skill-hijack-invisible-sentence), and Datadog Security Labs' [Malicious Coding Agent Skills and the Risk of Dynamic Context](https://securitylabs.datadoghq.com/articles/malicious-skills-supply-chain-risks-in-coding-agents-with-dynamic-context/).
+
+The Datadog piece documents a *distinct* mechanism the other two don't: a skill's dynamic-context `!` commands execute **during preprocessing, before the rendered skill is ever sent to the model** - so Claude's prompt-injection defenses never get a turn to refuse. Their "Clawsights" PoC skill (posing as a Claude Code leaderboard) runs `gh auth token` and `curl`s the token to an attacker endpoint before any safety check fires; in one test Claude then claimed it *wouldn't* run a command it had already executed. Worse, a malicious skill can reach a trusted session just by cloning a repo - `.claude/skills/`, nested folders, and `--add-dir` paths all count, with no marketplace install required. Datadog's recommended hard mitigation: set `"disableSkillShellExecution": true` in managed settings, review the **whole** repo (not just `~/.claude/skills/`), and require code review on every `.claude/` change. Treat agent skills like the rest of your software supply chain - model-level defenses cannot be the only control.
 
 ### Claude Code & MCP CVEs (2025–2026)
 
