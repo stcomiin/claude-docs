@@ -66,7 +66,7 @@ Before we go deeper, here are some commands / CLI flags that are useful.
 | Action | Command | Remarks |
 | --- | --- | --- |
 | Stop a conversation | Ctrl + C twice in the session until the session is exited | All session history is stored as .jsonl files in .claude folder in User Directory. `~/.claude/projects/<folder name>` |
-| Resume a previous conversation | `claude --resume`  which will show a list of previous conversations to resume from in this current folder, OR `claude —continue` which will auto continue from the last stopped conversation in this current folder | you can also append additional flags to these resume and continue commands for eg. `claude --continue --dangerously-skip-permissions --effort max --model claude-sonnet-5` |
+| Resume a previous conversation | `claude --resume`  which will show a list of previous conversations to resume from in this current folder, OR `claude --continue` which will auto continue from the last stopped conversation in this current folder | you can also append additional flags to these resume and continue commands for eg. `claude --continue --dangerously-skip-permissions --effort max --model claude-sonnet-5` |
 
 ### Useful Claude Code Customisation
 
