@@ -58,7 +58,13 @@ Claude Code, like every agent runtime, sits between the public internet (web fet
 
 ### Skill / supply-chain attacks
 
-Already covered in detail in [Foundations → On Skill Security](/docs/agentic-coding-in-terminal/#on-skill-security). Required reading: Snyk's [ClawHavoc](https://snyk.io/articles/skill-md-shell-access/) writeup (three-line `SKILL.md` → full shell) and Sondera's [hidden-PDF skill hijack](https://blog.sondera.ai/p/claude-skill-hijack-invisible-sentence).
+Already covered in detail in [Foundations → On Skill Security](/docs/agentic-coding-in-terminal/#on-skill-security). Required reading: Snyk's [ClawHavoc](https://snyk.io/articles/skill-md-shell-access/) writeup (three-line `SKILL.md` → full shell), Sondera's [hidden-PDF skill hijack](https://blog.sondera.ai/p/claude-skill-hijack-invisible-sentence), and Datadog Security Labs' [Malicious Coding Agent Skills and the Risk of Dynamic Context](https://securitylabs.datadoghq.com/articles/malicious-skills-supply-chain-risks-in-coding-agents-with-dynamic-context/).
+
+The Datadog write-up covers a failure mode the other two don't. Their example, Clawsights, is a real skill found in the wild that poses as a leaderboard for Claude Code, then reads your GitHub token with `gh auth token` and uses `curl` to send it to a server the attacker controls, disguised as a stats upload. Run as an ordinary skill, Clawsights spells out every step in plain text, and when Datadog tested it, Opus 4.6 on its highest reasoning setting read the instructions, flagged the credential theft, and refused.
+
+Dynamic context is what takes that decision away from the model. When the researchers rebuilt Clawsights with `!` commands, the shell ran while the skill was still being assembled, before the finished text ever reached Claude. The token was read and sent during preprocessing, and the model never got a say. In that version Claude even claimed afterward that it wouldn't run a skill it had already run. The rebuild also preapproves its own shell access with `allowed-tools: Bash(*)`, which is a useful thing to grep for.
+
+What makes this dangerous is how little it takes to land in a session you trust. Nothing has to be installed from a marketplace. Cloning a repo is enough, since skills in `.claude/skills/`, in nested folders, or under any `--add-dir` path all get loaded. The hard fix is to set `"disableSkillShellExecution": true` in managed settings. Beyond that, review the whole repo instead of just your own `~/.claude/skills/`, and put `.claude/` changes through code review like anything else. A skill is part of your supply chain, and the model's own judgment shouldn't be the only thing guarding your credentials.
 
 ### Claude Code & MCP CVEs (2025–2026)
 
