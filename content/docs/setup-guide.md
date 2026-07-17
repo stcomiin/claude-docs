@@ -26,7 +26,7 @@ These need to be in place before installing anything else.
 
 ### Node.js (v22 or higher)
 
-Download from [nodejs.org](https://nodejs.org/) — grab the LTS version. This also installs npm. Claude Code itself no longer needs Node (its native installer ships a standalone binary), but the GSD installer and other npx tooling below do — and installing Claude Code via npm requires Node v22+ as of v2.1.198.
+Download from [nodejs.org](https://nodejs.org/) and grab the LTS version. This also installs npm. Claude Code itself no longer needs Node (its native installer ships a standalone binary), but the GSD installer and other npx tooling below do. Installing Claude Code through npm also needs Node v22+ as of v2.1.198.
 
 Verify after install:
 
@@ -45,9 +45,9 @@ git --version
 
 ### Windows Users
 
-Claude Code now runs natively on Windows in PowerShell or CMD — WSL is no longer required (WSL 2 is only needed if you want [sandboxing](https://code.claude.com/docs/en/sandboxing)). Installing **Git for Windows** is still recommended: it provides Git Bash, which Claude Code uses for its Bash tool (without it, Claude falls back to a PowerShell tool). Codex is still happiest inside WSL or Git Bash.
+Claude Code now runs natively on Windows in PowerShell or CMD, so WSL is no longer required (WSL 2 is only needed if you want [sandboxing](https://code.claude.com/docs/en/sandboxing)). Installing **Git for Windows** is still recommended: it provides Git Bash, which Claude Code uses for its Bash tool (without it, Claude falls back to a PowerShell tool). Codex is still happiest inside WSL or Git Bash.
 
-Note the Git Bash path — you may need it later:
+Note the Git Bash path (you may need it later):
 
 ```text
 C:\Program Files\Git\bin\bash.exe
@@ -89,7 +89,7 @@ If your organization runs a LiteLLM proxy (or you self-host one):
 
 1. **Installation via the native installer (recommended)**
     
-    The native installer is now the officially recommended method — it needs no Node.js and auto-updates in the background.
+    The native installer is now the officially recommended method. It needs no Node.js and auto-updates in the background.
     
     ```bash
     # macOS / Linux / WSL
@@ -192,7 +192,7 @@ If your organization runs a LiteLLM proxy (or you self-host one):
     }
     ```
     
-4. `claude` to launch the CLI in terminal. Select model with `/model` — current lineup (July 2026): `claude-opus-4-8` (recommended for agentic coding), `claude-fable-5` (top-end, 1M context), `claude-sonnet-5` (faster/cheaper, 1M context). Aliases: `opus`, `sonnet`, `fable`. Use `/effort` for reasoning depth — it now defaults to `high` on Opus 4.8 and Sonnet 5, with `xhigh` and `max` above it.
+4. `claude` to launch the CLI in terminal. Select model with `/model`. The current lineup (July 2026) is `claude-opus-4-8` (recommended for agentic coding), `claude-fable-5` (top-end, 1M context), and `claude-sonnet-5` (faster/cheaper, 1M context), with aliases `opus`, `sonnet`, `fable`. Use `/effort` for reasoning depth; the default is now `high` on Opus 4.8 and Sonnet 5, with `xhigh` and `max` above it.
 
 ### Codex (ChatGPT's Claude Code Competitor)
 

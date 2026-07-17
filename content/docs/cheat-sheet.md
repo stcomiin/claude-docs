@@ -23,7 +23,7 @@ A printable reference attendees can take home. One page (ish), organized by "wha
 | `/stats` | Plan usage (Pro/Max) |
 | `/insights` | Monthly HTML usage report |
 | `/model [name]` | Switch model: opus, sonnet, fable, haiku |
-| `/effort [level]` | low / medium / high (default) / xhigh / max — plus `ultracode` (xhigh + auto-orchestrated workflows) |
+| `/effort [level]` | low / medium / high (default) / xhigh / max, plus `ultracode` (xhigh + auto-orchestrated workflows) |
 | `/fast [on\|off]` | Fast mode on Opus 4.8: 2x the rate for 2.5x the speed (same model, faster output) |
 
 ## 🧠 Memory & project setup
@@ -63,7 +63,7 @@ A printable reference attendees can take home. One page (ish), organized by "wha
 | `/review <pr>` | Fast single-pass PR review (reverted to single-pass in v2.1.202) |
 | `/security-review` | Scoped security scan — see [Cybersecurity & Hardening](/docs/security/) |
 | `/code-review <level>` | Multi-agent bug-hunting review (renamed from `/simplify` in v2.1.147). `ultra` level runs the deep cloud review; `/ultrareview` is its deprecated alias |
-| `/simplify` | Cleanup-only pass (reuse, simplification, efficiency) — reintroduced in v2.1.154 alongside `/code-review` |
+| `/simplify` | Cleanup-only pass (reuse, simplification, efficiency), reintroduced in v2.1.154 alongside `/code-review` |
 | `/batch <description>` | Parallel worktree agents for migrations |
 | `/autofix-pr` | Address PR review comments automatically |
 
@@ -71,7 +71,7 @@ A printable reference attendees can take home. One page (ish), organized by "wha
 
 | Flag / Command | Description |
 | --- | --- |
-| `--permission-mode auto` | Start in auto mode (works with `-p` headless too). The old `--enable-auto-mode` flag is gone — auto joins the Shift+Tab cycle automatically when your account qualifies |
+| `--permission-mode auto` | Start in auto mode (works with `-p` headless too). The old `--enable-auto-mode` flag is gone; auto joins the Shift+Tab cycle automatically when your account qualifies |
 | `claude auto-mode defaults` | Print the classifier's default allow/deny rules (also: `config`, `critique`) |
 | `ultracode` (in prompt) or `/effort ultracode` | Dynamic multi-agent workflows: orchestrate tens-to-hundreds of background agents (v2.1.154+) |
 | `/workflows` | List, watch, pause, resume, save, stop workflow runs |

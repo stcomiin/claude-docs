@@ -78,7 +78,7 @@ Already covered in detail in [Foundations → On Skill Security](/docs/agentic-c
 | **CVE-2026-40068** - Trust dialog bypass via git worktree spoofing | A spoofed worktree layout made an untrusted repo appear already-trusted, enabling arbitrary code execution on open - relevant if you use worktree-based parallel agent flows on cloned repos. High severity. Patched in v2.1.84 (Apr 2026). | [GHSA-q5hj-mxqh-vv77](https://github.com/advisories/GHSA-q5hj-mxqh-vv77) |
 | **CVE-2026-54316** - Exfiltration via pre-approved WebFetch domain | Data could be exfiltrated out-of-band through a pre-approved HuggingFace domain in WebFetch - a reminder that allowlisted domains are still an exfil channel. Medium severity. Patched in v2.1.163 (Jun 2026). | [GHSA-fg94-h982-f3mm](https://github.com/advisories/GHSA-fg94-h982-f3mm) |
 
-> 13 Claude Code advisories were published between Feb and Jun 2026 alone - the table above curates the most instructive. Browse the full list on the [GitHub Advisory Database](https://github.com/advisories?query=%40anthropic-ai%2Fclaude-code) and keep Claude Code current (native installs auto-update; npm installs need `claude update`).
+> 13 Claude Code advisories were published between Feb and Jun 2026 alone - the table above only picks out the most instructive ones. Browse the full list on the [GitHub Advisory Database](https://github.com/advisories?query=%40anthropic-ai%2Fclaude-code) and keep Claude Code current (native installs auto-update; npm installs need `claude update`).
 
 ### Sandbox, permissions, and Anthropic's own guidance
 
