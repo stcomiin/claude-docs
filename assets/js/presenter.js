@@ -120,7 +120,10 @@ document.addEventListener("DOMContentLoaded", function () {
   penBtn.className = "presenter-pen";
   penBtn.setAttribute("aria-label", "Toggle draw mode (Alt+P)");
   penBtn.setAttribute("aria-pressed", "false");
-  penBtn.title = "Draw on page (Alt+P)";
+  // data-tip drives a CSS tooltip anchored to the button. Never use the
+  // native title attribute here: its tooltip is cursor-anchored, and at
+  // this bottom-right corner Windows clamps it directly under the pointer.
+  penBtn.setAttribute("data-tip", "Draw on page (Alt+P)");
   penBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897l12.682-12.68z"/></svg>';
   penBtn.addEventListener("click", toggleDrawMode);
   document.body.appendChild(penBtn);
@@ -144,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
     b.className = "presenter-tool";
     b.style.setProperty("--tool-color", t.color);
     b.setAttribute("aria-label", t.label);
-    b.title = t.label;
+    b.setAttribute("data-tip", t.label);
     b.addEventListener("click", function () { selectTool(i); });
     toolButtons.push(b);
     toolbar.appendChild(b);
@@ -171,7 +174,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   var projBtn = addAction("Projector", function () { toggleProjector(); });
   projBtn.setAttribute("aria-pressed", "false");
-  projBtn.title = "Projector type size (Alt+B)";
+  projBtn.setAttribute("data-tip", "Projector type size (Alt+B)");
 
   function applyProjector(on) {
     document.documentElement.classList.toggle("projector", on);
