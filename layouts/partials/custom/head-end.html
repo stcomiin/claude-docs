@@ -278,3 +278,8 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
+
+<!-- Presenter Kit (ephemeral ink overlay + projector mode). Kept in
+     assets/js/ and piped through Hugo so head-end stays a thin loader. -->
+{{ $presenter := resources.Get "js/presenter.js" | minify | fingerprint }}
+<script defer src="{{ $presenter.RelPermalink }}" integrity="{{ $presenter.Data.Integrity }}"></script>

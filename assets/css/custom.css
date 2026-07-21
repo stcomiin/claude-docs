@@ -172,3 +172,65 @@ body main#content > div > p:nth-of-type(2) {
 body .hextra-feature-grid {
   margin-top: 2.5rem;
 }
+
+/* ── Presenter Kit: ephemeral ink overlay + projector mode ────────────
+   Spec: docs/superpowers/specs/2026-07-21-presenter-kit-design.md.
+   Semantic classes only — Hextra's Tailwind bundle is precompiled. */
+
+/* Ink layer. Document-positioned (not fixed) so strokes scroll with the
+   content they mark. Height is set from JS to the document scrollHeight. */
+.presenter-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9000; /* above content, below the lightbox (9999) */
+  pointer-events: none; /* ink stays visible but clicks pass through */
+}
+.presenter-overlay.is-drawing {
+  pointer-events: auto; /* draw mode swallows clicks by design */
+  cursor: crosshair;
+  touch-action: none;
+}
+
+/* Pen toggle. Mirrors .scroll-to-top (2.5rem circle at right 2rem) and
+   stacks 0.5rem above it: 2rem + 2.5rem + 0.5rem = bottom 5rem. */
+.presenter-pen {
+  position: fixed;
+  bottom: 5rem;
+  right: 2rem;
+  z-index: 9100; /* above the overlay so it stays clickable while drawing */
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  background: rgba(23, 23, 23, 0.85);
+  color: #a1a1aa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.presenter-pen:hover {
+  background: rgba(38, 38, 38, 0.95);
+  color: #fff;
+}
+.presenter-pen[aria-pressed="true"] {
+  color: #fff;
+  border-color: #ef4444;
+}
+.presenter-pen svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+@media print {
+  .presenter-overlay,
+  .presenter-pen,
+  .presenter-toolbar {
+    display: none !important;
+  }
+}
