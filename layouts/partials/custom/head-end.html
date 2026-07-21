@@ -281,5 +281,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <!-- Presenter Kit (ephemeral ink overlay + projector mode). Kept in
      assets/js/ and piped through Hugo so head-end stays a thin loader. -->
+<script>
+  /* Synchronous projector-mode restore (same pattern Hextra uses for the
+     dark class): the .projector class must be on <html> before the body
+     lays out, or anchor navigation scrolls to 16px-based positions and the
+     page visibly jumps when the deferred script bumps the root to 20px. */
+  try {
+    if (sessionStorage.getItem("presenter-projector") === "1") {
+      document.documentElement.classList.add("projector");
+    }
+  } catch (err) {}
+</script>
 {{ $presenter := resources.Get "js/presenter.js" | minify | fingerprint }}
 <script defer src="{{ $presenter.RelPermalink }}" integrity="{{ $presenter.Data.Integrity }}"></script>
