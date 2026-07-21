@@ -270,6 +270,12 @@ body .hextra-feature-grid {
   color: #fff;
 }
 
+/* Projector mode: Hextra sizes type and layout in rem, so bumping the root
+   font-size rescales everything coherently. Applied by presenter.js. */
+:root.projector {
+  font-size: 20px;
+}
+
 @media print {
   .presenter-overlay,
   .presenter-pen,

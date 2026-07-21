@@ -162,6 +162,34 @@ document.addEventListener("DOMContentLoaded", function () {
   addAction("Undo", undoStroke);
   addAction("Clear", clearInk);
   addAction("Exit", exitDrawMode);
+
+  // ── Projector mode ──
+  // The single deliberate storage exception in this module: sessionStorage
+  // (never localStorage) so the type-size bump survives page navigation
+  // during a presentation and dies with the tab. Ink is never stored.
+  var PROJECTOR_KEY = "presenter-projector";
+
+  var projBtn = addAction("Projector", function () { toggleProjector(); });
+  projBtn.setAttribute("aria-pressed", "false");
+  projBtn.title = "Projector type size (Alt+B)";
+
+  function applyProjector(on) {
+    document.documentElement.classList.toggle("projector", on);
+    projBtn.setAttribute("aria-pressed", String(on));
+    try {
+      if (on) { sessionStorage.setItem(PROJECTOR_KEY, "1"); }
+      else { sessionStorage.removeItem(PROJECTOR_KEY); }
+    } catch (err) {} // storage may be blocked; mode still works for this page
+  }
+
+  function toggleProjector() {
+    applyProjector(!document.documentElement.classList.contains("projector"));
+  }
+
+  try {
+    if (sessionStorage.getItem(PROJECTOR_KEY) === "1") applyProjector(true);
+  } catch (err) {}
+
   document.body.appendChild(toolbar);
 
   // ── Keyboard ──
@@ -177,6 +205,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.altKey && e.code === "KeyP") {
       e.preventDefault();
       toggleDrawMode();
+      return;
+    }
+    if (e.altKey && e.code === "KeyB") {
+      e.preventDefault();
+      toggleProjector();
       return;
     }
     if (!drawing) return;
