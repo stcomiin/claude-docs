@@ -158,12 +158,16 @@ document.addEventListener("DOMContentLoaded", function () {
     ed.remove();
   }
 
-  function toggleTextMode(force) {
-    var next = typeof force === "boolean" ? force : !textMode;
-    if (!next && labelEditor) commitLabel();
-    textMode = next;
-    textBtn.setAttribute("aria-pressed", String(textMode));
-    if (overlay) overlay.classList.toggle("is-text", textMode);
+  // Radio-style mode pair: exactly one of Draw/Text is pressed at all
+  // times, so the filled chip always shows the current mode. Clicking the
+  // active mode is a no-op.
+  function setMode(mode) {
+    var toText = mode === "text";
+    if (!toText && labelEditor) commitLabel();
+    textMode = toText;
+    drawBtn.setAttribute("aria-pressed", String(!toText));
+    textBtn.setAttribute("aria-pressed", String(toText));
+    if (overlay) overlay.classList.toggle("is-text", toText);
   }
 
   function enterDrawMode() {
@@ -172,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
     ensureOverlay().classList.add("is-drawing");
     penBtn.setAttribute("aria-pressed", "true");
     selectTool(0); // spec: red pen is the default on every activation
-    toggleTextMode(false); // and always back to freehand, not text mode
+    setMode("draw"); // and always back to freehand, not text mode
     toolbar.hidden = false;
   }
 
@@ -240,7 +244,11 @@ document.addEventListener("DOMContentLoaded", function () {
     toolbar.appendChild(b);
     return b;
   }
-  var textBtn = addAction("Text", function () { toggleTextMode(); });
+  var drawBtn = addAction("Draw", function () { setMode("draw"); });
+  drawBtn.setAttribute("aria-pressed", "true");
+  drawBtn.setAttribute("data-tip", "Freehand ink: drag to draw");
+
+  var textBtn = addAction("Text", function () { setMode("text"); });
   textBtn.setAttribute("aria-pressed", "false");
   textBtn.setAttribute("data-tip", "Type labels: click the page to place");
 
