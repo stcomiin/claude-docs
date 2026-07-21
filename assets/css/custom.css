@@ -369,6 +369,12 @@ body .hextra-feature-grid {
   top: 50%;
   transform: translateY(-50%);
 }
+/* While draw mode is open the toolbar occupies the space left of the pen,
+   so the tooltip would land on top of the pill — and a pressed pen needs
+   no hint. Suppress it until the presenter exits draw mode. */
+.presenter-pen[aria-pressed="true"]::after {
+  display: none;
+}
 /* Toolbar controls: tooltip sits above the pill. */
 .presenter-tool::after,
 .presenter-action[data-tip]::after {
