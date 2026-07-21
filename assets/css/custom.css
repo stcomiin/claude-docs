@@ -281,7 +281,8 @@ body .hextra-feature-grid {
 }
 .presenter-pen::after,
 .presenter-tool::after,
-.presenter-action[data-tip]::after {
+.presenter-action[data-tip]::after,
+.scroll-to-top::after {
   content: attr(data-tip);
   position: absolute;
   padding: 0.25rem 0.5rem;
@@ -303,13 +304,18 @@ body .hextra-feature-grid {
 .presenter-tool:hover::after,
 .presenter-tool:focus-visible::after,
 .presenter-action[data-tip]:hover::after,
-.presenter-action[data-tip]:focus-visible::after {
+.presenter-action[data-tip]:focus-visible::after,
+.scroll-to-top:hover::after,
+.scroll-to-top:focus-visible::after {
   opacity: 1;
   visibility: visible;
   transition-delay: 0.35s, 0.35s; /* mimic the native tooltip's hover delay */
 }
-/* Pen button: tooltip sits to the left, clear of pointer and screen edge. */
-.presenter-pen::after {
+/* Right-edge column buttons (pen, and scroll-to-top from head-end.html):
+   tooltip sits to the left, clear of pointer and screen edge. Above is not
+   an option for scroll-to-top — it would collide with the pen button. */
+.presenter-pen::after,
+.scroll-to-top::after {
   right: calc(100% + 0.6rem);
   top: 50%;
   transform: translateY(-50%);
