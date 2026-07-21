@@ -181,6 +181,8 @@ If your organization runs a LiteLLM proxy (or you self-host one):
     }
     ```
     
+    > 🖼️ Is your custom model **text-only** (no image input)? Pasted screenshots won't work — add an image-analysis tool (works with LiteLLM and OpenRouter setups alike): [Vision for Text-Only Models](/docs/vision-for-text-only-models/).
+
 4. `claude` to launch the CLI in terminal. Select model with `/model` , `/effort`  for reasoning effort
 
 ### Codex (ChatGPT's Claude Code Competitor)
