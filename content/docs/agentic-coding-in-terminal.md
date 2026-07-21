@@ -503,7 +503,7 @@ Useful Claude Code + `gh` workflows:
 /simplify on git diffs, run multiple agents, use agent teams and dispatch multiple agents per category from different pov to debate, then synthesise the results of their debate on the code review
 ```
 
-1. Use Codex CLI to review (select latest frontier with xhigh reasoning: gpt-5.5 xhigh)
+1. Use Codex CLI to review (select latest frontier with max reasoning: gpt-5.6 max)
 
 ```markdown
 use codex to code review the entire codebase/git diffs, with focus areas on:
@@ -523,7 +523,7 @@ The code review workflow above has been incorporated into a skill for use. Insta
 Main Thread: Scope → Dispatch 4 parallel stages → Consolidate → Devil's Advocate → Final Output
                           │
                           ├── Stage 1: Agent Team Debate (simplify)
-                          ├── Stage 2: Codex Frontier Model Review (GPT-5.5)
+                          ├── Stage 2: Codex Frontier Model Review (GPT-5.6)
                           ├── Stage 3: CC-Native Review (code-reviewer)
                           └── Stage 4: BMAD Adversarial Review (bmad-code-review)
                                             ↓

@@ -26,7 +26,7 @@ These need to be in place before installing anything else.
 
 ### Node.js (v22 or higher)
 
-Download from [nodejs.org](https://nodejs.org/) and grab the LTS version. This also installs npm. Claude Code itself no longer needs Node (its native installer ships a standalone binary), but the GSD installer and other npx tooling below do. Installing Claude Code through npm also needs Node v22+ as of v2.1.198.
+Download from [nodejs.org](https://nodejs.org/) and grab the LTS version. This also installs npm. The npm install of Claude Code needs Node v22+ as of v2.1.198, and the GSD installer and other npx tooling below need Node as well.
 
 Verify after install:
 
@@ -87,32 +87,24 @@ If your organization runs a LiteLLM proxy (or you self-host one):
 
 ### Claude Code
 
-1. **Installation via the native installer (recommended)**
+1. **Installation via npm**
     
-    The native installer is now the officially recommended method. It needs no Node.js and auto-updates in the background.
+    **Prerequisites**
     
-    ```bash
-    # macOS / Linux / WSL
-    curl -fsSL https://claude.ai/install.sh | bash
-    ```
+    - Node.js ≥ 22 (required for the npm install as of v2.1.198)
+    - npm (comes with Node.js)
     
-    ```powershell
-    # Windows (PowerShell)
-    irm https://claude.ai/install.ps1 | iex
-    ```
+    npm is the default install method here because it also works in airgapped environments — point npm at your internal registry mirror and install the same way.
     
     ```bash
+    # Install globally
+    npm install -g @anthropic-ai/claude-code@2.1.216 # correct as of 21/07/26
+    
     # Verify
     claude --version
     
-    # Force an update immediately (native installs also auto-update on their own)
+    # Update claude version for latest features
     claude update
-    ```
-    
-    Installing via npm still works and delivers the same native binary (the `claude` command does not run on Node), but requires Node.js ≥ 22 as of v2.1.198:
-    
-    ```bash
-    npm install -g @anthropic-ai/claude-code
     ```
     
 2. **Skipping Onboarding via `.claude.json` (offline setup only, skip this step if doing online)**
@@ -301,7 +293,7 @@ If your organization runs a LiteLLM proxy (or you self-host one):
     model_context_window = 1000000
     ```
     
-5. In Codex, select model with `/model` , select latest frontier model (`gpt-5.5`) with highest reasoning (`xhigh`). OpenAI's docs now recommend starting with `gpt-5.5` for most tasks (`gpt-5.4` remains available; `gpt-5.4-mini` covers lighter subagent work).
+5. In Codex, select model with `/model` , select latest frontier model (`gpt-5.6`) with highest reasoning (`max`; `ultra` is available on Plus and higher plans). `gpt-5.6` is an alias for the flagship `gpt-5.6-sol` tier — `gpt-5.6-terra` covers balanced everyday work and `gpt-5.6-luna` covers lighter subagent work.
 
 ---
 
