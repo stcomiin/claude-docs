@@ -186,6 +186,9 @@ document.addEventListener("DOMContentLoaded", function () {
     applyProjector(!document.documentElement.classList.contains("projector"));
   }
 
+  // The class itself is restored synchronously by an inline head script
+  // (see head-end.html) so anchor navigation lays out at the right size;
+  // this idempotent re-apply only syncs the toolbar button state.
   try {
     if (sessionStorage.getItem(PROJECTOR_KEY) === "1") applyProjector(true);
   } catch (err) {}
@@ -202,12 +205,17 @@ document.addEventListener("DOMContentLoaded", function () {
   // Esc-with-lightbox-open would close the lightbox AND exit draw mode.
   document.addEventListener("keydown", function (e) {
     if (inEditable(e.target)) return;
-    if (e.altKey && e.code === "KeyP") {
+    var key = (e.key || "").toLowerCase();
+    // Match the produced character first so shortcuts follow the user's
+    // layout (on AZERTY the physical KeyZ types "w"). Alt combos keep a
+    // physical-code fallback because macOS Option composes characters
+    // (Option+P yields a Greek pi, so only the code matches there).
+    if (e.altKey && (key === "p" || e.code === "KeyP")) {
       e.preventDefault();
       toggleDrawMode();
       return;
     }
-    if (e.altKey && e.code === "KeyB") {
+    if (e.altKey && (key === "b" || e.code === "KeyB")) {
       e.preventDefault();
       toggleProjector();
       return;
@@ -217,7 +225,9 @@ document.addEventListener("DOMContentLoaded", function () {
       if (document.querySelector(".lightbox.is-open")) return; // lightbox owns this Esc
       exitDrawMode();
     }
-    if ((e.ctrlKey || e.metaKey) && e.code === "KeyZ") {
+    // Character-only on purpose: a code fallback would let QWERTZ Ctrl+Y
+    // (physical KeyZ) false-trigger undo. Ctrl+char-Z is what users mean.
+    if ((e.ctrlKey || e.metaKey) && key === "z") {
       e.preventDefault();
       undoStroke();
     }
