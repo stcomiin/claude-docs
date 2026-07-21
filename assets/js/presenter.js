@@ -27,6 +27,10 @@ document.addEventListener("DOMContentLoaded", function () {
     sizeOverlay();
     // Lazy images and projector-mode reflow grow/shrink the page after load.
     new ResizeObserver(sizeOverlay).observe(document.body);
+    overlay.addEventListener("pointerdown", onPointerDown);
+    overlay.addEventListener("pointermove", onPointerMove);
+    overlay.addEventListener("pointerup", onPointerUp);
+    overlay.addEventListener("pointercancel", onPointerUp);
     return overlay;
   }
 
@@ -39,11 +43,60 @@ document.addEventListener("DOMContentLoaded", function () {
     overlay.style.height = document.documentElement.scrollHeight + "px";
   }
 
+  // ── Strokes ──
+  // Document coordinates (client + scroll) so ink scrolls with the page.
+  function docX(e) { return e.clientX + window.scrollX; }
+  function docY(e) { return e.clientY + window.scrollY; }
+
+  var TOOLS = [
+    { label: "Red pen", color: "#ef4444", width: 3, opacity: 1 },
+    { label: "Blue pen", color: "#3b82f6", width: 3, opacity: 1 },
+    { label: "Highlighter", color: "#facc15", width: 14, opacity: 0.4 },
+  ];
+  var tool = TOOLS[0];
+
+  function onPointerDown(e) {
+    if (!drawing || !e.isPrimary) return;
+    // Untrusted (synthetic) events have no active pointer to capture; real
+    // input succeeds and keeps the stroke when the pointer leaves the window.
+    try { overlay.setPointerCapture(e.pointerId); } catch (err) {}
+    currentPath = document.createElementNS(SVG_NS, "path");
+    currentPath.setAttribute("d", "M" + docX(e) + " " + docY(e));
+    currentPath.setAttribute("stroke", tool.color);
+    currentPath.setAttribute("stroke-width", tool.width);
+    currentPath.setAttribute("stroke-opacity", tool.opacity);
+    currentPath.setAttribute("fill", "none");
+    currentPath.setAttribute("stroke-linecap", "round");
+    currentPath.setAttribute("stroke-linejoin", "round");
+    overlay.appendChild(currentPath);
+    e.preventDefault();
+  }
+
+  // O(n^2) string growth is fine at presentation stroke lengths (hundreds of
+  // points); not worth a points-array rebuild.
+  function onPointerMove(e) {
+    if (!currentPath) return;
+    currentPath.setAttribute("d", currentPath.getAttribute("d") + " L" + docX(e) + " " + docY(e));
+  }
+
+  function onPointerUp() { currentPath = null; }
+
+  function undoStroke() {
+    if (overlay && overlay.lastElementChild) overlay.removeChild(overlay.lastElementChild);
+  }
+
+  function clearInk() {
+    if (!overlay) return;
+    while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
+  }
+
   function enterDrawMode() {
     if (drawing) return;
     drawing = true;
     ensureOverlay().classList.add("is-drawing");
     penBtn.setAttribute("aria-pressed", "true");
+    selectTool(0); // spec: red pen is the default on every activation
+    toolbar.hidden = false;
   }
 
   // Exiting keeps ink visible (pointer-events return to none, so links work
@@ -54,6 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
     currentPath = null;
     if (overlay) overlay.classList.remove("is-drawing");
     penBtn.setAttribute("aria-pressed", "false");
+    toolbar.hidden = true;
   }
 
   function toggleDrawMode() {
@@ -70,6 +124,45 @@ document.addEventListener("DOMContentLoaded", function () {
   penBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897l12.682-12.68z"/></svg>';
   penBtn.addEventListener("click", toggleDrawMode);
   document.body.appendChild(penBtn);
+
+  // ── Toolbar (visible only while drawing) ──
+  var toolbar = document.createElement("div");
+  toolbar.className = "presenter-toolbar";
+  toolbar.hidden = true;
+
+  var toolButtons = [];
+  function selectTool(i) {
+    tool = TOOLS[i];
+    toolButtons.forEach(function (b, j) {
+      b.setAttribute("aria-pressed", j === i ? "true" : "false");
+    });
+  }
+
+  TOOLS.forEach(function (t, i) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "presenter-tool";
+    b.style.setProperty("--tool-color", t.color);
+    b.setAttribute("aria-label", t.label);
+    b.title = t.label;
+    b.addEventListener("click", function () { selectTool(i); });
+    toolButtons.push(b);
+    toolbar.appendChild(b);
+  });
+
+  function addAction(label, handler) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "presenter-action";
+    b.textContent = label;
+    b.addEventListener("click", handler);
+    toolbar.appendChild(b);
+    return b;
+  }
+  addAction("Undo", undoStroke);
+  addAction("Clear", clearInk);
+  addAction("Exit", exitDrawMode);
+  document.body.appendChild(toolbar);
 
   // ── Keyboard ──
   function inEditable(el) {
@@ -90,6 +183,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.key === "Escape") {
       if (document.querySelector(".lightbox.is-open")) return; // lightbox owns this Esc
       exitDrawMode();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.code === "KeyZ") {
+      e.preventDefault();
+      undoStroke();
     }
   }, true);
 });
