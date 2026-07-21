@@ -14,6 +14,10 @@ document.addEventListener("DOMContentLoaded", function () {
   var drawing = false;     // draw mode active?
   var overlay = null;      // <svg> ink layer; created lazily, lives until navigation
   var currentPath = null;  // <path> being drawn, null between strokes
+  var textMode = false;    // clicks place typed labels instead of strokes
+  var labelEditor = null;  // open contenteditable label editor, null when none
+  var labelColor = "#ef4444";   // tool color captured when the editor opened
+  var committingLabel = false;  // reentrancy guard: removal fires blur -> commit
 
   // The overlay is absolutely positioned at the document origin and sized to
   // the full document, so stroke coordinates recorded in document space stay
@@ -57,6 +61,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function onPointerDown(e) {
     if (!drawing || !e.isPrimary) return;
+    if (textMode) {
+      // preventDefault stops the native focus change, so an open editor
+      // does not blur-commit AND explicit-commit from the same click.
+      e.preventDefault();
+      if (labelEditor) { commitLabel(); } else { placeLabelEditor(docX(e), docY(e)); }
+      return;
+    }
     // Untrusted (synthetic) events have no active pointer to capture; real
     // input succeeds and keeps the stroke when the pointer leaves the window.
     try { overlay.setPointerCapture(e.pointerId); } catch (err) {}
@@ -90,12 +101,78 @@ document.addEventListener("DOMContentLoaded", function () {
     while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
   }
 
+  // ── Typed labels (multi-line) ──
+  // The editor is an HTML contenteditable at document coordinates; commit
+  // converts it to a <foreignObject> overlay child with identical width and
+  // typography, so committed wrapping matches the editor exactly. Being an
+  // overlay child means undo, clear, scroll anchoring, and ephemerality
+  // treat labels and strokes uniformly.
+  function placeLabelEditor(x, y) {
+    labelEditor = document.createElement("div");
+    labelEditor.className = "presenter-label-editor";
+    labelEditor.contentEditable = "true";
+    labelEditor.style.left = x + "px";
+    labelEditor.style.top = y + "px";
+    // Clamp so the box stays on the page when placed near the right edge.
+    labelEditor.style.width = Math.min(380, document.documentElement.scrollWidth - x - 24) + "px";
+    labelColor = tool.color; // full opacity even when the highlighter is active
+    labelEditor.style.color = labelColor;
+    labelEditor.dataset.x = x;
+    labelEditor.dataset.y = y;
+    labelEditor.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { e.stopPropagation(); cancelLabel(); }
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); commitLabel(); }
+    });
+    labelEditor.addEventListener("blur", function () { commitLabel(); });
+    document.body.appendChild(labelEditor);
+    labelEditor.focus();
+  }
+
+  function commitLabel() {
+    if (!labelEditor || committingLabel) return;
+    committingLabel = true;
+    var text = labelEditor.innerText;
+    if (text.trim()) {
+      var fo = document.createElementNS(SVG_NS, "foreignObject");
+      fo.setAttribute("class", "presenter-label");
+      fo.setAttribute("x", labelEditor.dataset.x);
+      fo.setAttribute("y", labelEditor.dataset.y);
+      fo.setAttribute("width", labelEditor.offsetWidth);
+      fo.setAttribute("height", labelEditor.offsetHeight + 4);
+      var block = document.createElement("div");
+      block.textContent = text; // pre-wrap CSS preserves the hard breaks
+      block.style.color = labelColor;
+      fo.appendChild(block);
+      overlay.appendChild(fo);
+    }
+    var ed = labelEditor;
+    labelEditor = null; // clear before removal: removal fires a final blur
+    ed.remove();
+    committingLabel = false;
+  }
+
+  function cancelLabel() {
+    if (!labelEditor) return;
+    var ed = labelEditor;
+    labelEditor = null; // the blur fired by removal must find nothing to commit
+    ed.remove();
+  }
+
+  function toggleTextMode(force) {
+    var next = typeof force === "boolean" ? force : !textMode;
+    if (!next && labelEditor) commitLabel();
+    textMode = next;
+    textBtn.setAttribute("aria-pressed", String(textMode));
+    if (overlay) overlay.classList.toggle("is-text", textMode);
+  }
+
   function enterDrawMode() {
     if (drawing) return;
     drawing = true;
     ensureOverlay().classList.add("is-drawing");
     penBtn.setAttribute("aria-pressed", "true");
     selectTool(0); // spec: red pen is the default on every activation
+    toggleTextMode(false); // and always back to freehand, not text mode
     toolbar.hidden = false;
   }
 
@@ -103,6 +180,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // again). Only Clear, refresh, or navigation removes ink.
   function exitDrawMode() {
     if (!drawing) return;
+    if (labelEditor) commitLabel(); // do not lose a half-typed label
     drawing = false;
     currentPath = null;
     if (overlay) overlay.classList.remove("is-drawing");
@@ -162,6 +240,10 @@ document.addEventListener("DOMContentLoaded", function () {
     toolbar.appendChild(b);
     return b;
   }
+  var textBtn = addAction("Text", function () { toggleTextMode(); });
+  textBtn.setAttribute("aria-pressed", "false");
+  textBtn.setAttribute("data-tip", "Type labels: click the page to place");
+
   addAction("Undo", undoStroke);
   addAction("Clear", clearInk);
   addAction("Exit", exitDrawMode);

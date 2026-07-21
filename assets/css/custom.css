@@ -270,6 +270,32 @@ body .hextra-feature-grid {
   color: #fff;
 }
 
+/* Typed labels: the editor (while typing) and committed overlay labels
+   share width and typography so committed wrapping matches the editor
+   exactly. pre-wrap keeps hard breaks and soft-wraps long lines. */
+.presenter-label-editor,
+.presenter-label div {
+  font-size: 28px;
+  line-height: 1.25;
+  font-weight: 600;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+.presenter-label-editor {
+  position: absolute;
+  z-index: 9050; /* above the ink overlay, below the pen button and toolbar */
+  min-height: 1.25em;
+  background: transparent;
+  outline: 2px dashed rgba(128, 128, 128, 0.6);
+  outline-offset: 3px;
+}
+.presenter-label {
+  pointer-events: none; /* ink can be drawn over committed labels */
+}
+.presenter-overlay.is-text {
+  cursor: text;
+}
+
 /* Button-anchored tooltips via data-tip. The native title tooltip is
    cursor-anchored and uncontrollable; at the bottom-right viewport corner
    Windows clamps it onto the pointer. A pseudo-element anchored to the
