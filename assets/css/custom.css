@@ -269,6 +269,20 @@ body .hextra-feature-grid {
 .presenter-action:hover {
   color: #fff;
 }
+/* Mode toggles (Text, Projector) must be unmistakably on or off: a filled
+   high-contrast chip, not just a text-color shift. The toolbar pill is
+   dark in both site themes, so the white chip works everywhere. Plain
+   action buttons (Undo/Clear/Exit) carry no aria-pressed and never match. */
+.presenter-action[aria-pressed="true"] {
+  background: #fff;
+  color: #171717;
+  border-radius: 999px;
+  font-weight: 600;
+}
+.presenter-action[aria-pressed="true"]:hover {
+  background: #e5e5e5;
+  color: #171717; /* beat the shared :hover rule that sets white-on-white */
+}
 
 /* Typed labels: the editor (while typing) and committed overlay labels
    share width and typography so committed wrapping matches the editor
