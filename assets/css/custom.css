@@ -1,3 +1,89 @@
+/* ── Anthropic-inspired theme ───────────────────────────────────────────
+   Hextra derives every accent shade (primary-50…900) from three HSL vars
+   via calc(), and Tailwind v4 emits all palette colors as runtime
+   var(--hx-color-*) references inside @layer theme. Both are overridable
+   from this (unlayered, later-loaded) file, so the whole site re-tints
+   from variables alone — no per-component rules needed.
+
+   Light: warm ivory paper (#faf9f5) + "book cloth" clay accent. With
+   hue 16deg / sat 53% / lightness 55%, Hextra's shade math lands
+   primary-500 on ~#c9704f (book cloth) and primary-600 (links, hero
+   buttons) on ~#c15f3c (Anthropic's CTA clay).
+   Dark: warm charcoal (#1a1815) + Claude terracotta. Lightness 66.7%
+   puts primary-600 at ~#d97757 — the Claude brand orange.
+
+   IMPORTANT: the theme sets `.dark { --primary-hue: … }` in an earlier
+   stylesheet at equal specificity, so this file must declare :root
+   (light) first and then re-declare .dark AFTER it — source order inside
+   this file is what restores the light/dark split. */
+:root {
+  --primary-hue: 16deg;
+  --primary-saturation: 53%;
+  --primary-lightness: 55%;
+}
+.dark {
+  --primary-hue: 15deg;
+  --primary-saturation: 63%;
+  --primary-lightness: 66.7%;
+}
+
+/* One warm stone ramp replaces Tailwind's cool `gray` (light surfaces +
+   dark text), `neutral` (dark surfaces + borders), and `slate` (headings)
+   so the two modes stop mixing blue-grays with true grays. `white` feeds
+   the light body, navbar glass (bg-white/[.85]) and popovers; `dark`
+   feeds the dark body and navbar (bg-dark/80) — both warm in one move. */
+:root {
+  --hx-color-white: #faf9f5;
+  --hx-color-dark: #1a1815;
+
+  --hx-color-gray-50: #f7f5ef;
+  --hx-color-gray-100: #f0ede5;
+  --hx-color-gray-200: #e6e2d7;
+  --hx-color-gray-300: #d1ccc0;
+  --hx-color-gray-400: #a39f93;
+  --hx-color-gray-500: #837f73;
+  --hx-color-gray-600: #635f55;
+  --hx-color-gray-700: #4b473f;
+  --hx-color-gray-800: #37342d;
+  --hx-color-gray-900: #211f1a;
+
+  --hx-color-neutral-50: #f7f5ef;
+  --hx-color-neutral-200: #e6e2d7;
+  --hx-color-neutral-300: #d1ccc0;
+  --hx-color-neutral-400: #a39f93;
+  --hx-color-neutral-500: #837f73;
+  --hx-color-neutral-600: #635f55;
+  --hx-color-neutral-700: #454138;
+  --hx-color-neutral-800: #322f28;
+  --hx-color-neutral-900: #252220;
+
+  --hx-color-slate-50: #faf9f5;
+  --hx-color-slate-100: #f2efe8;
+  --hx-color-slate-900: #221f1a;
+}
+
+/* Dark-mode text contrast lift. The shared ramp above tunes gray-400/500
+   as light-mode muted text, but in dark mode those same tokens render the
+   secondary tier (inactive sidebar/TOC links, footer, breadcrumbs) at only
+   ~6.4:1 against the body — which dominates the perceived contrast of a
+   docs page. Re-scope just the text-tier tokens brighter for dark
+   (~8.6:1 on the body, ~7.7:1 on the footer surface); light mode keeps
+   the quieter values. Surface tokens (700-900) stay untouched. */
+.dark {
+  --hx-color-gray-100: #f3f1e9;
+  --hx-color-gray-400: #b9b5a7;
+  --hx-color-gray-500: #a09b8d;
+  --hx-color-neutral-400: #b9b5a7;
+  --hx-color-neutral-500: #a09b8d;
+}
+
+/* Clay-tinted text selection; tracks each mode's accent automatically. */
+::selection {
+  background-color: hsl(
+    var(--primary-hue) var(--primary-saturation) var(--primary-lightness) / 0.3
+  );
+}
+
 /* ── Full-width layout overrides ────────────────────────────────────────
    Hextra caps the navbar, page wrapper, content, and footer at fixed rem
    widths (90/72/90/80rem) in variables.css. On wide monitors that leaves
