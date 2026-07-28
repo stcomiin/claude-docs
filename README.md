@@ -133,7 +133,7 @@ Every page ships live-presentation tools for the instructor: an ephemeral ink ov
 | Control | Action |
 | --- | --- |
 | Pencil button (bottom-right) or `Alt+P` | Toggle the annotation overlay and its toolbar |
-| `Draw` / `Text` | Mode pair — exactly one is active (shown as a filled chip): freehand ink, or click-to-type labels |
+| `Draw` / `Text` | Mode pair (exactly one is active, shown as a filled chip): freehand ink, or click-to-type labels |
 | Color dots | Red pen, blue pen, yellow highlighter; labels use the selected color |
 | `Undo` or `Ctrl+Z` | Remove the newest stroke or label |
 | `Clear` | Remove every annotation |
@@ -147,7 +147,7 @@ In text mode, click the page to place a typing cursor: `Enter` adds a line, long
 - Annotations anchor to the content and scroll with the page.
 - Nothing persists: no `localStorage`, no network. Refresh or navigation wipes all ink and labels. Projector mode alone survives page changes (via `sessionStorage`) and dies with the tab.
 - Shortcuts match the typed character, so they work on AZERTY and QWERTZ layouts; `Alt` combos also accept the physical key for macOS. Shortcuts never fire while typing in a search field or label.
-- There is no sync between browsers — participants see the presenter's ink only through the projector or screen share.
+- There is no sync between browsers; participants see the presenter's ink only through the projector or screen share.
 
 ### Implementation
 
