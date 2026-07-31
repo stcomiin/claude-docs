@@ -5,7 +5,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "chrome-devtools-mcp@1.1.0"
+        "chrome-devtools-mcp@1.0.1"
       ],
       "env": {}
     }

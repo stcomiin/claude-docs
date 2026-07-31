@@ -13,10 +13,10 @@ Hugo runs via Docker — not installed natively.
 
 ```bash
 # Dev server
-docker run --rm -d --name hugo-preview -p 1313:1313 -v "$(pwd):/src" -w /src hugomods/hugo:exts hugo server --bind 0.0.0.0 --baseURL "http://localhost:1313" --disableFastRender --noHTTPCache
+docker run --rm -d --name hugo-preview -p 1313:1313 -v "$(pwd):/src" -w /src hugomods/hugo:exts hugo server --bind 0.0.0.0 --baseURL "http://localhost:1313" --disableFastRender --noHTTPCache --poll 700ms
 
-# Restart (required after asset/config changes)
-docker stop hugo-preview && docker run --rm -d --name hugo-preview -p 1313:1313 -v "$(pwd):/src" -w /src hugomods/hugo:exts hugo server --bind 0.0.0.0 --baseURL "http://localhost:1313" --disableFastRender --noHTTPCache
+# Restart (required after config / Hextra theme changes)
+docker stop hugo-preview && docker run --rm -d --name hugo-preview -p 1313:1313 -v "$(pwd):/src" -w /src hugomods/hugo:exts hugo server --bind 0.0.0.0 --baseURL "http://localhost:1313" --disableFastRender --noHTTPCache --poll 700ms
 
 # Build
 docker run --rm -v "$(pwd):/src" -w /src hugomods/hugo:exts hugo --gc --minify
@@ -29,7 +29,8 @@ On Windows with Git Bash, prefix Docker commands with `MSYS_NO_PATHCONV=1` to pr
 
 ## Gotchas
 
-- **Docker caches assets.** Changes to `assets/css/`, `hugo.yaml`, or layouts require a container restart. Content/static changes reload automatically.
+- **Live reload requires `--poll` on Docker-for-Windows.** Hugo's default watcher uses inotify, but Docker Desktop's virtualized Windows→Linux bind mount does **not** forward inotify events — file contents update on read, but the kernel inside the container never sees a change event, so Hugo never rebuilds. Always launch with `--poll 700ms` (already in the Commands above) so Hugo stats files on an interval instead. Without it the dev server appears alive but silently serves the build from container start.
+- **Restart still needed for config / theme changes.** With `--poll`, content, layouts, shortcodes, `assets/css/`, and `static/images/` reload automatically. But `hugo.yaml` module changes and Hextra theme updates (`hugo mod get -u …`) require a container restart — Hugo only resolves modules at startup.
 - **No duplicate H1 headings.** Hextra renders `title` from front matter as the page H1. Never add `# Title` in the markdown body — it will show twice.
 - **Hugo `weight` = sidebar order.** Lower weight = higher position. Current pages use 1–4.
 - **Images go in `static/images/`**, referenced as `/images/filename.png` in markdown (not relative paths).
@@ -41,7 +42,7 @@ On Windows with Git Bash, prefix Docker commands with `MSYS_NO_PATHCONV=1` to pr
 
 ## Verification
 
-The repo ships with a project-scoped `.mcp.json` that wires up the [chrome-devtools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp). On first session start in this repo Claude Code will prompt to approve it — accept it. Per the Rules section above, this MCP is the **mandatory** verification path for any UI change.
+The repo ships with a project-scoped `.mcp.json` that wires up the [chrome-devtools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp) (pinned to `chrome-devtools-mcp@1.0.1`), and `.claude/settings.json` pre-approves it via `enabledMcpjsonServers`, so it loads automatically at session start with no prompt. MCP servers only initialize at startup, so after a fresh clone or any `.mcp.json`/settings change, restart Claude Code once to bring it up. Per the Rules section above, this MCP is the **mandatory** verification path for any UI change.
 
 Standard workflow:
 
@@ -80,6 +81,8 @@ weight: 5
 ```
 
 For sub-sections, create a folder with `_index.md` inside it.
+
+**Always mirror a new page into the home landing grid.** Every page added under `content/docs/` must also get a matching `hextra/feature-card` inside the `hextra/feature-grid` in `content/_index.md`, so it's reachable from the landing page and not only the sidebar. Copy the existing card pattern (`title`, one-line `subtitle`, `icon`, `link="docs/<slug>/"`). The `icon` must be a valid name from Hextra's bundled `data/icons.yaml` — an unknown name fails the build with `icon %q not found` (errorf), it does not degrade gracefully.
 
 ## Shortcodes
 
