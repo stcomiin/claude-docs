@@ -803,6 +803,8 @@ minimumReleaseAge = 604800
 export UV_EXCLUDE_NEWER="7 days"
 ```
 
+> 🗒️ **Dependabot now applies its own three-day cooldown by default** (Jul 2026) before opening version-update PRs - security updates still open immediately. That is a complement, not a replacement: the cooldown delays the *pull request*, while the settings above block the *install*. Set both. See [the npm / Actions case study](#-case-study---npm-and-github-actions-as-one-trust-boundary).
+
 ### Lifecycle scripts from Claude-installed packages
 
 When Claude runs `npm install`, any `preinstall`/`postinstall` scripts in those packages execute immediately on your machine with your credentials. This is the vector supply-chain worms like [Shai-Hulud](https://www.microsoft.com/en-us/security/blog/2025/12/09/shai-hulud-2-0-guidance-for-detecting-investigating-and-defending-against-the-supply-chain-attack/) used to compromise 500+ npm packages across three waves in 2025–2026.
@@ -816,6 +818,8 @@ ignore-scripts=true
 
 For deps that legitimately need lifecycle scripts (`esbuild`, `sharp`, `node-pre-gyp`), use [LavaMoat allow-scripts](https://github.com/LavaMoat/LavaMoat) so the allowlist is reviewable in git. Python equivalent: `pip install --require-hashes -r requirements.txt` after generating hashes with `pip-compile --generate-hashes`.
 
+> 🗒️ **npm v12 disables install scripts by default** (Jun 2026), which makes the setting above the platform default going forward - re-enable per approved script rather than globally. Keep setting it explicitly anyway: any machine, CI image, or container still on npm ≤ 11 does not get the new default. Details in [the npm / Actions case study](#-case-study---npm-and-github-actions-as-one-trust-boundary).
+
 ### GitHub Actions Claude generates
 
 When Claude writes CI workflows, ensure third-party actions are pinned by **commit SHA, not tag** - tags can be retroactively rewritten to inject malicious code ([CISA advisory on tj-actions/changed-files](https://www.cisa.gov/news-events/alerts/2025/03/18/supply-chain-compromise-third-party-tj-actionschanged-files-cve-2025-30066-and-reviewdogaction)).
@@ -828,6 +832,8 @@ When Claude writes CI workflows, ensure third-party actions are pinned by **comm
 ```
 
 Ask Claude: `"Pin all third-party actions in this workflow to commit SHAs."` Dependabot keeps SHA pins up to date automatically.
+
+Pinning is the floor, not the ceiling. For the rest - least-privilege `permissions`, fork/PR secret isolation, protected publishing environments, and workflow linting - use the [secure Actions baseline](#derived-guidance---a-secure-actions-baseline) in the next section.
 
 ### Quick health check after a Claude Code session
 
@@ -846,6 +852,190 @@ osv-scanner scan source -r .
 ```
 
 If anything looks wrong, run the `incident-triage` subagent defined in [Layer 2](#-layer-2---securing-the-agent-itself) - it produces a timeline + IOCs + blast-radius report.
+
+---
+
+## 🔗 Case study - npm and GitHub Actions as one trust boundary
+
+The section above treats supply chain as a problem you solve with local config. This one is about the ground moving under you: through the first half of 2026 GitHub changed a series of npm and Actions **defaults** specifically to break supply-chain attack chains, and several of those changes make advice that was correct last year incomplete.
+
+**Primary source:** Greg Ose and Zachary Steindler, [Disrupting supply chain attacks on npm and GitHub Actions](https://github.blog/security/supply-chain-security/disrupting-supply-chain-attacks-on-npm-and-github-actions/), GitHub Blog, 28 July 2026 - the fourth in a series after [Our plan for a more secure npm supply chain](https://github.blog/security/supply-chain-security/our-plan-for-a-more-secure-npm-supply-chain/) (Sep 2025), [Preparing for the next malware campaign](https://github.blog/security/supply-chain-security/strengthening-supply-chain-security-preparing-for-the-next-malware-campaign/) (Dec 2025), and the [Actions 2026 security roadmap](https://github.blog/news-insights/product-news/whats-coming-to-our-github-actions-2026-security-roadmap/) (Mar 2026).
+
+> 🗒️ **What this source is, and what it isn't.** It is a round-up of shipped mitigations organised around the anatomy of these attacks - **not** an incident post-mortem. GitHub names no campaign and publishes no victim counts here. Read the chain below as GitHub's generalised model, with the named incidents elsewhere on this page ([Shai-Hulud](#lifecycle-scripts-from-claude-installed-packages), [LiteLLM and TanStack](#minimum-release-age---the-automated-version-of-wait-and-see), [`tj-actions/changed-files`](#github-actions-claude-generates)) as the worked examples. As in the [Hugging Face case study](#-case-study---the-july-2026-hugging-face-agent-intrusion), anything under a **Derived guidance** heading is this workshop's interpretation, not GitHub's recommendation.
+
+**Why this sits on a Claude Code page.** Claude installs packages, writes and edits workflow YAML, and the skills, plugins, and MCP servers you add to a session are themselves npm packages and GitHub repos. Those are not three separate trust decisions - they are one boundary, and GitHub's model describes attackers crossing it in a single direction: compromise one project, harvest credentials, publish malware everywhere those credentials reach.
+
+### The chain GitHub describes (reported)
+
+| Stage | Technique | What GitHub shipped against it |
+| --- | --- | --- |
+| **1. Initial compromise** | Phish a maintainer account, or exploit a ["pwn request"](https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/) - a workflow that triggers on fork PRs and then executes untrusted code from that fork | [72-hour read-only lock](https://github.blog/changelog/2026-06-25-npm-adds-preventive-account-protection-for-high-impact-accounts/) on high-impact npm accounts after an email change or 2FA-recovery-code use (Jun 2026); [`actions/checkout` no longer checks out untrusted fork code](https://github.blog/changelog/2026-06-18-safer-pull_request_target-defaults-for-github-actions-checkout/) on commonly exploited triggers unless you opt out, backported to older versions (Jun 2026); [policies over who may trigger workflows and which triggers are allowed](https://github.blog/changelog/2026-06-18-control-who-and-what-triggers-github-actions-workflows/) (Jun 2026) |
+| **2. Escalate** | Poison cache entries shared across workflows to reach more privileged workflows and their credentials | [Actions cache is read-only for untrusted triggers](https://github.blog/changelog/2026-06-26-read-only-actions-cache-for-untrusted-triggers/) (Jun 2026), closing "a common path attackers have used to turn a vulnerability with limited impact into one that compromises highly privileged credentials used by release and publishing workflows" |
+| **3. Exfiltrate credentials** | Detect and steal long-lived tokens from the CI environment, for reuse across ecosystems | [npm trusted publishing added CircleCI](https://github.blog/changelog/2026-04-06-npm-trusted-publishing-now-supports-circleci/) (Apr 2026); the [Actions network firewall](https://github.com/github-early-access/actions-native-egress-firewall/) technical preview logs all outbound traffic from workflow runs |
+| **4. Propagate** | Publish malware fast, using npm **install-time** scripts to harvest credentials rather than waiting for the package to run | [Staged publishing](https://github.blog/changelog/2026-05-22-staged-publishing-and-new-install-time-controls-for-npm/) holds a publish until separate approval and 2FA (May 2026); [npm v12](https://github.blog/changelog/2026-06-09-upcoming-breaking-changes-for-npm-v12/) disables install scripts by default and blocks git/remote-URL dependencies (Jun 2026); [Dependabot waits three days](https://github.blog/changelog/2026-07-14-dependabot-version-updates-introduce-default-package-cooldown/) before opening version-update PRs (Jul 2026) |
+| **Response** | - | [Self-service revocation](https://github.blog/changelog/2026-06-24-self-service-credential-revocation-for-incident-response/) of every credential belonging to a user in an enterprise (Jun 2026); the [credential-revocation API extended](https://github.blog/changelog/2026-03-26-credential-revocation-api-now-supports-github-oauth-and-github-app-credentials/) from PATs to GitHub OAuth and App tokens (Mar 2026) |
+
+GitHub's own single strongest statement, worth reading twice: **"The number one thing you can do to disrupt these attacks is to remove long-lived credentials from your CI/CD pipeline."**
+
+### Defaults that changed under you (reported)
+
+Four of these change what "secure" means for advice written earlier on this page:
+
+| Change | On by default? | What it means for you |
+| --- | --- | --- |
+| **npm v12 disables install scripts** | **Yes** - breaking change | The `ignore-scripts=true` advice [above](#lifecycle-scripts-from-claude-installed-packages) becomes the platform default on v12+. Re-enable per approved script rather than globally - and keep setting it explicitly for any machine still on npm ≤ 11. |
+| **Dependabot 3-day cooldown** | **Yes** | Complements [minimum release age](#minimum-release-age---the-automated-version-of-wait-and-see) rather than replacing it: cooldown delays the *PR*, release-age pinning blocks the *install*. Set both. Security updates still open immediately. |
+| **`actions/checkout` fork-checkout block** | **Yes**, backported | If a workflow of yours relied on checking out fork code under `pull_request_target`, it now needs an explicit opt-out - which is a decision to re-review, not to rubber-stamp. |
+| **Staged publishing** | No - opt in | Turn it on for anything you publish. It decouples the credentials CI holds from the authority to ship a version. |
+
+### Derived guidance - before you install or enable anything
+
+An npm package, a GitHub Action, a Claude Code skill or plugin, and an MCP server are the same trust decision. Use one checklist:
+
+```markdown
+### Before installing or enabling
+
+Provenance
+- [ ] Publisher is who you expect; repo link resolves and matches the package
+- [ ] Release is older than your cooldown window
+- [ ] No version-number jump or first release from a long-dormant project
+- [ ] Attestations or provenance verified where the ecosystem offers them
+
+Execution surface
+- [ ] Install-time scripts reviewed (preinstall / postinstall / prepare)
+- [ ] For an Action: source read at the SHA you are pinning, not at HEAD
+- [ ] For a skill or plugin: grepped for `!` dynamic-context commands and
+      `allowed-tools: Bash(*)` before it can reach a session
+- [ ] For an MCP server: you know what it reads, where it sends it, and
+      whose infrastructure it runs on
+
+Blast radius
+- [ ] It cannot see credentials it does not need
+- [ ] Adding it is a reviewable commit, not an untracked local change
+```
+
+> 💡 The skill and plugin lines matter because `.claude/` is loaded from any cloned repo and any `--add-dir` path - see [Skill / supply-chain attacks](#skill--supply-chain-attacks). A skill is a supply-chain artefact that happens not to live in `package.json`.
+
+### Derived guidance - before you publish or release
+
+```markdown
+### Before publishing or releasing
+
+Identity
+- [ ] Phishing-resistant 2FA (hardware key or passkey) on npm and GitHub
+- [ ] Recovery codes stored offline - and you know that using one now puts
+      a high-impact npm account read-only for 72 hours
+- [ ] Maintainer list reviewed; no stale accounts still holding publish rights
+
+Credentials
+- [ ] Trusted publishing (OIDC) configured - no long-lived npm token in CI
+- [ ] Any remaining token is granular and scoped to a single package
+- [ ] Staged publishing enabled, so a stolen CI credential cannot ship alone
+
+Release path
+- [ ] Publish job runs in a protected environment with required reviewers
+- [ ] Publish job is the only job granted `id-token: write`
+- [ ] Provenance / build attestations generated and verifiable
+- [ ] The release workflow itself is SHA-pinned like any third-party code
+```
+
+[Trusted publishing](https://docs.npmjs.com/trusted-publishers) is the load-bearing item - it is what removes the credential the whole attack chain is built to steal.
+
+### Derived guidance - a secure Actions baseline
+
+Start every workflow from this shape. `permissions: {}` at the top means each job opts *up* to exactly what it needs and nothing inherits write access by accident.
+
+```yaml
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Deny everything at the top; each job opts up to what it needs.
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read          # the only scope most jobs ever need
+    steps:
+      # Egress monitoring first, so it sees every later step.
+      - uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit     # move to `block` + allowed-endpoints once known
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false   # don't leave a usable token in .git/config
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      # Install without running lifecycle scripts (default on npm v12+).
+      - run: npm ci --ignore-scripts
+      - run: npm test
+
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: true
+```
+
+Rules that go with it:
+
+- **Pin by full 40-character SHA, comment the version.** Resolve one with `gh api repos/actions/checkout/commits/v7.0.1 --jq .sha`. Dependabot updates SHA pins for you; the comment is what keeps the diff readable.
+- **Never mix `pull_request_target` with a checkout of the PR head.** That combination gives untrusted code a token *and* secrets. If you truly need repo context on a fork PR, split it: an untrusted job that builds and uploads an artifact, and a separate trusted job that downloads it. GitHub's [pwn-request writeup](https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/) is the canonical explanation.
+- **Secrets belong to jobs, not workflows.** Scope each secret to the single job that needs it, and put anything that publishes behind a [protected environment](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments) with required reviewers.
+- **Lint the workflows themselves.** [`zizmor`](https://github.com/zizmorcore/zizmor) audits for exactly these patterns (unpinned actions, injectable `${{ }}` interpolation into `run:`, dangerous triggers); [`actionlint`](https://github.com/rhysd/actionlint) catches syntax and expression bugs. Both run in a pre-commit hook.
+- **Attest what you build.** [`actions/attest-build-provenance`](https://github.com/actions/attest-build-provenance) produces verifiable provenance, which is what lets a downstream consumer check the artefact came from your workflow and not an attacker's.
+
+> ⚠️ **Workflow YAML that Claude wrote deserves a slower review than the code that Claude wrote.** A subtle `permissions:` widening, a new trigger, or a swapped action reference is a credential-scope change wearing the costume of a config tweak. Ask specifically: *did this diff add a trigger, widen a permission, introduce a secret, or change an action reference?*
+
+### Derived guidance - if a package, account, or token is compromised
+
+```markdown
+### Supply-chain incident response
+
+First hour
+- [ ] Revoke first, investigate second - enterprise admins can revoke every
+      credential belonging to a user in one action
+- [ ] Rotate npm tokens, PATs, OAuth and App tokens, and every cloud
+      credential CI could reach
+- [ ] Deprecate or unpublish the malicious version and ship a clean patch
+      (deprecation is usually faster and less disruptive than unpublish)
+
+Scope it
+- [ ] Audit Actions run logs for the window: what ran, what it fetched,
+      what it pushed
+- [ ] Diff every workflow file, and every repository secret created or
+      changed in the window
+- [ ] Check for new deploy keys, webhooks, App installations, collaborators
+- [ ] Search downstream lockfiles for the affected version range
+
+Close out
+- [ ] Notify downstream users with the affected version range and IOCs
+- [ ] File a GitHub Security Advisory so Dependabot and OSV pick it up
+- [ ] Re-verify published artifacts against their expected digests
+```
+
+The last item is not busywork: verifying published images and packages against expected digests is precisely how Hugging Face established that real write access [had not produced a change that shipped](#-case-study---the-july-2026-hugging-face-agent-intrusion).
 
 ---
 
@@ -918,6 +1108,8 @@ Drop this into `PULL_REQUEST_TEMPLATE.md` - items are specific to Claude Code an
 - [ ] Secrets scan clean (gitleaks / detect-secrets / trufflehog `--only-verified`)
 - [ ] No unexpected `preinstall`/`postinstall` scripts in new deps
 - [ ] All third-party GitHub Actions pinned by commit SHA (not tag)
+- [ ] Workflow diffs checked for added triggers, widened `permissions`,
+      new secrets, or changed action references
 - [ ] Claude-suggested dependencies verified on registry (slopsquatting check)
 - [ ] Security tests added for new code paths
 - [ ] If Claude built an AI feature: Garak/Promptfoo probe added for new prompt surface
@@ -935,3 +1127,4 @@ Drop this into `PULL_REQUEST_TEMPLATE.md` - items are specific to Claude Code an
 - **OWASP GenAI Security Project** - [genai.owasp.org](https://genai.owasp.org/) for evolving LLM/agent threat frameworks.
 - **Hugging Face blog** - [huggingface.co/blog](https://huggingface.co/blog) publishes their incident write-ups, including the [July 2026 agent-intrusion timeline](https://huggingface.co/blog/agent-intrusion-technical-timeline) covered [above](#-case-study---the-july-2026-hugging-face-agent-intrusion). The evaluation-side counterpart is [OpenAI's disclosure](https://openai.com/index/hugging-face-model-evaluation-security-incident/), which is still being updated as their review with METR and Redwood Research completes.
 - **GitHub Security Advisories** - for every framework Claude scaffolds for you (`Watch → Custom → Security alerts`).
+- **GitHub changelog, supply-chain filter** - [github.blog/changelog?label=supply-chain-security](https://github.blog/changelog/?label=supply-chain-security) is where npm and Actions default changes land first, usually months before anyone writes them up. The [July 2026 round-up](#-case-study---npm-and-github-actions-as-one-trust-boundary) is a digest of this feed.
