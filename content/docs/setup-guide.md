@@ -15,7 +15,7 @@ Please finish these steps **before** the workshop. Allow about 15–20 minutes.
 - [ ] Git installed
 - [ ] A terminal you're comfortable with
 - [ ] Claude Code installed and working
-- [ ] Codex installed and working
+- [ ] (Optional) Codex installed and working
 - [ ] (Optional) A code editor you like
 
 ---
@@ -77,6 +77,10 @@ If you want to bring your own key, follow the setup steps below.
 6. Note your API key — it starts with `sk-or-`
 
 ### Claude Code
+
+{{< callout type="warning" >}}
+**The workshop OpenRouter key gives you Haiku only.** The only Claude model available with the key we email you is **Claude Haiku 4.5**. Any other model shown below — Opus 5, Sonnet 5, or Fable 5 — will **not** work with the provided key. Set the model to Haiku in your config, and switch with `/model haiku` inside Claude Code.
+{{< /callout >}}
 
 1. **Install with npm**
     
@@ -142,7 +146,7 @@ If you want to bring your own key, follow the setup steps below.
 
 3. Run `claude`, then use `/model` to change models. As of 2026-07-27, the Claude Code lineup is Fable 5, Opus 5, Sonnet 5, and Haiku 4.5. These gateway examples use Opus 5. Use `/effort` when you need to change the reasoning depth.
 
-### Codex CLI
+### (Optional) Codex CLI
 
 1. **Install with npm**
 
