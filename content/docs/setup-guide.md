@@ -106,7 +106,7 @@ If you want to bring your own key, follow the setup steps below.
     
     Edit `~/.claude/settings.json` and replace the example URL and key. In PowerShell, the same file is `$HOME\.claude\settings.json`. Claude Code sends requests to `ANTHROPIC_BASE_URL` and authenticates them with `ANTHROPIC_AUTH_TOKEN`.
     
-    **LiteLLM proxy:**
+    **LiteLLM proxy (Use Openrouter section below for the workshop):**
     
     ```json
     {
@@ -124,20 +124,19 @@ If you want to bring your own key, follow the setup steps below.
     }
     ```
     
-    **OpenRouter:**
+    **OpenRouter (use this for the workshop):**
     
     ```json
     {
       "env": {
         "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
         "ANTHROPIC_AUTH_TOKEN": "sk-or-your-openrouter-key",
-        "ANTHROPIC_MODEL": "anthropic/claude-opus-5",
-        "ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic/claude-opus-5",
-        "ANTHROPIC_DEFAULT_SONNET_MODEL": "anthropic/claude-opus-5",
-        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-opus-5",
-        "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-opus-5",
-        "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-        "CLAUDE_CODE_EFFORT_LEVEL": "max"
+        "ANTHROPIC_MODEL": "anthropic/claude-haiku-4.5",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic/claude-haiku-4.5",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "anthropic/claude-haiku-4.5",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-haiku-4.5",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-haiku-4.5",
+        "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
       }
     }
     ```
