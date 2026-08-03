@@ -146,7 +146,7 @@ If you want to bring your own key, follow the setup steps below.
 
 3. Run `claude`, then use `/model` to change models. As of 2026-07-27, the Claude Code lineup is Fable 5, Opus 5, Sonnet 5, and Haiku 4.5. These gateway examples use Opus 5. Use `/effort` when you need to change the reasoning depth.
 
-### (Optional) Codex CLI
+### (Optional, not needed for this workshop) Codex CLI
 
 1. **Install with npm**
 
