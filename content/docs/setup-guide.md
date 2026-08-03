@@ -159,7 +159,7 @@ If you want to bring your own key, follow the setup steps below.
  - `CLAUDE_CODE_SUBAGENT_MODEL` is a default rather than an override since v2.1.251: an agent file's own `model:` wins. `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` (v2.1.257+) force applies it to every subagent.
  - `CLAUDE_CODE_FORK_SUBAGENT=0` turns off subagent forking, which has been on by default since v2.1.232. A forked subagent inherits the whole conversation which is context bloat. With forking off, subagents start from only the brief they are given.
 
-### (Optional) Codex CLI
+### (Optional, not needed for this workshop) Codex CLI
 
 1. **Install with npm**
 
