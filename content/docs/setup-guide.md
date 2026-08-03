@@ -57,30 +57,24 @@ C:\Program Files\Git\bin\bash.exe
 
 ## 2. Install and configure
 
-### Get an API key
+### Getting Your API Key
 
-You need a key from the provider used for the workshop.
+You'll need an API key from your chosen provider.
 
-#### Option A: LiteLLM proxy
+> ℹ️ **For workshop participants:** We will provide your API key. Watch for a follow-up email from us.
 
-If your organization provides a LiteLLM proxy, or you run one yourself:
+If you want to bring your own key, follow the setup steps below.
 
-1. Open the LiteLLM admin page at `https://your-litellm-proxy.example.com/ui`.
-2. Select **Virtual Keys**, then **Create new key**.
-3. Choose your team, give the key a name, and leave the other fields at their defaults.
-4. Create the key and save it somewhere secure. You can regenerate it later from the same page.
-5. Use **Logs** for request details such as token counts and time to first token. Use **Usage** for totals.
+#### OpenRouter setup steps
 
-#### Option B: OpenRouter
+[OpenRouter](https://openrouter.ai/) provides unified access to Claude, GPT, Gemini, and many other models through a single API key.
 
-[OpenRouter](https://openrouter.ai/) routes requests to Claude, GPT, Gemini, and other model providers through one API key.
-
-1. Sign up at [openrouter.ai](https://openrouter.ai/).
-2. Open [Keys](https://openrouter.ai/keys) and create an API key.
-3. Add credits under [Credits](https://openrouter.ai/credits).
-4. Save the key; it starts with `sk-or-`.
-
-Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses `https://openrouter.ai/api/v1`.
+1. Skip to [Claude Code installation section](#claude-code) if you already have an OpenRouter key (`sk-or-xxxxxx`).
+2. Sign up at [openrouter.ai](https://openrouter.ai/)
+3. Go to [Keys](https://openrouter.ai/keys) and create an API key
+4. Add credits under [Credits](https://openrouter.ai/credits)
+5. Your base URL will be `https://openrouter.ai/api`
+6. Note your API key — it starts with `sk-or-`
 
 ### Claude Code
 
