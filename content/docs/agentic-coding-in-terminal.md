@@ -5,11 +5,11 @@ weight: 1
 
 **Apex Builders Collective** × **Info PC • April** 2026
 
-[Pre-Workshop Setup Guide](/docs/setup-guide)
+[Pre-Workshop Setup Guide](/docs/setup-guide/)
 
 > 💁 **Workshop materials** — Use the navigation to browse all sections.
 
-# Foundations
+## Foundations
 
 ## What is Agentic Coding?
 
@@ -27,18 +27,18 @@ Specs are the source of truth in an agent-led coding world. Clearly defined spec
 
 ## Installation & Configuration
 
-> For step-by-step installation instructions (API key setup, Claude Code, Codex, GSD), see the **[Pre-Workshop Setup Guide](/docs/setup-guide)**.
+> For step-by-step installation instructions (API key setup, Claude Code, Codex, GSD), see the **[Pre-Workshop Setup Guide](/docs/setup-guide/)**.
 
 ### Claude Products Overview
 
 **What are the differences between Claude Models, Claude Harness, Claude Code, Claude API, Claude Max, Claude Desktop, Claude Design, Claude Code on the Web?**
 
 - Claude Code is the terminal coding IDE used to call Claude models to perform various actions. Also known as an Agentic (Coding) Harness. Other alternatives to this are Codex (by OpenAI) and OpenCode. However, there is also a VSCode extension of Claude Code which is the UI alternative for those that are terminal-averse, however support is slower.
-- Claude models are the different LLM models powering the different Anthropic products like Claude Desktop, Claude Code, Claude Design. As of Apr 2026, the main LLM models are Opus 4.6/4.7, Sonnet 4.6, Haiku 4.5
+- Claude models power Claude Desktop, Claude Code, Claude Design, and the Anthropic API. As of 2026-07-27, the Claude Code lineup is Fable 5, Opus 5, Sonnet 5, and Haiku 4.5. Opus 5 is the default on Max, Team Premium, Enterprise pay-as-you-go, the API, Amazon Bedrock, Claude Platform on AWS, and Google Cloud's Agent Platform. Sonnet 5 is the default on Pro, Team Standard, and Enterprise subscription seats. Microsoft Foundry still defaults to Sonnet 4.5. Use `/model` when you want a different model.
 - Claude Max refers to one of the subscription tiers for usage-based consumer plans. The subscription plans are Pro($20 USD), Max 5X($100 USD) and Max 20X($200 USD). Refer to [https://claude.com/pricing](https://claude.com/pricing) for more details. The actual LLM usage derived from the subscription plans are way higher than the equivalent money cost through the Anthropic API
 - Claude API aka Anthropic API refers to the API to call the different Claude LLMs. Billing of LLM calls when using the API is charged by per million token rates of the various models and is much more expensive when compared to using it through a subscription plan.
 - Claude Desktop is the desktop app that allows you to chat, run Co-Work, run Claude Code but in a UI format. This requires a personal Claude account to access, and out of scope for this Claude Code workshop.
-- Claude Code on the web allows for Claude Code sessions that run on Anthropic hardware online, allowing cloud Claude Code sessions that connect to your Github Repos online and do work and also submit PRs directly to the repo. These stay online and can be accessed from Claude Desktop or Claude website.
+- Claude Code on the web runs sessions in isolated Anthropic-managed VMs. A session can connect to a GitHub repository, work in the background, and open a pull request. You can monitor it at [claude.ai/code](https://claude.ai/code) or in the Claude mobile app. The research preview is available on Pro, Max, Team, and Enterprise plans with premium seats.
 
 ### Useful Claude Code Commands
 
@@ -50,12 +50,12 @@ Before we go deeper, here are some commands / CLI flags that are useful.
 | `/init` | Scans the repo and generates a starter `CLAUDE.md`. NOT RECOMMENDED FOR USE |
 | `/clear` | Wipes conversation history (CLAUDE.md stays loaded). Use when switching tasks or when you find that the context is filling up. This should be your most used command. Always start fresh whenever possible. |
 | `/compact [focus]` | Summarizes history instead of wiping it. Pass instructions: `/compact keep the auth decisions`. NOT RECOMMENDED FOR USE |
-| `/model [name]` | Switch model mid-session: `opus`, `sonnet`, `haiku`, `claude-opus-4-6[1m]` |
-| `/cost` / `/stats` | Token spend (`/cost` for API users, `/stats` for Pro/Max) |
+| `/model [name]` | Switch model mid-session: `opus`, `sonnet`, `fable`, `haiku`, or a full ID like `claude-fable-5` |
+| `/usage` | Shows usage and limits. `/cost` and `/stats` remain available as aliases. |
 | `/resume` | Pick up a previous session. `claude -c` from the shell resumes the most recent. e.g `claude --resume <some-session-id>` |
 | `Esc` | Stop Claude mid-action. |
 | **`Ctrl+U` \|\| `Ctrl+Y`** | Cuts the current Input \|\| Paste the Cut prompt |
-| `Ctrl+S` | Prompt Stashing - Best for mid-prompt and need to ask something else first. Stashed Prompt auto restores after sending something else. |
+| `Ctrl+S` | Prompt stashing - best for when you're mid-prompt and need to ask something else first. Press `Ctrl+S` again on an empty prompt to bring the stash back. |
 | `Esc Esc` (Empty prompt) | Open the rewind menu (selective: code only, conversation only, or both). You can also use `/rewind` |
 | `@filepath` | Reference a file or directory inline — `@src/auth/login.ts fix the JWT check` |
 
@@ -66,13 +66,13 @@ Before we go deeper, here are some commands / CLI flags that are useful.
 | Action | Command | Remarks |
 | --- | --- | --- |
 | Stop a conversation | Ctrl + C twice in the session until the session is exited | All session history is stored as .jsonl files in .claude folder in User Directory. `~/.claude/projects/<folder name>` |
-| Resume a previous conversation | `claude --resume`  which will show a list of previous conversations to resume from in this current folder, OR `claude —continue` which will auto continue from the last stopped conversation in this current folder | you can also append additional flags to these resume and continue commands for eg. `claude --continue --dangerously-skip-permissions --effort max --model claude-sonnet-4-6` |
+| Resume a previous conversation | `claude --resume`  which will show a list of previous conversations to resume from in this current folder, OR `claude --continue` which will auto continue from the last stopped conversation in this current folder | you can also append additional flags to these resume and continue commands for eg. `claude --continue --dangerously-skip-permissions --effort max --model claude-sonnet-5` |
 
 ### Useful Claude Code Customisation
 
 1. cc-status line
     
-    Leverage cc-status-line to customise metrics for better observability of your Claude Code session 
+    Use ccstatusline to keep the session metrics you care about in the status bar.
     GitHub *repo:* https://github.com/sirmalloc/ccstatusline
     
     ```bash
@@ -143,7 +143,7 @@ Please open Claude Code, and ask it to give you a CRUD app of some kind.
 
 ---
 
-# Working with Agentic Coding
+## Working with Agentic Coding
 
 ## 🧠 Context & Memory
 
@@ -153,7 +153,7 @@ Agentic coding tools like Claude Code maintain context across a session, but und
 
 - **`CLAUDE.md`** is a special file Claude Code reads automatically when it starts in a project. Use it to encode persistent instructions: coding conventions, architecture decisions, preferred libraries, things Claude should never do, and so on. The contents of this is injected at the start of the conversation, in one of the many system prompts.
 - **`AGENTS.md`** serves a similar purpose for other agent runtimes (e.g. OpenAI Codex). If you're working across multiple agents, keeping both in sync is good practice using symlink.
-- **Claude Code does NOT read AGENTS.md, only CLAUDE.md.** Do symlinks or @mention AGENTS.md inside CLAUDE.md
+- **Claude Code reads `CLAUDE.md`, not `AGENTS.md`, directly.** If another tool already uses `AGENTS.md`, import it from `CLAUDE.md` with `@AGENTS.md` or link the two files with `ln -s AGENTS.md CLAUDE.md`. `/init` reads existing Cursor and Copilot rule files by default; with `CLAUDE_CODE_NEW_INIT=1`, it also incorporates `AGENTS.md` and `.windsurfrules`.
 - Think of these files as your **onboarding doc for the AI** — the same way you'd brief a new contractor on how your codebase works, but not quite. Normally briefs would be done using actual documentation. CLAUDE.md is more for project specific stuff.
 - Good things to put in `CLAUDE.md`:
     - Tech stack and versions
@@ -221,7 +221,7 @@ Test it out! Prompt Claude Code to add a feature. Check whether if follows the r
 
 - LLMs have a finite context window. In long sessions, older conversation turns get summarised ("compacted") to free up context.
 - What goes into the context? Visualize it - [https://code.claude.com/docs/en/context-window](https://code.claude.com/docs/en/context-window)
-- [https://github.com/jhlee0409/claude-code-history-viewer](https://github.com/jhlee0409/claude-code-history-viewer) to check past convos and to see specific stats by project. Install using the msi file from latest releases [here](https://github.com/jhlee0409/claude-code-history-viewer/releases). Contrary to its name, it is not just for viewing CC conversations, but also for other harnesses like Codex, etc. It also allows analysis of sessions, token usage, etc.
+- [Claude Code History Viewer](https://github.com/jhlee0409/claude-code-history-viewer) lets you browse past sessions and project statistics. Install the MSI from the [latest release](https://github.com/jhlee0409/claude-code-history-viewer/releases). Despite the name, it also reads sessions from tools such as Codex and reports token usage.
 - Do not let conversations get to the point where your conversation needs to be compacted. Always /clear around 200k context if possible. Claude models have 1M context now by default but performance still degrades in long context, no matter how good they say it is.
 - Claude Code handles the context window automatically (that's the whole point of CC: context engineering for agentic tasks), but you can influence it:
     - Always start a **new session** for any task that is not related to current session.
@@ -237,7 +237,7 @@ Test it out! Prompt Claude Code to add a feature. Check whether if follows the r
 | `/context` | Visual grid showing how your context window is allocated |
 | `/compact [focus]` | Compress conversation into a summary. Pass focus instructions to steer what's preserved |
 | `/clear` | Wipe conversation entirely. CLAUDE.md stays loaded. Use when switching to an unrelated task |
-| `/recap` | *New in v2.1.108.* Generate a one-line context summary when returning to a session after a break |
+| `/recap` | Generate a one-line context summary when returning to a session after a break |
 
 ### Cost, Token & Usage Awareness
 
@@ -256,16 +256,15 @@ Test it out! Prompt Claude Code to add a feature. Check whether if follows the r
     - Avoid pasting entire large files when only a section is relevant
     - Use plan mode (see below) to scope work before execution begins — cheap to plan, expensive to re-do
     - Check token usage in the dashboard if running at scale or via API (doesn't apply for our case)
-    - Cache token writes are a killer: Costs 25% of standard input token cost (1.25x more). All requests sent through CC will incur cache writes
-    - Cached token reads are 10% of tokens cost price (Cached duration ~5min)
-        - Best Practices: Continuing the conversation within 5 mins costs lesser than continuously stopping and going
+    - A five-minute cache write costs 1.25× the base input price; a cache hit costs 0.1×. You pay the write rate when content is first cached and the read rate when a later request reuses it. Continuing within the cache window can therefore reduce cost.
+    - Sonnet 5 is priced at $2/$10 per MTok through 2026-08-31, then $3/$15. Claude 4.7 and later models can produce about 30% more tokens than earlier models for the same text, depending on the workload, so compare the cost of a completed task, not only the per-million-token rate.
 
 ### Commands for watching what you spend
 
 | Command | What it does |
 | --- | --- |
 | `/model [name]` | Chooses the model for the current session |
-| `/effort [level]` | Control reasoning depth: `low`, `medium`, `high`, `xhigh`, `max`. Lower = faster & cheaper |
+| `/effort [level]` | Control reasoning depth: `low`, `medium`, `high` (the default on Opus 5 / Sonnet 5), `xhigh`, `max`. Lower = faster and cheaper. The menu also offers `ultracode`, which uses xhigh reasoning and can dispatch workflow agents when parts of the task can run independently |
 
 Model Drift (Models do get dumber sometimes, it's not just you)
 
@@ -287,41 +286,53 @@ The quality of your prompt is the biggest lever you have on output quality. Thes
 
 - Before Claude starts writing or changing code, ask it to **plan first**: `"Think through the approach before making any changes."`
 - In Claude Code, you can explicitly enter **plan mode** to get a structured breakdown of what it intends to do — review it, push back, then approve execution.
-- This is especially valuable for tasks that touch multiple files or have irreversible side effects.
+- Use plan mode when a task spans several files or could make changes that are hard to undo.
 - A good plan includes: what files will be changed, what the success condition looks like, and any risks or unknowns.
-- `Shift+Tab` cycles through permission modes. **Default cycle:** `default → acceptEdits → plan`. **With auto mode enabled** (run `claude --enable-auto-mode` first): `default → acceptEdits → plan → auto`. We cover auto mode properly in its own section
+- Press `Shift+Tab` to cycle through `default`, `acceptEdits`, and `plan`. If auto mode is available for your account, it appears as a fourth option.
 
 #### Auto Mode & Automation
 
 **Commands for running Claude with fewer interruptions**
 
 - The default "approve every action" flow is safe but slow. `--dangerously-skip-permissions` is fast but genuinely dangerous. Auto Mode is the middle path.
-- **`--enable-auto-mode`** — turn on the classifier-based permission mode
+- Auto mode appears in the `Shift+Tab` cycle once it is available for your account: `default → acceptEdits → plan → auto`.
     
     ```bash
-    # From the CLI
-    claude --enable-auto-mode         # launches with auto mode available
-    # Then Shift+Tab to cycle to it in-session
+    # Start a session directly in auto mode
+    claude --permission-mode auto
     
     # For scripted / headless runs
     claude -p "refactor the auth module" --permission-mode auto
-    ```
     
-- **Key thing to know up front:** auto mode **doesn't appear in the `Shift+Tab` cycle until you've enabled it.** 
-Run `claude --enable-auto-mode` at launch, and `Shift+Tab` picks it up as a fourth stop after plan mode: `default → acceptEdits → plan → auto`.
+    # Remove custom auto-mode classifier rules from user settings
+    claude auto-mode reset
+    ```
 
-**Availability gotchas worth calling out:**
+To make auto mode the default, put this in `~/.claude/settings.json`:
 
-- Auto mode requires **Claude Code v2.1.83+**
-- For Claude Max subscriptions only via Claude Oauth
-- Requires Sonnet 4.6 or newer as the classifier model
-- Admins can disable it org-wide via managed settings (`disableAutoMode: "disable"`)
+```json
+{
+  "permissions": {
+    "defaultMode": "auto"
+  }
+}
+```
+
+Only user settings can select auto mode as the default; project and local settings cannot. The separate top-level `autoMode` block configures classifier rules. It does not select the permission mode. `claude auto-mode reset` removes that customization block from user settings.
+
+**Availability:**
+
+- Auto mode remains a research preview.
+- It is available on all plans. On Team and Enterprise, an Owner must enable it in the admin settings first.
+- It also works with Amazon Bedrock, Google Cloud's Agent Platform, and Microsoft Foundry when you use Sonnet 5, Opus 4.7 or later, or Fable 5. Foundry still defaults to Sonnet 4.5, so switch models there first.
+- Admins can disable it across the organization through managed settings (`disableAutoMode: "disable"`).
 
 **How it works:**
 
 - **Input layer:** a prompt-injection probe scans tool outputs before they enter Claude's context
-- **Output layer:** a Sonnet 4.6 classifier evaluates every action before execution — fast single-token filter first, chain-of-thought reasoning only if flagged
-- The classifier is **reasoning-blind** — it sees only user messages and tool calls, not Claude's own reasoning, so Claude can't "talk it into" dangerous actions
+- **Output layer:** a classifier model (server-configured, independent of your `/model` choice) evaluates every action before execution
+- The classifier is **reasoning-blind**: it sees user messages, tool calls, and your CLAUDE.md, but tool results are stripped, so hostile content Claude reads can't talk it into dangerous actions
+- Boundaries you state in conversation ("don't push until I review") are treated as block signals until you explicitly lift them
 
 **When auto mode falls back**
 
@@ -379,10 +390,10 @@ Double-tap `Esc` on an empty input to open the rewind menu. Scroll back with `�
 | Command | What it does |
 | --- | --- |
 | `/plan` or `Shift+Tab` | Enter plan mode — Claude becomes read-only and proposes each change for approval |
-| `claude --enable-auto-mode` | Run with `--enable-auto-mode` flag |
+| `claude --permission-mode auto` | Start the session directly in auto mode |
 | `claude --dangerously-skip-permissions` | Skip all permission prompts (dangerous) |
 | `/btw` | Ask a side question without polluting conversation context. |
-| `/fork` or `/branch` | Branch the conversation at this point. Original history is preserved; new timeline diverges independently. |
+| `/branch` / `/fork` | `/branch` switches to a new conversation timeline from this point. `/fork` copies the conversation into a background session. |
 | `/copy [N]` | Copy last response to clipboard |
 | **`Esc + Esc` / `/rewind`** | Rewind menu — code only, convo only, both, summarize from |
 | `Alt + v` | Paste Screenshots / images |
@@ -411,7 +422,9 @@ Including an explicit success condition (passing tests, a specific output, a dif
 
 When Claude Code acts on your codebase, it calls **tools**. Tools that only read don't need permission; tools that modify things do (unless pre-approved or in auto mode).
 
-### Built-in Tools
+### Selected Built-in Tools
+
+These are the tools used most often in the workshop. See the [tools reference](https://code.claude.com/docs/en/tools-reference) for the full list.
 
 | Category | Tool | What it does | Permission? |
 | --- | --- | --- | --- |
@@ -429,11 +442,12 @@ When Claude Code acts on your codebase, it calls **tools**. Tools that only read
 | | `WebSearch` | Web search (returns URLs, doesn't fetch pages) | Yes |
 | **Agentic** | `Agent` | Spawn sub-agent with own context window | No |
 | | `EnterPlanMode` | Switch to read-only planning mode | No |
-| | `EnterWorktree` | Create isolated git worktree | No |
+| | `EnterWorktree` | Create or enter an isolated git worktree | Yes |
 | | `Skill` | Execute a skill / slash command | Yes |
 | | `TaskCreate/Update/List` | Structured task management | No |
 | | `CronCreate/Delete/List` | Schedule recurring prompts in-session | No |
-| | `SendMessage` / `TeamCreate` | Agent team coordination (experimental) | No |
+| | `Workflow` | Run reusable JavaScript multi-agent orchestration (see Dynamic Multi-Agent Workflows below) | Yes |
+| | `SendMessage` | Message or resume named subagents, including members of an agent team | No |
 
 - **Bash is the workhorse.** It's how Claude runs tests, git, gh, docker, npm, and any CLI. If a CLI exists, Claude prefers Bash over an MCP server.
 - **MCP tools** (Chrome DevTools, Playwright, Context7, etc.) show up alongside built-in tools. Check with `/mcp`.
@@ -488,15 +502,18 @@ Useful Claude Code + `gh` workflows:
 1. Code that you are going to push must be simplified, clean, maintainable, readable, secure. For code that is going to be moved to offline environment, they must also be production ready.
 2. Devs should know and understand all lines of code (LOC) in your PR, and must be ready to explain reasoning or rationale behind certain LOC if needed. Please thoroughly review and understand all code.
 
-#### Possible commands for self code review to run in CC:
+#### Review commands to run in Claude Code
 
-1. Use CC's in-built `/simplify` skill with agent teams, get the team to debate and present their debate findings to a synthesizer agent
+Pick the lightest review that fits the change:
 
-```markdown
-/simplify on git diffs, run multiple agents, use agent teams and dispatch multiple agents per category from different pov to debate, then synthesise the results of their debate on the code review
-```
+| Command | What it does |
+| --- | --- |
+| `/review <pr>` | Fast, single-pass review of a pull request |
+| `/code-review` | Looks for correctness bugs and cleanup opportunities in a background subagent by default |
+| `/code-review ultra` | Runs the cloud review; `/ultrareview` is also a supported alias |
+| `/simplify` | Runs four cleanup agents that check reuse, code quality, and efficiency |
 
-1. Use Codex CLI to review (select latest frontier with xhigh reasoning: gpt-5.4 xhigh)
+For a second-model pass, ask Codex to review a narrow set of risks. For example:
 
 ```markdown
 use codex to code review the entire codebase/git diffs, with focus areas on:
@@ -505,9 +522,7 @@ use codex to code review the entire codebase/git diffs, with focus areas on:
 3. Readability and maintainability
 ```
 
-1. `/everything-claude-code:code-review`
-2. `/codex:adversarial-review` with the Codex CC plugin
-3. `/bmad-code-review`
+Other review commands installed in this workshop setup include `/everything-claude-code:code-review`, `/codex:adversarial-review`, and `/bmad-code-review`.
 
 The code review workflow above has been incorporated into a skill for use. Install the skill from [https://github.com/stcomiin/claude-helpers](https://github.com/stcomiin/claude-helpers), `/team-code-review` 
 
@@ -515,7 +530,7 @@ The code review workflow above has been incorporated into a skill for use. Insta
 Main Thread: Scope → Dispatch 4 parallel stages → Consolidate → Devil's Advocate → Final Output
                           │
                           ├── Stage 1: Agent Team Debate (simplify)
-                          ├── Stage 2: Codex Frontier Model Review (GPT-5.4)
+                          ├── Stage 2: Codex Review (GPT-5.6)
                           ├── Stage 3: CC-Native Review (code-reviewer)
                           └── Stage 4: BMAD Adversarial Review (bmad-code-review)
                                             ↓
@@ -544,21 +559,19 @@ Codex, Gemini and Claude review bots have been added to the organisation on GitH
 
 ### Working with GitLab
 
-Install the **GitLab plugin** from the claude-code-official marketplace:
+Install the **GitLab plugin** from the claude-plugins-official marketplace:
 
 ```bash
-claude plugin install gitlab
+claude plugin install gitlab@claude-plugins-official
 ```
 
-Once installed, authenticate with your GitLab instance:
+On gitlab.com, authenticate when the plugin prompts you. For self-managed GitLab, register the instance's MCP endpoint directly:
 
 ```bash
-# For gitlab.com
-claude plugin configure gitlab
-
-# For self-hosted GitLab
-claude plugin configure gitlab --url <https://gitlab.yourcompany.com>
+claude mcp add --transport http GitLab https://gitlab.example.com/api/v4/mcp
 ```
+
+Open `/mcp`, select GitLab, and approve the OAuth request in your browser.
 
 Then you can reference GitLab directly in your prompts:
 
@@ -574,14 +587,14 @@ Useful Claude Code + GitLab workflows:
 - Check pipeline status and fix failing jobs
 - Search across repos, issues, and snippets within your GitLab group
 
-> **Self-hosted GitLab users:** make sure your instance URL and personal access token are configured in the plugin settings.
-
 ### Working with Other Agents (Sub-agents & Agent Teams)
 
 - Claude Code can **spawn sub-agents** to work on parallel tasks — useful for large features where multiple independent pieces can be built simultaneously.
-- Sub-agents' contexts are independent of the main thread that spawn it, so it starts fresh with just the instructions given to it.
+- A subagent has its own context, separate from the conversation that spawned it. It starts with the instructions and context passed to it.
+- Subagents can nest three levels below the main conversation by default.
 - In a **multi-agent setup**, the main claude code agent acts as the orchestrator (breaking down tasks, reviewing outputs) while dispatched agents act as workers (implementing specific pieces).
 - Keep inter-agent communication structured: have each sub-agent produce a clear output summary the orchestrator can evaluate.
+- **Agent teams** remain experimental and are gated behind `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in the shell or the `settings.json` `env` block. Each session has one implicit team; spawn named teammates directly and Claude Code cleans up the team state when the session ends.
 
 ![Sub-agents diagram](/images/subagents-diagram.png)
 
@@ -603,20 +616,51 @@ Useful Claude Code + GitLab workflows:
     ```
     
 
+### Dynamic Multi-Agent Workflows (ultracode)
+
+Dynamic workflows let you define fan-out, loops, barriers, and structured outputs in JavaScript. The workflow runs in the background, so you can keep using the main session while it works.
+
+A workflow can run up to 16 agents at once and 1,000 agents in one run. Workflow sizing defaults to `medium`, which aims to use fewer than 15 agents. Calls made through a workflow's `agent()` function do not consume the normal `Agent` tool quota. Regular `Agent` calls are limited separately to 20 concurrent subagents and 200 per session.
+
+Two ways to trigger it:
+
+1. **Inline keyword**: include `ultracode` in a prompt to authorize one orchestrated run:
+
+    ```text
+    ultracode: audit every API endpoint in this repo for missing auth checks,
+    verify each finding with independent reviewer agents, and give me only
+    the confirmed ones
+    ```
+
+2. **Session setting**: `/effort ultracode` uses xhigh reasoning and lets Claude dispatch workflow agents when parts of a task can run independently. It is a session setting, not a model effort level.
+
+Supporting commands:
+
+| Command | What it does |
+| --- | --- |
+| `/workflows` | List, watch, pause, resume, save, and stop workflow runs |
+| `/deep-research <question>` | Built-in workflow: fan-out web search, cross-check sources, adversarially vote on claims, produce a cited report |
+
+You can inspect a workflow script before it runs and save it for reuse. A review workflow might collect candidate findings, ask separate agents to challenge each one, and report which findings survive that second check.
+
+Availability: all paid plans, the API, Amazon Bedrock, Google Cloud's Agent Platform, and Microsoft Foundry. On Pro, enable workflows first in `/config`.
+
+Read more: [code.claude.com/docs/en/workflows](https://code.claude.com/docs/en/workflows)
+
 ### Hooks
 
-- Hooks intercept Claude Code at lifecycle points — they receive JSON via stdin, run your logic, and return decisions (block, allow, or ask). Unlike CLAUDE.md rules, hooks are **enforced** — Claude can't skip them.
-- Hooks run **synchronously**, so keep them fast. Bash (~10-20ms) for one-liners, Node.js (~50-100ms) for frequent events, Python (~200-400ms) only for session-level hooks.
-- Hooks fire at different cadences:
+- Hooks receive JSON at Claude Code lifecycle events, run your handler, and can return event-specific output. A `PreToolUse` hook can allow, deny, or ask before a tool runs. Unlike instructions in CLAUDE.md, hook checks are enforced by the runtime.
+- Hooks block the current event by default, so keep them quick. A command hook that does not need to affect the current action can set `"async": true`.
+- Common events include:
     - Once per session: **`SessionStart`**, **`SessionEnd`**
     - Once per turn: **`UserPromptSubmit`**, **`Stop`**, **`StopFailure`**
     - Once per tool call: **`PreToolUse`**, **`PostToolUse`**, **`PostToolUseFailure`**
-    - Other: **`Notification`**, **`PreCompact`**, **`SubagentStart`**, **`SubagentStop`**, **`Setup`**
+    - Other: **`Notification`**, **`PreCompact`**, **`SubagentStart`**, **`SubagentStop`**, and **`Setup`**. The [hooks reference](https://code.claude.com/docs/en/hooks) lists every event and its output format.
 
 ![Hooks diagram](/images/hooks-diagram.png)
 
 - Configure hooks in `settings.json` — global (`~/.claude/`), project (`.claude/`), or local (`.claude/settings.local.json`, gitignored). Matchers are case-sensitive; use regex like `Edit|Write` to match multiple tools.
-- **How they work:** Your hook reads JSON from stdin (contains `tool_name`, `tool_input`, `cwd`, etc.) and writes JSON to stdout with a `permissionDecision` of `"allow"`, `"deny"`, or `"ask"`. Exit code 2 = blocking error (stderr gets sent to Claude as context).
+- **How they work:** Your hook reads JSON from stdin, including fields such as `tool_name`, `tool_input`, and `cwd`. For `PreToolUse`, return `hookSpecificOutput.permissionDecision` as `"allow"`, `"deny"`, or `"ask"`. `"defer"` is limited to non-interactive `claude -p` handling. Exit code 2 is handled differently across events, so check the [event reference](https://code.claude.com/docs/en/hooks) before relying on it.
 - **Hook to add:** Prevent destructive delete by requiring user approval:
 
 > ✏️ **Add this to your CC settings.json file**
@@ -641,7 +685,7 @@ Useful Claude Code + GitLab workflows:
 }
 ```
 
-**Other high-value hooks to consider:**
+**Other useful hooks:**
 
 | Hook | Event | What It Does |
 |------|-------|--------------|
@@ -762,7 +806,7 @@ Using the latest FastAPI and Pydantic docs, add soft-delete to my app.
 Records should get a deleted_at timestamp instead of being removed from the database.
 ```
 
-Notice how Context7 pulls in current documentation rather than relying on Claude's training data. This is especially valuable for fast-moving libraries where APIs change between versions (e.g. Pydantic v1 → v2 syntax differences).
+Context7 pulls in current documentation instead of relying on Claude's training data. It is especially useful for libraries whose APIs change between versions, such as the move from Pydantic v1 to v2.
 
 **Chrome Devtools for browser automation**
 
@@ -782,7 +826,7 @@ See the following Github repo for living doc: https://github.com/luongnv89/claud
 
 ### Notable Skills for Reference
 
-> ⚠️ **Security warning:** Skills can execute arbitrary code in your environment. Before installing any community skill, **review the SKILL.md and any bundled scripts yourself**. Malicious skills can access your shell, exfiltrate data, or modify files — all from three lines of Markdown. Only install skills from sources you trust. This applies not just for Claude Code but also general skills for OpenClaw and other coding CLIs
+> ⚠️ **Security warning:** Skills can execute arbitrary code in your environment. Before installing a community skill, **review SKILL.md and every bundled script yourself**. A malicious skill can access your shell, exfiltrate data, or modify files from a few lines of Markdown. Install only from sources you trust. The same risk applies to skills used by OpenClaw and other coding CLIs.
 
 This is a growing list of community and official skills worth knowing about. Not all of these are endorsed — they're here as references for what's possible.
 
@@ -847,7 +891,7 @@ The convenience of skills comes with real risk.
 
 Plugins extend Claude Code with additional capabilities — language intelligence, platform integrations, workflow automation, and more.
 
-> 🗒️ Some plugins use MCPs behind the scene, hence you can install simply install plugins that will install the required MCPs *(claude code makes it easy by exposing these via claude-code-official marketplace)*
+> 🗒️ Some plugins install the MCP servers they depend on. Official plugins are available through the `claude-plugins-official` marketplace.
 
 ### Notable Plugins
 
@@ -857,14 +901,14 @@ Plugins extend Claude Code with additional capabilities — language intelligenc
 | **Skills for Real Engineers** | Matt Pocock's composable collection of engineering-discipline skills — requirements grilling, domain modeling, specs and ticket decomposition, TDD, debugging, code review, and codebase architecture | [GitHub](https://github.com/mattpocock/skills/tree/main/skills)<br><code>/plugin install mattpocock-skills</code> (or <code>npx skills@latest add mattpocock/skills</code> for editable project-local copies — pick one method to avoid duplicate skills) |
 | **Security Guidance** | Official plugin that automatically reviews code changes for vulnerabilities on edits, commits, or pushes | [Docs](https://code.claude.com/docs/en/security-guidance#on-each-commit-or-push-claude-makes)<br><code>/plugin install security-guidance@claude-plugins-official</code> |
 | **Codex Security** | OpenAI Codex plugin for authorized repository, deep, and diff-focused security scans, plus minimal fixes for validated findings | [Docs](https://developers.openai.com/codex/security/plugin)<br><code>$codex-security:security-scan</code> / <code>$codex-security:security-diff-scan</code> |
-| **open-gsd/get-shit-done (GSD)** | Opinionated workflow plugin focused on shipping fast (SDD) | [https://github.com/open-gsd/get-shit-done-redux](https://github.com/open-gsd/get-shit-done-redux) |
-| **BMAD** | AI-driven agile development module (SDD) | [docs](https://docs.bmad-method.org/) / [GitHub](https://github.com/bmad-code-org/BMAD-METHOD) |
+| **GSD Core** | Phase-based spec, implementation, and verification workflow | [https://github.com/open-gsd/gsd-core](https://github.com/open-gsd/gsd-core) |
+| **BMAD** | Agile-style planning and development framework (SDD) | [docs](https://docs.bmad-method.org/) / [GitHub](https://github.com/bmad-code-org/BMAD-METHOD) |
 | **Spec Kit** | SDD Framework | [https://github.com/github/spec-kit](https://github.com/github/spec-kit) |
 | **OpenSpec** | SDD Framework | [https://github.com/Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec) |
-| **GitLab** | GitLab-native version of the GitHub integration | via claude-code-official marketplace |
-| **Codex for CC** | Invoke Codex cli as a secondary LLM pass, get different opinions from another frontier model | [GitHub](https://github.com/openai/codex-plugin-cc) (use [this fork](https://github.com/f5xc-salesdemos/codex-plugin-cc) for now until the issue is fixed in main repo) |
-| **Playwright** | Browser automation and end-to-end testing MCP server | via claude-code-official marketplace |
-| **Language Servers (LSP)** | Gives Claude real-time access to your language server — hover info, go-to-definition, diagnostics | via claude-code-official marketplace |
+| **GitLab** | GitLab-native version of the GitHub integration | via claude-plugins-official marketplace |
+| **Codex for CC** | Call Codex CLI for a second review or delegated task | [GitHub](https://github.com/openai/codex-plugin-cc)<br><code>/plugin marketplace add openai/codex-plugin-cc</code><br><code>/plugin install codex@openai-codex</code> |
+| **Playwright** | Browser automation and end-to-end testing MCP server | via claude-plugins-official marketplace |
+| **Language Servers (LSP)** | Gives Claude real-time access to your language server — hover info, go-to-definition, diagnostics | via claude-plugins-official marketplace |
 
 ### Plugin Marketplace
 
@@ -892,13 +936,13 @@ To add a self-hosted LiteLLM as a plugin marketplace in Claude Code:
 
 `claude plugin marketplace add http://your-litellm-proxy.example.com/claude-code/marketplace.json`
 
-# Skills/Plugins Deep Dive
+## Skills and Plugins Reference
 
-The sections above cover what skills and plugins are, how they're structured, how to install them, and where to find them. The deep dive below covers *why specific ones matter*. It walks through notable tools in the ecosystem, explaining what each one does, how they prevent vibe coding, and when to reach for which.
+The sections above explain how skills and plugins work and how to install them. The companion page looks at specific tools: what they add, where they help, and when their process costs more than it saves.
 
-Deep Dive Doc: [Skills & Plugins Deep Dive](/docs/skills-plugins-deep-dive/)
+Read the [Skills and Plugins Reference](/docs/skills-plugins-deep-dive/).
 
-# More Things
+## More Things
 
 ## Useful Resources
 
@@ -931,4 +975,3 @@ Some thoughts about agentic coding.
     
 - [The AI Disruption We've Been Waiting For Has Arrived](https://www.nytimes.com/2026/02/18/opinion/ai-software.html), Paul Ford: 
 *"The simple truth is that I am less valuable than I used to be. It stings to be made obsolete, but it's fun to code on the train, too. And if this technology keeps improving, then all of the people who tell me how hard it is to make a report, place an order, upgrade an app or update a record — they could get the software they deserve, too. That might be a good trade, long term."*
-

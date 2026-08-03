@@ -1,5 +1,5 @@
 ---
-title: Skills & Plugins Deep Dive
+title: Skills & Plugins Reference
 weight: 3
 ---
 
@@ -483,25 +483,25 @@ BMAD is a poor fit when the overhead is larger than the change. If the task is "
 
 ---
 
-## GSD - Get Shit Done
+## GSD Core
 
-**Project:** [open-gsd/get-shit-done-redux](https://github.com/open-gsd/get-shit-done-redux)
+**Project:** [open-gsd/gsd-core](https://github.com/open-gsd/gsd-core)
 
-GSD splits a project into requirements, roadmap phases, discussion context, plans, execution, and verification, each with its own command. The point is keeping each phase small enough to plan and review on its own instead of leaning on one long chat to track everything.
+GSD divides a project into requirements, roadmap phases, discussion, planning, execution, and verification. Each phase is small enough to review on its own, and the working state lives on disk instead of depending on one long conversation.
 
 ### Install
 
-Interactive install:
+Run the installer and choose the runtime and install scope when prompted:
 
 ```bash
-npx get-shit-done-cc@latest
+npx @opengsd/gsd-core@1.8.0
 ```
 
-Claude Code only:
+For a non-interactive Claude Code install, choose either user-wide or project-local scope:
 
 ```bash
-npx get-shit-done-cc --claude --global
-npx get-shit-done-cc --claude --local
+npx @opengsd/gsd-core@1.8.0 --claude --global  # All projects for this user
+npx @opengsd/gsd-core@1.8.0 --claude --local   # Current project only
 ```
 
 Verify inside Claude Code:
@@ -512,13 +512,13 @@ Verify inside Claude Code:
 
 ### Existing code - brownfield
 
-If the repo already has code, map it before starting a new project:
+For an existing repository, start with the guided onboarding command:
 
 ```text
-/gsd-map-codebase
+/gsd-onboard
 ```
 
-This gives GSD a first pass at the stack, architecture, conventions, and risk areas. It is more useful than asking project-init questions against an unknown codebase.
+Onboarding maps the codebase, initializes the planning files, and records a summary. Use `/gsd-map-codebase` directly when you only need to refresh or inspect the codebase map.
 
 For a step-by-step brownfield workflow, see [Existing Codebase Workflows](/docs/existing-codebase-workflows/).
 
@@ -530,6 +530,7 @@ For a step-by-step brownfield workflow, see [Existing Codebase Workflows](/docs/
 /gsd-plan-phase 1
 /gsd-execute-phase 1
 /gsd-verify-work 1
+/gsd-ship 1
 ```
 
 GSD writes its working state into `.planning/`, including `.planning/PROJECT.md`, `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, and phase-specific files. Treat these as the current source of truth for scope, requirements, and decisions. Review them before continuing, because later GSD agents read them to stay grounded in the project.
@@ -550,13 +551,7 @@ Many GSD commands support `--auto`. Use it when the task is clear and you are co
 /gsd-plan-phase 1 --auto
 ```
 
-`--chain` can continue from discussion into the next steps:
-
-```text
-/gsd-discuss-phase 1 --chain
-```
-
-These flags save handoffs. They also reduce the number of places where you review assumptions before the next step starts. Use them for low-risk or well-specified work. For product, UX, API, data, or architecture decisions, stay manual until the important choices are written down.
+These flags reduce handoffs, but they also skip places where you would normally review assumptions. Use them for low-risk or well-specified work. Keep product, UX, API, data, and architecture decisions interactive until the important choices are written down.
 
 ### Quick work vs phase work
 
@@ -568,14 +563,6 @@ Use the smallest workflow that fits the task:
 | `/gsd-quick` | Small tasks that still benefit from light tracking |
 | `/gsd-discuss-phase` -> `/gsd-plan-phase` -> `/gsd-execute-phase` | Scoped feature or project work |
 
-GSD also supports a minimal install for token-sensitive or throwaway setups:
-
-```bash
-npx get-shit-done-cc --claude --global --minimal
-```
-
-Use the full install when you expect to use the broader command set. Use `--minimal` when you only need the core loop.
-
 ### Execution model
 
 Execution is plan-based. GSD splits a phase into plans, groups independent plans into waves, and runs work in fresh subagents where possible. Dependent work waits for the earlier wave to finish.
@@ -584,13 +571,9 @@ This is useful when a phase has several separable parts. It is less useful when 
 
 ### Two layers of verification
 
-GSD verifies work in two layers, not one.
+During `/gsd-execute-phase`, a verifier checks the completed phase against its goals and writes `VERIFICATION.md`. If it finds gaps, run `/gsd-plan-phase N --gaps`, followed by `/gsd-execute-phase N --gaps-only`, to close them.
 
-**Layer 1: in-loop code verifier (automatic).** During `/gsd-execute-phase`, a code verifier agent checks the work as it lands. If the implementation does not meet the plan, the execution loops — fix, re-verify, repeat — until the spec is met. This catches "agent claimed done but it isn't."
-
-**Layer 2: `/gsd-verify-work` (human UAT).** Once the in-loop verifier passes, `/gsd-verify-work` walks you through the feature to confirm it behaves the way you envisioned. The agent's "spec met" is not the user's "feature delivered."
-
-Together: **structured human-in-the-loop, not human-eliminated.** Layer 1 catches agent self-deception. Layer 2 catches the spec-vs-vision gap.
+`/gsd-verify-work N` then walks through user acceptance testing and writes the phase's UAT file. If you report issues, it creates fix plans.
 
 ### When to use it
 

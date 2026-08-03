@@ -1,3 +1,89 @@
+/* ── Anthropic-inspired theme ───────────────────────────────────────────
+   Hextra derives every accent shade (primary-50…900) from three HSL vars
+   via calc(), and Tailwind v4 emits all palette colors as runtime
+   var(--hx-color-*) references inside @layer theme. Both are overridable
+   from this (unlayered, later-loaded) file, so the whole site re-tints
+   from variables alone — no per-component rules needed.
+
+   Light: warm ivory paper (#faf9f5) + "book cloth" clay accent. With
+   hue 16deg / sat 53% / lightness 55%, Hextra's shade math lands
+   primary-500 on ~#c9704f (book cloth) and primary-600 (links, hero
+   buttons) on ~#c15f3c (Anthropic's CTA clay).
+   Dark: warm charcoal (#1a1815) + Claude terracotta. Lightness 66.7%
+   puts primary-600 at ~#d97757 — the Claude brand orange.
+
+   IMPORTANT: the theme sets `.dark { --primary-hue: … }` in an earlier
+   stylesheet at equal specificity, so this file must declare :root
+   (light) first and then re-declare .dark AFTER it — source order inside
+   this file is what restores the light/dark split. */
+:root {
+  --primary-hue: 16deg;
+  --primary-saturation: 53%;
+  --primary-lightness: 55%;
+}
+.dark {
+  --primary-hue: 15deg;
+  --primary-saturation: 63%;
+  --primary-lightness: 66.7%;
+}
+
+/* One warm stone ramp replaces Tailwind's cool `gray` (light surfaces +
+   dark text), `neutral` (dark surfaces + borders), and `slate` (headings)
+   so the two modes stop mixing blue-grays with true grays. `white` feeds
+   the light body, navbar glass (bg-white/[.85]) and popovers; `dark`
+   feeds the dark body and navbar (bg-dark/80) — both warm in one move. */
+:root {
+  --hx-color-white: #faf9f5;
+  --hx-color-dark: #1a1815;
+
+  --hx-color-gray-50: #f7f5ef;
+  --hx-color-gray-100: #f0ede5;
+  --hx-color-gray-200: #e6e2d7;
+  --hx-color-gray-300: #d1ccc0;
+  --hx-color-gray-400: #a39f93;
+  --hx-color-gray-500: #837f73;
+  --hx-color-gray-600: #635f55;
+  --hx-color-gray-700: #4b473f;
+  --hx-color-gray-800: #37342d;
+  --hx-color-gray-900: #211f1a;
+
+  --hx-color-neutral-50: #f7f5ef;
+  --hx-color-neutral-200: #e6e2d7;
+  --hx-color-neutral-300: #d1ccc0;
+  --hx-color-neutral-400: #a39f93;
+  --hx-color-neutral-500: #837f73;
+  --hx-color-neutral-600: #635f55;
+  --hx-color-neutral-700: #454138;
+  --hx-color-neutral-800: #322f28;
+  --hx-color-neutral-900: #252220;
+
+  --hx-color-slate-50: #faf9f5;
+  --hx-color-slate-100: #f2efe8;
+  --hx-color-slate-900: #221f1a;
+}
+
+/* Dark-mode text contrast lift. The shared ramp above tunes gray-400/500
+   as light-mode muted text, but in dark mode those same tokens render the
+   secondary tier (inactive sidebar/TOC links, footer, breadcrumbs) at only
+   ~6.4:1 against the body — which dominates the perceived contrast of a
+   docs page. Re-scope just the text-tier tokens brighter for dark
+   (~8.6:1 on the body, ~7.7:1 on the footer surface); light mode keeps
+   the quieter values. Surface tokens (700-900) stay untouched. */
+.dark {
+  --hx-color-gray-100: #f3f1e9;
+  --hx-color-gray-400: #b9b5a7;
+  --hx-color-gray-500: #a09b8d;
+  --hx-color-neutral-400: #b9b5a7;
+  --hx-color-neutral-500: #a09b8d;
+}
+
+/* Clay-tinted text selection; tracks each mode's accent automatically. */
+::selection {
+  background-color: hsl(
+    var(--primary-hue) var(--primary-saturation) var(--primary-lightness) / 0.3
+  );
+}
+
 /* ── Full-width layout overrides ────────────────────────────────────────
    Hextra caps the navbar, page wrapper, content, and footer at fixed rem
    widths (90/72/90/80rem) in variables.css. On wide monitors that leaves
@@ -171,4 +257,228 @@ body main#content > div > p:nth-of-type(2) {
 
 body .hextra-feature-grid {
   margin-top: 2.5rem;
+}
+
+/* ── Presenter Kit: ephemeral ink overlay + projector mode ────────────
+   Spec: docs/superpowers/specs/2026-07-21-presenter-kit-design.md.
+   Semantic classes only — Hextra's Tailwind bundle is precompiled. */
+
+/* Ink layer. Document-positioned (not fixed) so strokes scroll with the
+   content they mark. Height is set from JS to the document scrollHeight. */
+.presenter-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9000; /* above content, below the lightbox (9999) */
+  pointer-events: none; /* ink stays visible but clicks pass through */
+}
+.presenter-overlay.is-drawing {
+  pointer-events: auto; /* draw mode swallows clicks by design */
+  cursor: crosshair;
+  touch-action: none;
+}
+
+/* Pen toggle. Mirrors .scroll-to-top (2.5rem circle at right 2rem) and
+   stacks 0.5rem above it: 2rem + 2.5rem + 0.5rem = bottom 5rem. */
+.presenter-pen {
+  position: fixed;
+  bottom: 5rem;
+  right: 2rem;
+  z-index: 9100; /* above the overlay so it stays clickable while drawing */
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  /* Surface must read against Hextra's #111 dark background: the old
+     rgba(23,23,23,.85) was near-invisible over it. Lighter fill, stronger
+     border, brighter glyph, and an elevation shadow keep the button
+     distinct on dark pages while staying dark chrome on the light theme. */
+  border: 1px solid rgba(148, 148, 158, 0.5);
+  background: rgba(48, 48, 52, 0.92);
+  color: #d4d4d8;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.presenter-pen:hover {
+  background: rgba(66, 66, 72, 0.95);
+  border-color: rgba(180, 180, 190, 0.6);
+  color: #fff;
+}
+.presenter-pen[aria-pressed="true"] {
+  color: #fff;
+  border-color: #ef4444;
+}
+.presenter-pen svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+/* Toolbar pill, left of the pen button (pen: right 2rem + 2.5rem wide). */
+.presenter-toolbar {
+  position: fixed;
+  bottom: 5rem;
+  right: 5rem;
+  z-index: 9100;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 999px;
+  /* Same raised-surface recipe as .presenter-pen: distinct on dark pages. */
+  border: 1px solid rgba(148, 148, 158, 0.5);
+  background: rgba(48, 48, 52, 0.92);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.presenter-toolbar[hidden] {
+  display: none;
+}
+.presenter-tool {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: var(--tool-color);
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+}
+.presenter-tool[aria-pressed="true"] {
+  border-color: #fff;
+}
+.presenter-action {
+  background: none;
+  border: none;
+  color: #a1a1aa;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.35rem;
+}
+.presenter-action:hover {
+  color: #fff;
+}
+/* Mode toggles (Text, Projector) must be unmistakably on or off: a filled
+   high-contrast chip, not just a text-color shift. The toolbar pill is
+   dark in both site themes, so the white chip works everywhere. Plain
+   action buttons (Undo/Clear/Exit) carry no aria-pressed and never match. */
+.presenter-action[aria-pressed="true"] {
+  background: #fff;
+  color: #171717;
+  border-radius: 999px;
+  font-weight: 600;
+}
+.presenter-action[aria-pressed="true"]:hover {
+  background: #e5e5e5;
+  color: #171717; /* beat the shared :hover rule that sets white-on-white */
+}
+
+/* Typed labels: the editor (while typing) and committed overlay labels
+   share width and typography so committed wrapping matches the editor
+   exactly. pre-wrap keeps hard breaks and soft-wraps long lines. */
+.presenter-label-editor,
+.presenter-label div {
+  font-size: 28px;
+  line-height: 1.25;
+  font-weight: 600;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+.presenter-label-editor {
+  position: absolute;
+  z-index: 9050; /* above the ink overlay, below the pen button and toolbar */
+  min-height: 1.25em;
+  background: transparent;
+  outline: 2px dashed rgba(128, 128, 128, 0.6);
+  outline-offset: 3px;
+}
+.presenter-label {
+  pointer-events: none; /* ink can be drawn over committed labels */
+}
+.presenter-overlay.is-text {
+  cursor: text;
+}
+
+/* Button-anchored tooltips via data-tip. The native title tooltip is
+   cursor-anchored and uncontrollable; at the bottom-right viewport corner
+   Windows clamps it onto the pointer. A pseudo-element anchored to the
+   button (pen: left of it, toolbar: above it) can never meet the cursor,
+   which sits on the button itself while hovering. */
+.presenter-tool,
+.presenter-action {
+  position: relative; /* anchor the ::after to the button, not the toolbar */
+}
+.presenter-pen::after,
+.presenter-tool::after,
+.presenter-action[data-tip]::after,
+.scroll-to-top::after {
+  content: attr(data-tip);
+  position: absolute;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid rgba(148, 148, 158, 0.5);
+  background: rgba(40, 40, 44, 0.97);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  color: #e5e5e5;
+  font-size: 0.7rem;
+  line-height: 1.3;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease 0s, visibility 0.15s ease 0s;
+  z-index: 9200;
+}
+.presenter-pen:hover::after,
+.presenter-pen:focus-visible::after,
+.presenter-tool:hover::after,
+.presenter-tool:focus-visible::after,
+.presenter-action[data-tip]:hover::after,
+.presenter-action[data-tip]:focus-visible::after,
+.scroll-to-top:hover::after,
+.scroll-to-top:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0.35s, 0.35s; /* mimic the native tooltip's hover delay */
+}
+/* Right-edge column buttons (pen, and scroll-to-top from head-end.html):
+   tooltip sits to the left, clear of pointer and screen edge. Above is not
+   an option for scroll-to-top — it would collide with the pen button. */
+.presenter-pen::after,
+.scroll-to-top::after {
+  right: calc(100% + 0.6rem);
+  top: 50%;
+  transform: translateY(-50%);
+}
+/* While draw mode is open the toolbar occupies the space left of the pen,
+   so the tooltip would land on top of the pill — and a pressed pen needs
+   no hint. Suppress it until the presenter exits draw mode. */
+.presenter-pen[aria-pressed="true"]::after {
+  display: none;
+}
+/* Toolbar controls: tooltip sits above the pill. */
+.presenter-tool::after,
+.presenter-action[data-tip]::after {
+  bottom: calc(100% + 0.6rem);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Projector mode: Hextra sizes type and layout in rem, so bumping the root
+   font-size rescales everything coherently. Applied by presenter.js. */
+:root.projector {
+  font-size: 20px;
+}
+
+@media print {
+  .presenter-overlay,
+  .presenter-pen,
+  .presenter-toolbar {
+    display: none !important;
+  }
 }

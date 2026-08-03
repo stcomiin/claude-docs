@@ -5,13 +5,13 @@ weight: 2
 
 **Agentic Coding in Terminal** — Apex Builders Collective × Info PC
 
-Please complete these steps **before** the workshop so we can hit the ground running. The whole setup should take 15–20 minutes.
+Please finish these steps **before** the workshop. Allow about 15–20 minutes.
 
 ---
 
-## ✅ Checklist at a Glance
+## Setup checklist
 
-- [ ] Node.js v18+ installed
+- [ ] Node.js v22+ installed (for npm/npx tooling like GSD)
 - [ ] Git installed
 - [ ] A terminal you're comfortable with
 - [ ] Claude Code installed and working
@@ -22,17 +22,17 @@ Please complete these steps **before** the workshop so we can hit the ground run
 
 ## 1. Prerequisites
 
-These need to be in place before installing anything else.
+Install these first.
 
-### Node.js (v18 or higher)
+### Node.js (v22 or higher)
 
-Download from [nodejs.org](https://nodejs.org/) — grab the LTS version. This also installs npm.
+Download the current LTS release from [nodejs.org](https://nodejs.org/). It includes npm and meets the Node.js 22+ requirement for Claude Code and the GSD installer below.
 
 Verify after install:
 
 ```bash
-node --version    # Should show v18.x.x or higher
-npm --version     # Should show 9.x.x or higher
+node --version    # Should show v22.x.x or higher
+npm --version     # Should show 10.x.x or higher
 ```
 
 ### Git
@@ -43,11 +43,11 @@ Download from [git-scm.com](https://git-scm.com/). Most macOS and Linux machines
 git --version
 ```
 
-### Windows Users
+### Windows
 
-You'll need **WSL** (Windows Subsystem for Linux) or **Git Bash** (comes with Git for Windows). Claude Code and Codex don't run natively in CMD or PowerShell.
+Claude Code and Codex both run natively in PowerShell. WSL and Git Bash are optional, not installation requirements. Install **Git for Windows** so both tools can use Git. Claude Code can also use the bundled Git Bash shell for its Bash tool; otherwise it uses PowerShell.
 
-If using Git Bash, note the path — you may need it later:
+If Claude Code does not find Git Bash automatically, its usual path is:
 
 ```text
 C:\Program Files\Git\bin\bash.exe
@@ -55,281 +55,207 @@ C:\Program Files\Git\bin\bash.exe
 
 ---
 
-## 2. Installation & Configuration
+## 2. Install and configure
 
-### Getting Your API Key
+### Get an API key
 
-You'll need an API key from your chosen provider. Here are your options:
+You need a key from the provider used for the workshop.
 
-#### Option A: LiteLLM Proxy (Self-Hosted / Org-Provided)
+#### Option A: LiteLLM proxy
 
-If your organization runs a LiteLLM proxy (or you self-host one):
+If your organization provides a LiteLLM proxy, or you run one yourself:
 
-1. Login to your LiteLLM admin UI at `https://your-litellm-proxy.example.com/ui`.
-2. Click "Virtual Keys" on the tabs on the left, and click "Create new key"
-3. Change the following: 
-    1. Team: Select your team, and 
-    2. Enter your key name. 
-    3. Leave everything else as default
-    4. Click "Create Key"
-4. Please note this API key down. You can also regenerate your key if you lost it after creation, by going back to the same page and clicking inside your key.
-5. To view requests made by your API key, go to "Logs" on the left tab, which will show you detailed usage of your requests, including token counts, TTFT. Click on "Usage" tab for aggregated stats of your keys.
+1. Open the LiteLLM admin page at `https://your-litellm-proxy.example.com/ui`.
+2. Select **Virtual Keys**, then **Create new key**.
+3. Choose your team, give the key a name, and leave the other fields at their defaults.
+4. Create the key and save it somewhere secure. You can regenerate it later from the same page.
+5. Use **Logs** for request details such as token counts and time to first token. Use **Usage** for totals.
 
 #### Option B: OpenRouter
 
-[OpenRouter](https://openrouter.ai/) provides unified access to Claude, GPT, Gemini, and many other models through a single API key.
+[OpenRouter](https://openrouter.ai/) routes requests to Claude, GPT, Gemini, and other model providers through one API key.
 
-1. Sign up at [openrouter.ai](https://openrouter.ai/)
-2. Go to [Keys](https://openrouter.ai/keys) and create an API key
-3. Add credits under [Credits](https://openrouter.ai/credits)
-4. Your base URL will be `https://openrouter.ai/api`
-5. Note your API key — it starts with `sk-or-`
+1. Sign up at [openrouter.ai](https://openrouter.ai/).
+2. Open [Keys](https://openrouter.ai/keys) and create an API key.
+3. Add credits under [Credits](https://openrouter.ai/credits).
+4. Save the key; it starts with `sk-or-`.
+
+Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses `https://openrouter.ai/api/v1`.
 
 ### Claude Code
 
-1. **Installation Via npm** 
+1. **Install with npm**
     
     **Prerequisites**
     
-    - Node.js ≥ 18
+    - Node.js 22 or later
     - npm (comes with Node.js)
-    - WSL or Git Bash (for windows installation)
+    
+    npm is the default install method here because it also works in air-gapped environments: point npm at your internal registry mirror and install the same way.
     
     ```bash
     # Install globally
-    npm install -g @anthropic-ai/claude-code
+    npm install -g @anthropic-ai/claude-code@2.1.220 # verified 2026-07-27
     
     # Verify
     claude --version
     
-    # Update claude version for latest features, works offline as well
-    claude update
+    # Upgrade later
+    npm install -g @anthropic-ai/claude-code@latest
     ```
     
-2. **Skipping Onboarding via `.claude.json` (offline setup only, skip this step if doing online)**
-*When Claude Code launches for the first time, it forces an onboarding wizard that requires OAuth login to an Anthropic or Console account. In offline custom-endpoint setups, **this blocks you entirely**.*
+2. **Configure the gateway**
     
-    Manually create/edit `~/.claude.json` with the onboarding flag set.
+    Edit `~/.claude/settings.json` and replace the example URL and key. In PowerShell, the same file is `$HOME\.claude\settings.json`. Claude Code sends requests to `ANTHROPIC_BASE_URL` and authenticates them with `ANTHROPIC_AUTH_TOKEN`.
     
-    ```json
-    {
-      "hasCompletedOnboarding": true,
-      "shiftEnterKeyBindingInstalled": true,
-      "theme": "dark"
-    }
-    ```
-    
-3. Setting Environment Variables to connect to Custom endpoint 
-    
-    **Create or Edit Settings File (`~/.claude/settings.json`) (replace with your api key in** `ANTHROPIC_AUTH_TOKEN` )
-    
-    > 💡 Recommend Version Below ⬇️
-    
-    **Using a LiteLLM Proxy:**
+    **LiteLLM proxy:**
     
     ```json
     {
       "env": {
         "ANTHROPIC_BASE_URL": "https://your-litellm-proxy.example.com",
         "ANTHROPIC_AUTH_TOKEN": "sk-your-api-key",
-        "ANTHROPIC_MODEL": "claude-opus-4-6",
-        "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-opus-4-6",
-        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-opus-4-6",
-        "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-4-6",
+        "ANTHROPIC_MODEL": "claude-opus-5",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-opus-5",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-opus-5",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-5",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-        "CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe",
-        "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-        "ENABLE_TOOL_SEARCH": "1",
-        "CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
-        "ENABLE_LSP_TOOL": "1",
-        "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
-        "MAX_THINKING_TOKENS": "128000",
-        "DISABLE_AUTO_COMPACT": "1",
-        "CLAUDE_CODE_EFFORT_LEVEL": "max",
-        "CLAUDE_CODE_NO_FLICKER": "1"
-      },
-      "alwaysThinkingEnabled": true,
-      "cleanupPeriodDays": 365
+        "CLAUDE_CODE_EFFORT_LEVEL": "max"
+      }
     }
     ```
     
-    **Using OpenRouter:**
+    **OpenRouter:**
     
     ```json
     {
       "env": {
         "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
         "ANTHROPIC_AUTH_TOKEN": "sk-or-your-openrouter-key",
-        "ANTHROPIC_MODEL": "anthropic/claude-opus-4-6",
-        "ANTHROPIC_DEFAULT_SONNET_MODEL": "anthropic/claude-opus-4-6",
-        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-opus-4-6",
-        "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-opus-4-6",
+        "ANTHROPIC_MODEL": "anthropic/claude-opus-5",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic/claude-opus-5",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "anthropic/claude-opus-5",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-opus-5",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-opus-5",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-        "CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe",
-        "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-        "ENABLE_TOOL_SEARCH": "1",
-        "CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
-        "ENABLE_LSP_TOOL": "1",
-        "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
-        "MAX_THINKING_TOKENS": "128000",
-        "DISABLE_AUTO_COMPACT": "1",
-        "CLAUDE_CODE_EFFORT_LEVEL": "max",
-        "CLAUDE_CODE_NO_FLICKER": "1"
-      },
-      "alwaysThinkingEnabled": true,
-      "cleanupPeriodDays": 365
+        "CLAUDE_CODE_EFFORT_LEVEL": "max"
+      }
     }
     ```
     
-4. `claude` to launch the CLI in terminal. Select model with `/model` , `/effort`  for reasoning effort
+    Leave `ENABLE_TOOL_SEARCH` out unless your gateway forwards `tool_reference` blocks. If it does, add `"ENABLE_TOOL_SEARCH": "true"` to the `env` object. On Windows, add `"CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe"` only if Claude Code cannot find Git Bash.
 
-### Codex (ChatGPT's Claude Code Competitor)
+3. Run `claude`, then use `/model` to change models. As of 2026-07-27, the Claude Code lineup is Fable 5, Opus 5, Sonnet 5, and Haiku 4.5. These gateway examples use Opus 5. Use `/effort` when you need to change the reasoning depth.
 
-1. **Installation Via npm** 
-    
-    **Prerequisites**
-    
-    - Node.js ≥ 18
-    - npm (comes with Node.js)
-    - WSL or Git Bash (for windows installation)
-    
+### Codex CLI
+
+1. **Install with npm**
+
+    Codex requires Node.js 16 or later and runs directly in PowerShell on Windows. The Node.js 22+ workshop prerequisite already meets this requirement.
+
     ```bash
-    # Install globally
     npm install -g @openai/codex
-    
-    # Verify
+
     codex --version
-    # codex-cli 0.116.0
+    # codex-cli 0.145.0, verified 2026-07-27
     ```
-    
-2. First-time login 
-    
-    Run Codex once to create the config directory and trigger login:
-    
+
+2. **Put the provider key in an environment variable**
+
+    Use the variable that matches your provider. These commands set it for the current terminal session.
+
+    macOS or Linux:
+
     ```bash
-    codex
+    # LiteLLM
+    export LITELLM_API_KEY="sk-your-api-key"
+
+    # OpenRouter
+    export OPENROUTER_API_KEY="sk-or-your-openrouter-key"
     ```
-    
-    It will ask you to log in with OpenAI. Since we are using LiteLLM instead, you can skip/cancel this - we will just need the `~/.codex/` folder to exist. Running the `codex` command above should auto-create the `~/.codex/` folder 
-    
-    If it doesn't auto-create, make it manually:
-    
+
+    PowerShell:
+
+    ```powershell
+    # LiteLLM
+    $env:LITELLM_API_KEY = "sk-your-api-key"
+
+    # OpenRouter
+    $env:OPENROUTER_API_KEY = "sk-or-your-openrouter-key"
+    ```
+
+3. **Create `config.toml`**
+
+    The file is `~/.codex/config.toml` on macOS and Linux, or `$HOME\.codex\config.toml` in PowerShell. Create the directory if it does not exist:
+
     ```bash
+    # macOS or Linux
     mkdir -p ~/.codex
     ```
-    
-3. Create Codex config
-    
-    In a **new terminal**, create the config file:
-    
-    > 💡 Note: Codex updates its config file frequently, check online for updated docs.
-    
-    **Using a LiteLLM Proxy:**
-    
-    ```bash
-    cat > ~/.codex/config.toml << 'EOF'
+
+    ```powershell
+    # PowerShell
+    New-Item -ItemType Directory -Force "$HOME\.codex"
+    ```
+
+    Then create `config.toml` with the example for your provider.
+
+    **LiteLLM proxy:**
+
+    ```toml
     model_provider = "litellm"
-    
+
     [model_providers.litellm]
     name = "LiteLLM Proxy"
     base_url = "https://your-litellm-proxy.example.com/v1"
     wire_api = "responses"
-    http_headers = { "Authorization" = "Bearer sk-YOUR-API-KEY" }
-    model_auto_compact_token_limit = 900000
-    model_context_window = 1000000
-    EOF
+    env_key = "LITELLM_API_KEY"
     ```
-    
-    **Using OpenRouter:**
-    
-    ```bash
-    cat > ~/.codex/config.toml << 'EOF'
+
+    **OpenRouter:**
+
+    ```toml
     model_provider = "openrouter"
-    
+
     [model_providers.openrouter]
     name = "OpenRouter"
     base_url = "https://openrouter.ai/api/v1"
     wire_api = "responses"
-    http_headers = { "Authorization" = "Bearer sk-or-YOUR-OPENROUTER-KEY" }
-    model_auto_compact_token_limit = 900000
-    model_context_window = 1000000
-    EOF
+    env_key = "OPENROUTER_API_KEY"
     ```
-    
-    Now, running `codex` in terminal should work! 
-    
-4. Check Config file if there are issues 
-    
-    **Config File (`~/.codex/config.toml` )**
-    
-    **LiteLLM Proxy example:**
-    
-    ```toml
-    model_provider = "litellm"
-    
-    [model_providers.litellm]
-    name = "LiteLLM Proxy"
-    base_url = "https://your-litellm-proxy.example.com/v1"
-    wire_api = "responses"
-    http_headers = { "Authorization" = "Bearer sk-YOUR-API-KEY" }
-    model_auto_compact_token_limit = 900000
-    model_context_window = 1000000
-    ```
-    
-    **OpenRouter example:**
-    
-    ```toml
-    model_provider = "openrouter"
-    
-    [model_providers.openrouter]
-    name = "OpenRouter"
-    base_url = "https://openrouter.ai/api/v1"
-    wire_api = "responses"
-    http_headers = { "Authorization" = "Bearer sk-or-YOUR-OPENROUTER-KEY" }
-    model_auto_compact_token_limit = 900000
-    model_context_window = 1000000
-    ```
-    
-5. In Codex, select model with `/model` , select latest frontier model (`gpt-5.4)`  with highest reasoning (`xhigh`)
+
+    Keep API keys out of `http_headers`. Codex reads the variable named by `env_key` and sends it as the provider credential. Do not add context-window or compaction limits unless your gateway needs values that differ from the model metadata.
+
+4. Run `codex` in the same terminal, then use `/model`. With OpenRouter, choose a provider-qualified ID such as `openai/gpt-5.6-sol`, `openai/gpt-5.6-terra`, or `openai/gpt-5.6-luna`. With LiteLLM, use the deployment name configured on your proxy. Sol is for complex, open-ended work, Terra for everyday development, and Luna for clear, repeatable tasks. Max gives one agent more time to reason; Ultra can delegate independent parts to subagents on eligible accounts.
 
 ---
 
-## 3. Install GSD (Get Shit Done)
+## 3. Install GSD Core
 
-We'll be using this during the hands-on exercise. Install it now so we don't spend workshop time on setup.
+The hands-on exercise uses [GSD Core](https://github.com/open-gsd/gsd-core). Install version 1.8.0 in the workshop project.
 
 ```bash
-# Create a workshop project folder, run these in terminal
-mkdir workshop-project && cd workshop-project
+# Create a workshop project
+mkdir workshop-project
+cd workshop-project
 git init
 
-# Install GSD locally into this project - Deprecated as of 2026-05-22
-npx get-shit-done-cc@v1.37.0 # correct as of 20/04/26
-
-# 2026-05-22 Original GSD no longer maintained 
-npx @opengsd/get-shit-done-redux@1.0.0
+# Install GSD Core, verified 2026-07-27
+npx @opengsd/gsd-core@1.8.0
 ```
 
-Verify by opening Claude Code in that folder and typing `/gsd:help`.
+Verify by opening Claude Code in that folder and typing `/gsd-help`.
 
-> 2026-05-22 Update
-> To verify the installation of open-gsd over the original deprecated gsd-build, run /gsd-help in your harness; the "Update GSD" section should point to the @opengsd/ project.
->
-> Output: 
-> ![open-gsd-verify-highlight](/images/open-gsd-verify-highlight.png)
-
-
-> 💡 If you install via `npx get-shit-done-cc@latest` there is an open issue as follows: 
-> 
-> ![GSD install issue](/images/gsd-install-issue.png)
+The older `get-shit-done-cc` and `@opengsd/get-shit-done-redux` package names are deprecated.
 
 ---
 
-## 4. (Optional) Nice to Have
+## 4. Optional extras
 
-These aren't required but will make the workshop smoother:
+None of these are required.
 
-**A code editor** — [VS Code](https://code.visualstudio.com/), [Cursor](https://cursor.com/), or whatever you prefer. Useful for browsing the files that agents generate.
+**A code editor** — [VS Code](https://code.visualstudio.com/), [Cursor](https://cursor.com/), or whichever editor you already use. It helps when you want to inspect generated files outside the terminal.
 
 **GitHub CLI** — If you want to follow along with the GitHub integration section:
 
@@ -338,37 +264,35 @@ These aren't required but will make the workshop smoother:
 gh auth login
 ```
 
-**Familiarity with your terminal** — If you rarely use a terminal, spend 5 minutes getting comfortable with `cd`, `ls`, `mkdir`, and `cat`. Everything in the workshop happens in the terminal.
+**A few terminal basics** — If you rarely use a terminal, practice changing folders, listing files, creating a directory, and reading a text file before the workshop.
 
 ---
 
-## 5. Come With an Idea
+## 5. Bring a small project idea
 
-During the workshop, you'll build something from scratch using agentic coding. Come with a simple app idea in mind — it doesn't need to be original or useful. A CRUD app is perfect.
+During the workshop, you'll build a small app from scratch. It does not need to be original or useful; a basic CRUD app is enough.
 
-Some ideas to get you started:
+For example:
 
 - A job application tracker (roles, companies, stages, interview notes)
-- A stock tracker (input your own stocks, track green or red history, etc)
+- A stock tracker (symbols, prices, and daily movement)
 - A personal book tracker (title, author, status, notes)
 - An expense tracker (transactions, categories, budgets)
 - A recipe manager (recipes, ingredients, tags)
 - A workout logger (exercises, sets, reps, progress)
 - Something completely useless that makes you smile
 
-The simpler the better — the point is to experience the workflow, not to ship a product.
+Pick something you can describe in one sentence. The exercise is about the workflow, not a finished product.
 
 ---
 
-## ❓ Having Trouble?
+## If something fails
 
 If you get stuck on any step:
 
 1. Copy the error message
 2. Paste it into Claude or ChatGPT and ask for help
-3. If you're still stuck, reach out in the workshop group chat — someone's probably hit the same issue
-
-See you at the workshop! 🚀
+3. If you're still stuck, ask in the workshop group chat. Someone may already have seen the same error.
 
 ---
 

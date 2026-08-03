@@ -1,6 +1,6 @@
 ---
 title: Existing Codebase Workflows
-weight: 5
+weight: 6
 ---
 
 These are the two spec-driven frameworks we highly recommend for working with existing codebases using agentic coding tools.
