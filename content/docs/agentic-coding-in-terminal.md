@@ -40,6 +40,14 @@ Specs are the source of truth in an agent-led coding world. Clearly defined spec
 - Claude Desktop is the desktop app that allows you to chat, run Co-Work, run Claude Code but in a UI format. This requires a personal Claude account to access, and out of scope for this Claude Code workshop.
 - Claude Code on the web runs sessions in isolated Anthropic-managed VMs. A session can connect to a GitHub repository, work in the background, and open a pull request. You can monitor it at [claude.ai/code](https://claude.ai/code) or in the Claude mobile app. The research preview is available on Pro, Max, Team, and Enterprise plans with premium seats.
 
+### Why Claude Code (CC), and not other agentic harnesses (Codex, OpenCode, KiloCode)?
+
+Claude Code has been the pioneer of many things in the agentic world, and the other harnesses are simply copying the useful features that Claude Code has. They introduce first party support for these features with further optimizations in the product, while other harnesses might lag or struggle on equivalent implementations. We envisage that Anthropic/Claude Code will still continue to be the pioneer of newer features.
+
+- [Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) (introduced by CC in Oct 2025, now proliferated to other harnesses and OpenClaw as well)
+- CLAUDE.md (introduced by CC on launch in Feb 2025, now proliferated to Codex/other harnesses as AGENTS.md and OpenClaw as well)
+- [MCP](https://www.anthropic.com/news/donating-the-model-context-protocol-and-establishing-of-the-agentic-ai-foundation) (introduced by Anthropic in Nov 2024, donated to Linux Foundation in Dec 2025)
+
 ### Useful Claude Code Commands
 
 Before we go deeper, here are some commands / CLI flags that are useful.
