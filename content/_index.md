@@ -45,4 +45,10 @@ layout: hextra-home
     icon="book-open"
     link="docs/existing-codebase-workflows/"
   >}}
+  {{< hextra/feature-card
+    title="Reviewing Agentic Code"
+    subtitle="How to review an agent pull request in an AI-native team: the stacked PR model and what the final PR must carry."
+    icon="search"
+    link="docs/reviewing-agentic-code/"
+  >}}
 {{< /hextra/feature-grid >}}
