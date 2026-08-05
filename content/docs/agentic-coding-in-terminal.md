@@ -40,13 +40,25 @@ Specs are the source of truth in an agent-led coding world. Clearly defined spec
 - Claude Desktop is the desktop app that allows you to chat, run Co-Work, run Claude Code but in a UI format. This requires a personal Claude account to access, and out of scope for this Claude Code workshop.
 - Claude Code on the web runs sessions in isolated Anthropic-managed VMs. A session can connect to a GitHub repository, work in the background, and open a pull request. You can monitor it at [claude.ai/code](https://claude.ai/code) or in the Claude mobile app. The research preview is available on Pro, Max, Team, and Enterprise plans with premium seats.
 
-### Why Claude Code (CC), and not other agentic harnesses (Codex, OpenCode, KiloCode)?
+### Why Claude Code (CC) vs other agentic harnesses?
 
-Claude Code has been the pioneer of many things in the agentic world, and the other harnesses are simply copying the useful features that Claude Code has. They introduce first party support for these features with further optimizations in the product, while other harnesses might lag or struggle on equivalent implementations. We envisage that Anthropic/Claude Code will still continue to be the pioneer of newer features.
+When this workshop was first written, Claude Code was clearly out in front. That lead has shrunk. Codex, OpenCode, KiloCode, Pi, and Agy have all caught up quickly, and a few are very good now.
+
+Where we land today: Claude Code is the deepest and most heavily engineered harness you get out of the box. What stands out:
+
+- Dynamic workflows and subagent execution, so one session can run many agents in parallel
+- Memory that persists across sessions
+- The biggest ecosystem of Skills, plugins, and MCP servers
+
+That depth is a tradeoff. All the built-in features are powerful if you use them, and just bloat if you don't. Minimalist harnesses like Pi go the other way: a small, customisable core that feels faster to work in.
+
+Claude Code also tends to ship these things first, and the rest of the field catches up later:
 
 - [Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) (introduced by CC in Oct 2025, now proliferated to other harnesses and OpenClaw as well)
 - CLAUDE.md (introduced by CC on launch in Feb 2025, now proliferated to Codex/other harnesses as AGENTS.md and OpenClaw as well)
 - [MCP](https://www.anthropic.com/news/donating-the-model-context-protocol-and-establishing-of-the-agentic-ai-foundation) (introduced by Anthropic in Nov 2024, donated to Linux Foundation in Dec 2025)
+
+We use Claude Code for this workshop because of that depth and power. The right harness for you depends on how you actually work.
 
 ### Useful Claude Code Commands
 
@@ -258,7 +270,6 @@ Test it out! Prompt Claude Code to add a feature. Check whether if follows the r
             
             > 💡 **Third-party providers don't expose these limits the same way.** If you're routing Claude through a non-Anthropic provider, `/usage` won't show meaningful numbers — that reporting is only available on official subscriptions and API access.
             
-- Anthropic has been on a roll lately on cutting usage limits from both intended cuts and unintended "bugs" from vibecoding too hard - [https://vmfarms.com/claude/](https://vmfarms.com/claude/)
 - Practical tips:
     - Reference specific files with `@` rather than asking Claude to explore broadly
     - Avoid pasting entire large files when only a section is relevant
@@ -784,6 +795,7 @@ You should see the hook deny the request with a reason like `🛡️ [env-file] 
 | Name | Link | Install Command | Remarks |
 | --- | --- | --- | --- |
 | Context7 | [https://github.com/upstash/context7](https://github.com/upstash/context7) | `claude mcp add --scope user --header "CONTEXT7_API_KEY: YOUR_API_KEY" --transport http context7 https://mcp.context7.com/mcp` | Create API key at [https://context7.com/](https://context7.com/) and pass it |
+| docs-mcp-server | [https://github.com/arabold/docs-mcp-server](https://github.com/arabold/docs-mcp-server) | Run `npx @arabold/docs-mcp-server@latest` (or Docker), then `claude mcp add --transport sse docs-mcp http://localhost:6280/sse` | Self-hosted, open-source alternative to Context7. Indexes websites, GitHub, npm, PyPI, and local files and runs locally, so your code stays on your network. Optional embedding key improves search quality |
 | Chrome Devtools | [https://github.com/ChromeDevTools/chrome-devtools-mcp](https://github.com/ChromeDevTools/chrome-devtools-mcp) | `/plugin marketplace add ChromeDevTools/chrome-devtools-mcp` `/plugin install chrome-devtools-mcp` | Browser automation |
 | CodeGraphContext | [https://github.com/CodeGraphContext/CodeGraphContext](https://github.com/CodeGraphContext/CodeGraphContext) | | Indexes current codebase into graph DB for use by coding agents |
 | codebase-memory-mcp | [https://github.com/DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) | [Quick start guide](https://github.com/DeusData/codebase-memory-mcp?tab=readme-ov-file#quick-start) | Similar to CodeGraphContext above |
