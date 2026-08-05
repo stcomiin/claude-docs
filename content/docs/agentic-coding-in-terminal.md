@@ -42,23 +42,25 @@ Specs are the source of truth in an agent-led coding world. Clearly defined spec
 
 ### Why Claude Code (CC) vs other agentic harnesses?
 
-When this workshop was first written, Claude Code was clearly out in front. That lead has shrunk. Codex, OpenCode, KiloCode, Pi, and Agy have all caught up quickly, and a few are very good now.
+When this workshop was first written, Claude Code was clearly out in front. That lead has shrunk as other harnesses like Codex, OpenCode, KiloCode, Pi, and Antigravity-Cli have all caught up quickly, and a few are very good now.
 
-Where we land today: Claude Code is the deepest and most heavily engineered harness you get out of the box. What stands out:
+We believe that Claude Code is still the deepest and most heavily engineered harness you get out of the box. 
 
+Some notable features:
 - Dynamic workflows and subagent execution, so one session can run many agents in parallel
 - Memory that persists across sessions
 - The biggest ecosystem of Skills, plugins, and MCP servers
+- ...
 
 That depth is a tradeoff. All the built-in features are powerful if you use them, and just bloat if you don't. Minimalist harnesses like Pi go the other way: a small, customisable core that feels faster to work in.
+
+While the depth of built-in features is indeed powerful if you use them well, they can very easily be bloat if they do not fit your agentic coding workflow. Others have also found similar or even greater success in more minimalistic, highly customisable harnesses like Pi with little to no out-of-the-box features. The right harness for you really depends on how you actually work.
 
 Claude Code also tends to ship these things first, and the rest of the field catches up later:
 
 - [Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) (introduced by CC in Oct 2025, now proliferated to other harnesses and OpenClaw as well)
 - CLAUDE.md (introduced by CC on launch in Feb 2025, now proliferated to Codex/other harnesses as AGENTS.md and OpenClaw as well)
-- [MCP](https://www.anthropic.com/news/donating-the-model-context-protocol-and-establishing-of-the-agentic-ai-foundation) (introduced by Anthropic in Nov 2024, donated to Linux Foundation in Dec 2025)
-
-We use Claude Code for this workshop because of that depth and power. The right harness for you depends on how you actually work.
+- [MCP](https://www.anthropic.com/news/donating-the-model-context-protocol-and-establishing-of-the-agentic-ai-foundation) (introduced by Anthropic in Nov 2024, donated to the Linux Foundation in Dec 2025)
 
 ### Useful Claude Code Commands
 
