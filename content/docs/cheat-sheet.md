@@ -34,6 +34,8 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `/memory` | Open the CLAUDE.md files in scope |
 | `/permissions` | Review or edit permission rules |
 | `/config` | Open Claude Code settings |
+| `/doctor` | Diagnose setup issues and optionally fix them (alias `/checkup`) |
+| `/fewer-permission-prompts` | Scan recent transcripts and propose a read-only allowlist to cut permission prompts |
 
 ## ✍️ Writing better prompts
 
@@ -54,6 +56,8 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `Esc` | Stop generation |
 | `Esc Esc` or `/rewind` | Open the rewind menu for code, conversation, both, a summary point, or a fork (`f`) |
 | `/branch` / `/fork` | `/branch` switches to a new conversation timeline; `/fork` copies the conversation into a background session |
+| `/subtask <prompt>` | Hand a side task to a subagent; its result returns into this conversation |
+| `/background` / `/bg` | Detach the current session to run as a background agent and free the terminal |
 
 ## 🔍 Review & refactor
 
@@ -77,7 +81,9 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `ultracode` (in a prompt) or `/effort ultracode` | Use xhigh effort and dispatch workflow agents when parts of the task can run independently |
 | `/workflows` | List, watch, pause, resume, save, stop workflow runs |
 | `/deep-research <question>` | Research a question in parallel and return a cited report |
-| `/loop <interval> <prompt>` | Run a recurring task in the current session; tasks expire after seven days |
+| `/dataviz` | Chart and dashboard design guidance when building visualizations |
+| `/loop [interval] [prompt]` | Re-run a prompt while the session stays open (alias `/proactive`); `Esc` stops it. Omit the interval and Claude paces itself; omit the prompt and it runs a maintenance pass or your `.claude/loop.md`. Recurring tasks self-delete 7 days after creation |
+| `/goal [condition\|clear]` | Keep taking turns until an evaluator model confirms your condition is met (needs v2.1.139+); pair with auto mode or turns stall on prompts. `/goal` alone shows status; `/goal clear` stops it |
 | `/schedule` | Create a cloud routine triggered by a schedule, API call, or webhook |
 | `/sandbox` | Run with file and network isolation |
 
@@ -85,7 +91,7 @@ A compact reference for the commands and shortcuts that come up most often durin
 
 | Command | Description |
 | --- | --- |
-| `/agents` | Create and manage subagents |
+| `/agents` | Reminder to create or edit subagents by asking Claude or editing `.claude/agents/`; no longer an interactive manager (as of v2.1.198) |
 | `/skills` | List and manage skills |
 | `/plugin` | Browse plugin marketplaces |
 | `/mcp` | Manage MCP servers such as GitHub or Jira |
