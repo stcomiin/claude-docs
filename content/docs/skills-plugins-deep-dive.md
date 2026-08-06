@@ -341,29 +341,39 @@ The important check is simple: open the generated file and inspect it. Document 
 
 ## Superpowers
 
-**Project:** [obra/superpowers](https://github.com/obra/superpowers)
+**Project:** [obra/superpowers](https://github.com/obra/superpowers) · by Jesse Vincent (MIT)
 
-Unlike BMAD and GSD, Superpowers is less command-driven. The skills fire based on what you're doing, whether that's brainstorming, planning, debugging, TDD, or verification, without you having to remember which slash command to type.
+Unlike BMAD and GSD, Superpowers is less command-driven. Its skills fire based on what you're doing — brainstorming, planning, debugging, TDD, or verification — without you having to remember which command to type. A session-start bootstrap (the `using-superpowers` skill) teaches Claude to check for a relevant skill before each task.
 
 ### Install
+
+Superpowers now lives in Claude Code's **built-in** official plugin marketplace (`claude-plugins-official`), so there is no separate marketplace to register first — a single command installs it:
 
 ```text
 /plugin install superpowers@claude-plugins-official
 ```
 
-Restart Claude Code after installing.
+Restart Claude Code after installing. It is still an opt-in plugin (not enabled by default), and Superpowers also ships for Codex, Cursor, Gemini CLI, and other harnesses — install it separately in each.
 
-### Useful skills
+### Skills
+
+Superpowers ships **skills**, not standalone slash commands. They mostly fire on their own, but you can invoke any of them by name — namespaced as `/superpowers:<skill>` (for example, `/superpowers:brainstorming`):
 
 | Skill | What it adds |
 | --- | --- |
-| `/brainstorming` | Explore the approach before writing code |
-| `/writing-plans` | Break the work into short tasks with files and checks |
-| `/subagent-driven-development` | Use fresh agents for scoped tasks |
-| `/test-driven-development` | Follow red, green, refactor when appropriate |
-| `/systematic-debugging` | Form a hypothesis, gather evidence, then fix |
-| `/verification-before-completion` | Run checks before calling the task done |
-| `/using-git-worktrees` | Isolate larger work on a separate branch/worktree |
+| `brainstorming` | Explore the approach before writing code |
+| `writing-plans` | Break the work into short tasks with files and checks |
+| `executing-plans` | Work through a written plan with review checkpoints |
+| `subagent-driven-development` | Hand scoped tasks to fresh agents |
+| `dispatching-parallel-agents` | Fan out independent tasks across agents |
+| `test-driven-development` | Follow red, green, refactor when appropriate |
+| `systematic-debugging` | Form a hypothesis, gather evidence, then fix |
+| `requesting-code-review` | Get the work reviewed before calling it done |
+| `receiving-code-review` | Verify feedback instead of agreeing on reflex |
+| `verification-before-completion` | Run checks before claiming success |
+| `using-git-worktrees` | Isolate larger work on a separate worktree |
+| `finishing-a-development-branch` | Decide how to integrate completed work |
+| `writing-skills` | Author and test your own skills |
 
 ### When to use it
 
