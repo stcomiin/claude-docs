@@ -377,10 +377,6 @@ Double-tap `Esc` on an empty input to open the rewind menu. Scroll back with `�
 - Able to fork off `/btw` using (`f`)
     - Use `/resume <prev-conversation-id>` to return to original fork point if needed.
 
-**/copy [N]**
-
-- Copy Claude's last response (or the Nth-to-last) to your clipboard as markdown. If the response has multiple code blocks, you get an interactive picker.
-- Much faster than manually highlighting in terminal.
 
 ### Visual Inputs
 
@@ -484,7 +480,7 @@ Pre-approve tools via `/permissions` or `settings.json` to reduce prompts:
 
 > 🔗 Full tool reference: [https://code.claude.com/docs/en/tools-reference](https://code.claude.com/docs/en/tools-reference)
 
-## The Dev process for the Online Environment
+## Developing Online
 
 ### Working with GitHub
 
@@ -505,6 +501,13 @@ Useful Claude Code + `gh` workflows:
 - Review a PR diff and leave comments
 - Check CI status and fix failing tests
 
+
+### Working with GitLab
+
+Install the **GitLab CLI** from https://docs.gitlab.com/cli/, and use it similarly to how GH CLI is used.
+
+Also, install the agent skills with `glab skills install` so Claude knows how to use the CLI.
+
 ### Developer self code review before pushing code to GitHub
 
 1. Code that you are going to push must be simplified, clean, maintainable, readable, secure. For code that is going to be moved to offline environment, they must also be production ready.
@@ -518,7 +521,7 @@ Pick the lightest review that fits the change:
 | --- | --- |
 | `/review <pr>` | Fast, single-pass review of a pull request |
 | `/code-review` | Looks for correctness bugs and cleanup opportunities in a background subagent by default |
-| `/code-review ultra` | Runs the cloud review; `/ultrareview` is also a supported alias |
+| `/code-review ultra` | Runs the cloud review; `/ultrareview` is also a supported alias. Only 3 few runs are included once in the subscription plans, and do not refresh |
 | `/simplify` | Runs four cleanup agents that check reuse, code quality, and efficiency |
 
 For a second-model pass, ask Codex to review a narrow set of risks. For example:
@@ -563,37 +566,8 @@ Codex, Gemini and Claude review bots have been added to the organisation on GitH
 @claude review
 ```
 
-1. Make sure that the comment has 3 eyes emoji reactions from the respective bots to signify that they have received the request
+3. Make sure that the comment has 3 eyes emoji reactions from the respective bots to signify that they have received the request
 
-### Working with GitLab
-
-Install the **GitLab plugin** from the claude-plugins-official marketplace:
-
-```bash
-claude plugin install gitlab@claude-plugins-official
-```
-
-On gitlab.com, authenticate when the plugin prompts you. For self-managed GitLab, register the instance's MCP endpoint directly:
-
-```bash
-claude mcp add --transport http GitLab https://gitlab.example.com/api/v4/mcp
-```
-
-Open `/mcp`, select GitLab, and approve the OAuth request in your browser.
-
-Then you can reference GitLab directly in your prompts:
-
-```text
-"Can you use GitLab to create a new branch, push these changes, and open an MR?"
-```
-
-Useful Claude Code + GitLab workflows:
-
-- Create a branch, implement a feature, push and open a Merge Request — all in one prompt
-- Fetch open issues from a project and triage or assign them
-- Review an MR diff and suggest or apply changes
-- Check pipeline status and fix failing jobs
-- Search across repos, issues, and snippets within your GitLab group
 
 ### Working with Other Agents (Sub-agents & Agent Teams)
 
@@ -632,10 +606,10 @@ A workflow can run up to 16 agents at once and 1,000 agents in one run. Workflow
 
 Two ways to trigger it:
 
-1. **Inline keyword**: include `ultracode` in a prompt to authorize one orchestrated run:
+1. **Inline keywords**: include `ultracode` or `workflow` in a prompt to authorize one orchestrated run:
 
     ```text
-    ultracode: audit every API endpoint in this repo for missing auth checks,
+    audit every API endpoint in this repo using ultracode/workflows for missing auth checks,
     verify each finding with independent reviewer agents, and give me only
     the confirmed ones
     ```
