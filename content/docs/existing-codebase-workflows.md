@@ -62,6 +62,40 @@ Manually check that refreshing a source updates the row status and does not dele
 
 Paste those guardrails into the workflow prompt or a small handoff file. After GSD or BMAD creates planning files, move any long-lived constraints there and stop treating the handoff file as authoritative.
 
+## Come to a common understanding with `/grill-me`
+
+Most bad agent output comes from having vague understanding and wrong assumptions. Before you plan or write spec or even code, have the agent interrogate *you*, so that you come to a shared understanding with the agent that reflects your clear intentions of what you want to build.
+
+`/grill-me` is a skill from Matt Pocock's [Skills For Real Engineers](https://github.com/mattpocock/skills). It runs a `/grilling` session: the agent asks you focused questions, one round at a time, until nothing important is left assumed.
+
+Install it once (Claude Code, official marketplace):
+
+```text
+/plugin install mattpocock-skills
+```
+
+For Codex or other agents, or if you want editable copies to hack on:
+
+```bash
+npx skills@latest add mattpocock/skills
+```
+
+How a grilling session works:
+
+- It maps your change as a tree of decisions and asks only the questions whose answers aren't blocked by an earlier one.
+- Each round is a numbered list of questions, each with the agent's recommended answer. You reply; the next round goes deeper.
+- It looks up facts itself (reads the repo, runs tools) instead of asking you what it can find.
+- It stops when no open questions remain, and won't start building until you confirm you're aligned.
+
+```text
+/grill-me
+Add item categories with a filter on the items list.
+```
+
+Expect questions like: per-user or global categories? One category per item or many? What happens to existing items with no category? Filter by one category or several at once? Answer them and confirm alignment. For a small change that's the whole workflow — grill, then build in a plain session. Reach for GSD or BMAD only when the change is big enough to need their ceremony or brainstorming.
+
+> **Deeper on an existing codebase?** `/grill-with-docs` (same repo) runs the same grilling but also writes settled decisions into your project docs (`CONTEXT.md`, ADRs) as they formed, useful when the answers could shape future iterations of the build.
+
 ## Before Starting with GSD or BMAD
 
 1. Start from a clean branch.
