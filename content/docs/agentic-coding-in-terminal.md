@@ -227,14 +227,17 @@ Test it out! Prompt Claude Code to add a feature. Check whether if follows the r
 
 ### Compaction & Context Window Management
 
-- LLMs have a finite context window. In long sessions, older conversation turns get summarised ("compacted") to free up context.
+- LLMs have a finite context window. In long sessions, older conversation turns get summarised ("compacted") to free up context, and is not desirable.
 - What goes into the context? Visualize it - [https://code.claude.com/docs/en/context-window](https://code.claude.com/docs/en/context-window)
 - [Claude Code History Viewer](https://github.com/jhlee0409/claude-code-history-viewer) lets you browse past sessions and project statistics. Install the MSI from the [latest release](https://github.com/jhlee0409/claude-code-history-viewer/releases). Despite the name, it also reads sessions from tools such as Codex and reports token usage.
-- Do not let conversations get to the point where your conversation needs to be compacted. Always /clear around 200k context if possible. Claude models have 1M context now by default but performance still degrades in long context, no matter how good they say it is.
-- Claude Code handles the context window automatically (that's the whole point of CC: context engineering for agentic tasks), but you can influence it:
-    - Always start a **new session** for any task that is not related to current session.
-    - Use `/clear` to reset context without restarting (when hitting 200k context)
-    - Keep `CLAUDE.md` tight and relevant — it's loaded every session, so bloat here costs you tokens every time
+- Do not let conversations get to the point where your conversation needs to be compacted. Always /clear around 300k context if possible. Claude models have 1M context now by default but performance still degrades in longer context, no matter how good they say it is.
+- Do not use the compaction feature. Compaction is simply passing the chat history to a model and asking it to summarize the history. The session then continues from that summarized conversation, which is lossy and important details gleamed over the session may be stripped out.
+- Claude Code handles the context window automatically (that's the whole point of CC: context engineering for agentic tasks), but you can influence it in some ways:
+    - Always start a **new session** for any task that is not related to your current session.
+    - Use `/clear` to reset context without restarting (when hitting ~300k context)
+    - Keep `CLAUDE.md` tight and relevant — it's loaded at the start of every session, so bloat here costs you tokens every time
+    - Use the `/handoff` skill from Matt Pocock to generate a handoff document. https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md
+    - Just ask it to create a handoff document.
     - Use /context to check what's in your current context
 - If the agent starts "forgetting" earlier decisions, it's often a sign you've hit compaction — re-state the key constraints explicitly. Disable compaction.
 
@@ -506,7 +509,7 @@ Useful Claude Code + `gh` workflows:
 
 Install the **GitLab CLI** from https://docs.gitlab.com/cli/, and use it similarly to how GH CLI is used.
 
-Also, install the agent skills with `glab skills install` so Claude knows how to use the CLI.
+Authenticate the CLI with `glab auth login`. Also, install the agent skills with `glab skills install` so Claude knows how to use the CLI.
 
 ### Developer self code review before pushing code to GitHub
 
