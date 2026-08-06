@@ -110,13 +110,13 @@ When using such agentic coding tools on both brownfield work (with existing code
 
     ```python
     # Task: "Return None for missing users instead of letting db.find_user throw exception."
-    
+
     # Before
     def get_user(user_id):
         cached = cache.get(f"user:{user_id}")
         if cached is not None:
             return cached
-        
+
         user = db.find_user(user_id)                       # raises UserNotFound if missing, to be fixed
         cache.set(f"users:{user_id}", user, ttl=3600)
         return user
@@ -126,19 +126,20 @@ When using such agentic coding tools on both brownfield work (with existing code
         cached = cache.get(f"user:{user_id}")
         if cached is not None:
             return cached
-        
+
         try:
             user = db.find_user(user_id)
         except UserNotFound:
             return None                                    # changed by agent
         cache.set(f"users:{user_id}", user, ttl=3600)      # typo, pre-existing: "users:" vs "user:"
         return user
-    
+
     # Agent: "The cache.set key looks off but it's pre-existing — out of scope."
     # Result: the function appears to work perfectly. It just has a 0% cache hit rate,
     # hammering the database on every call.
 
     ```
+
 This is not a "model is not smart enough" problem. We need to build our "harness" or setup around the model with intentional guardrails that guide it toward what we want.
 
 We call this *bounded autonomy*: enough room to do the work, with guardrails that catch the specific ways it drifts.
@@ -341,29 +342,37 @@ The important check is simple: open the generated file and inspect it. Document 
 
 ## Superpowers
 
-**Project:** [obra/superpowers](https://github.com/obra/superpowers)
+**Project:** [obra/superpowers](https://github.com/obra/superpowers) · by Jesse Vincent (MIT)
 
-Unlike BMAD and GSD, Superpowers is less command-driven. The skills fire based on what you're doing, whether that's brainstorming, planning, debugging, TDD, or verification, without you having to remember which slash command to type.
+Unlike BMAD and GSD, Superpowers is less command-driven. Its skills fire based on what you're doing — brainstorming, planning, debugging, TDD, or verification — without you having to remember which command to type. A session-start bootstrap (the `using-superpowers` skill) teaches Claude to check for a relevant skill before each task.
 
 ### Install
+
+Superpowers now lives in Claude Code's **built-in** official plugin marketplace (`claude-plugins-official`), so there is no separate marketplace to register first:
 
 ```text
 /plugin install superpowers@claude-plugins-official
 ```
 
-Restart Claude Code after installing.
+Restart Claude Code after installing. It is still an opt-in plugin (not enabled by default), and Superpowers also ships for Codex, Cursor, Gemini CLI, and other harnesses, install it separately in each.
 
-### Useful skills
+### Skills
 
 | Skill | What it adds |
 | --- | --- |
-| `/brainstorming` | Explore the approach before writing code |
-| `/writing-plans` | Break the work into short tasks with files and checks |
-| `/subagent-driven-development` | Use fresh agents for scoped tasks |
-| `/test-driven-development` | Follow red, green, refactor when appropriate |
-| `/systematic-debugging` | Form a hypothesis, gather evidence, then fix |
-| `/verification-before-completion` | Run checks before calling the task done |
-| `/using-git-worktrees` | Isolate larger work on a separate branch/worktree |
+| `/superpowers:brainstorming` | Explore the approach before writing code |
+| `/superpowers:writing-plans` | Break the work into short tasks with files and checks |
+| `/superpowers:executing-plans` | Work through a written plan with review checkpoints |
+| `/superpowers:subagent-driven-development` | Hand scoped tasks to fresh agents |
+| `/superpowers:dispatching-parallel-agents` | Fan out independent tasks across agents |
+| `/superpowers:test-driven-development` | Follow red, green, refactor when appropriate |
+| `/superpowers:systematic-debugging` | Form a hypothesis, gather evidence, then fix |
+| `/superpowers:requesting-code-review` | Get the work reviewed before calling it done |
+| `/superpowers:receiving-code-review` | Verify feedback instead of agreeing on reflex |
+| `/superpowers:verification-before-completion` | Run checks before claiming success |
+| `/superpowers:using-git-worktrees` | Isolate larger work on a separate worktree |
+| `/superpowers:finishing-a-development-branch` | Decide how to integrate completed work |
+| `/superpowers:writing-skills` | Author and test your own skills |
 
 ### When to use it
 
