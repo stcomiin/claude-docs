@@ -241,14 +241,17 @@ Test it out! Prompt Claude Code to add a feature. Check whether if follows the r
 
 ### Compaction & Context Window Management
 
-- LLMs have a finite context window. In long sessions, older conversation turns get summarised ("compacted") to free up context.
+- LLMs have a finite context window. In long sessions, older conversation turns get summarised ("compacted") to free up context, and is not desirable.
 - What goes into the context? Visualize it - [https://code.claude.com/docs/en/context-window](https://code.claude.com/docs/en/context-window)
 - [Claude Code History Viewer](https://github.com/jhlee0409/claude-code-history-viewer) lets you browse past sessions and project statistics. Install the MSI from the [latest release](https://github.com/jhlee0409/claude-code-history-viewer/releases). Despite the name, it also reads sessions from tools such as Codex and reports token usage.
-- Do not let conversations get to the point where your conversation needs to be compacted. Always /clear around 200k context if possible. Claude models have 1M context now by default but performance still degrades in long context, no matter how good they say it is.
-- Claude Code handles the context window automatically (that's the whole point of CC: context engineering for agentic tasks), but you can influence it:
-    - Always start a **new session** for any task that is not related to current session.
-    - Use `/clear` to reset context without restarting (when hitting 200k context)
-    - Keep `CLAUDE.md` tight and relevant — it's loaded every session, so bloat here costs you tokens every time
+- Do not let conversations get to the point where your conversation needs to be compacted. Always /clear around 300k context if possible. Claude models have 1M context now by default but performance still degrades in longer context, no matter how good they say it is.
+- Do not use the compaction feature. Compaction is simply passing the chat history to a model and asking it to summarize the history. The session then continues from that summarized conversation, which is lossy and important details gleamed over the session may be stripped out.
+- Claude Code handles the context window automatically (that's the whole point of CC: context engineering for agentic tasks), but you can influence it in some ways:
+    - Always start a **new session** for any task that is not related to your current session.
+    - Use `/clear` to reset context without restarting (when hitting ~300k context)
+    - Keep `CLAUDE.md` tight and relevant — it's loaded at the start of every session, so bloat here costs you tokens every time
+    - Use the `/handoff` skill from Matt Pocock to generate a handoff document. https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md
+    - Just ask it to create a handoff document.
     - Use /context to check what's in your current context
 - If the agent starts "forgetting" earlier decisions, it's often a sign you've hit compaction — re-state the key constraints explicitly. Disable compaction.
 
@@ -390,10 +393,6 @@ Double-tap `Esc` on an empty input to open the rewind menu. Scroll back with `�
 - Able to fork off `/btw` using (`f`)
     - Use `/resume <prev-conversation-id>` to return to original fork point if needed.
 
-**/copy [N]**
-
-- Copy Claude's last response (or the Nth-to-last) to your clipboard as markdown. If the response has multiple code blocks, you get an interactive picker.
-- Much faster than manually highlighting in terminal.
 
 ### Visual Inputs
 
@@ -497,7 +496,7 @@ Pre-approve tools via `/permissions` or `settings.json` to reduce prompts:
 
 > 🔗 Full tool reference: [https://code.claude.com/docs/en/tools-reference](https://code.claude.com/docs/en/tools-reference)
 
-## The Dev process for the Online Environment
+## Developing Online
 
 ### Working with GitHub
 
@@ -518,6 +517,13 @@ Useful Claude Code + `gh` workflows:
 - Review a PR diff and leave comments
 - Check CI status and fix failing tests
 
+
+### Working with GitLab
+
+Install the **GitLab CLI** from https://docs.gitlab.com/cli/, and use it similarly to how GH CLI is used.
+
+Authenticate the CLI with `glab auth login`. Also, install the agent skills with `glab skills install` so Claude knows how to use the CLI.
+
 ### Developer self code review before pushing code to GitHub
 
 1. Code that you are going to push must be simplified, clean, maintainable, readable, secure. For code that is going to be moved to offline environment, they must also be production ready.
@@ -531,7 +537,7 @@ Pick the lightest review that fits the change:
 | --- | --- |
 | `/review <pr>` | Fast, single-pass review of a pull request |
 | `/code-review` | Looks for correctness bugs and cleanup opportunities in a background subagent by default |
-| `/code-review ultra` | Runs the cloud review; `/ultrareview` is also a supported alias |
+| `/code-review ultra` | Runs the cloud review; `/ultrareview` is also a supported alias. Only 3 few runs are included once in the subscription plans, and do not refresh |
 | `/simplify` | Runs four cleanup agents that check reuse, code quality, and efficiency |
 
 For a second-model pass, ask Codex to review a narrow set of risks. For example:
@@ -576,37 +582,8 @@ Codex, Gemini and Claude review bots have been added to the organisation on GitH
 @claude review
 ```
 
-1. Make sure that the comment has 3 eyes emoji reactions from the respective bots to signify that they have received the request
+3. Make sure that the comment has 3 eyes emoji reactions from the respective bots to signify that they have received the request
 
-### Working with GitLab
-
-Install the **GitLab plugin** from the claude-plugins-official marketplace:
-
-```bash
-claude plugin install gitlab@claude-plugins-official
-```
-
-On gitlab.com, authenticate when the plugin prompts you. For self-managed GitLab, register the instance's MCP endpoint directly:
-
-```bash
-claude mcp add --transport http GitLab https://gitlab.example.com/api/v4/mcp
-```
-
-Open `/mcp`, select GitLab, and approve the OAuth request in your browser.
-
-Then you can reference GitLab directly in your prompts:
-
-```text
-"Can you use GitLab to create a new branch, push these changes, and open an MR?"
-```
-
-Useful Claude Code + GitLab workflows:
-
-- Create a branch, implement a feature, push and open a Merge Request — all in one prompt
-- Fetch open issues from a project and triage or assign them
-- Review an MR diff and suggest or apply changes
-- Check pipeline status and fix failing jobs
-- Search across repos, issues, and snippets within your GitLab group
 
 ### Working with Other Agents (Sub-agents & Agent Teams)
 
@@ -645,10 +622,10 @@ A workflow can run up to 16 agents at once and 1,000 agents in one run. Workflow
 
 Two ways to trigger it:
 
-1. **Inline keyword**: include `ultracode` in a prompt to authorize one orchestrated run:
+1. **Inline keywords**: include `ultracode` or `workflow` in a prompt to authorize one orchestrated run:
 
     ```text
-    ultracode: audit every API endpoint in this repo for missing auth checks,
+    audit every API endpoint in this repo using ultracode/workflows for missing auth checks,
     verify each finding with independent reviewer agents, and give me only
     the confirmed ones
     ```
