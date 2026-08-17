@@ -15,3 +15,8 @@ Thumbs.db
 
 # Test/automation artifacts
 .playwright-mcp/
+
+# Impeccable transient artifacts (review captures + decision-page runtime state);
+# durable artifacts (config, surfaces, spent decision mocks) stay tracked.
+.impeccable/review/
+.impeccable/questions/

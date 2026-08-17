@@ -37,6 +37,14 @@ outputFormats:
 outputs:
   home: [HTML, RSS, LlmsTxt, LlmsFullTxt]
 
+# Keep HTML comments through `hugo --minify`: the landing layout carries its
+# design direction contract as an HTML comment that must survive the
+# production build so it stays auditable in the deployed page.
+minify:
+  tdewolff:
+    html:
+      keepComments: true
+
 menu:
   main:
     - identifier: documentation

@@ -185,6 +185,42 @@
         ],
         "createdAt": "2026-08-17T17:39:06.918Z",
         "reason": "lightbox overlay chrome; neutral scrim intentional so surround never tints the viewed image (close glyph)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": ".78rem",
+        "createdAt": "2026-08-17T18:29:55.470Z",
+        "reason": "user locked the Manual Cover render (2026-08-18 surface round, seed 40257c2b); cover type steps of the approved comp — DESIGN.md refresh lands at finish via documenter"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "3.1rem",
+        "createdAt": "2026-08-17T18:29:55.523Z",
+        "reason": "user locked the Manual Cover render (2026-08-18 surface round, seed 40257c2b); cover type steps of the approved comp — DESIGN.md refresh lands at finish via documenter"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "1.05rem",
+        "createdAt": "2026-08-17T18:29:55.573Z",
+        "reason": "user locked the Manual Cover render (2026-08-18 surface round, seed 40257c2b); cover type steps of the approved comp — DESIGN.md refresh lands at finish via documenter"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "1.15rem",
+        "createdAt": "2026-08-17T18:29:55.625Z",
+        "reason": "user locked the Manual Cover render (2026-08-18 surface round, seed 40257c2b); cover type steps of the approved comp — DESIGN.md refresh lands at finish via documenter"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": ".9rem",
+        "createdAt": "2026-08-17T18:29:55.673Z",
+        "reason": "user locked the Manual Cover render (2026-08-18 surface round, seed 40257c2b); cover type steps of the approved comp — DESIGN.md refresh lands at finish via documenter"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": ".85rem",
+        "createdAt": "2026-08-17T18:29:55.724Z",
+        "reason": "user locked the Manual Cover render (2026-08-18 surface round, seed 40257c2b); cover type steps of the approved comp — DESIGN.md refresh lands at finish via documenter"
       }
     ]
   }

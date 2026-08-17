@@ -100,17 +100,6 @@
      it would un-tighten reading lines on ultrawide screens. */
 }
 
-/* Re-center the home layout. Doc pages wrap <main> inside <article>, so
-   <main> as a direct child of .hextra-max-page-width is unique to the
-   hextra-home layout. Re-introducing a max-width here restores the
-   centered hero + feature grid look that the page-width cap used to give
-   us before we lifted it on the chrome above. */
-.hextra-max-page-width > main#content {
-  max-width: 90rem;
-  margin-left: auto;
-  margin-right: auto;
-}
-
 /* ── Bookmark embed cards (Notion-style link previews) ──────────────── */
 .bookmark-card {
   display: flex;
@@ -275,24 +264,6 @@ a.bookmark-info {
 .content table td a,
 .content table td code {
   overflow-wrap: anywhere;
-}
-
-/* Hero section spacing — body prefix adds specificity to beat theme defaults */
-body main#content > div > h1:first-child {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-}
-
-body main#content > div > p:nth-of-type(1) {
-  margin-bottom: 2rem;
-}
-
-body main#content > div > p:nth-of-type(2) {
-  margin-bottom: 1rem;
-}
-
-body .hextra-feature-grid {
-  margin-top: 2.5rem;
 }
 
 /* ── Presenter Kit: ephemeral ink overlay + projector mode ────────────
@@ -542,9 +513,8 @@ body .hextra-feature-grid {
   --card-shadow-hover: 0 3px 8px rgba(63, 52, 40, .07), 0 18px 34px rgba(150, 74, 46, .13);
   --card-border-hover: rgba(193, 95, 59, .5);
 
-  /* Home hero atmosphere: a warm clay glow from the top-left, plus grain. */
-  --hero-wash: radial-gradient(115% 78% at 12% -8%, rgba(193, 95, 59, .11), rgba(193, 95, 59, .035) 32%, transparent 66%);
-  --grain-opacity: .28;
+  /* Home cover bloom: a faint full-bleed clay glow rising from the top. */
+  --cover-bloom: radial-gradient(120% 55% at 50% -12%, rgba(193, 95, 59, .085), transparent 58%);
 
   /* Docs reading surface. */
   --table-head: #f2efe6;
@@ -561,8 +531,7 @@ body .hextra-feature-grid {
   --card-shadow-hover: 0 2px 6px rgba(0, 0, 0, .35), 0 20px 40px rgba(0, 0, 0, .5);
   --card-border-hover: rgba(217, 119, 87, .55);
 
-  --hero-wash: radial-gradient(115% 78% at 12% -8%, rgba(217, 119, 87, .15), rgba(217, 119, 87, .045) 36%, transparent 68%);
-  --grain-opacity: .22;
+  --cover-bloom: radial-gradient(120% 55% at 50% -12%, rgba(217, 119, 87, .12), transparent 58%);
 
   --table-head: #2a2621;
   --table-row-hover: rgba(217, 119, 87, .06);
@@ -571,127 +540,252 @@ body .hextra-feature-grid {
   --code-block-border: rgba(255, 255, 255, .07);
 }
 
-/* ── Home hero atmosphere ───────────────────────────────────────────────
-   `.hextra-max-page-width > main#content` matches ONLY the home layout —
-   doc pages nest <main> inside <article> — so the wash and grain never
-   touch the reading surface. */
-.hextra-max-page-width > main#content {
+/* ── Manual Cover home ──────────────────────────────────────────────────
+   The landing page is the title page of a bound manual (layout:
+   manual-cover). The ground is full-bleed — the bloom spans the viewport,
+   never a capped column, which is what retired the old seam band. The
+   old hextra-home shortcodes (hero, feature grid) left this surface with
+   that layout; their rules are gone with them. */
+.manual-cover-page {
   position: relative;
   isolation: isolate;
+  overflow: hidden; /* the bloom may not mint a horizontal scrollbar */
 }
-.hextra-max-page-width > main#content::before,
-.hextra-max-page-width > main#content::after {
+.manual-cover-page::before {
   content: "";
   position: absolute;
-  inset: -6rem 0 0; /* bleed up under the navbar so the glow starts off-screen */
+  inset: 0;
+  background: var(--cover-bloom);
   pointer-events: none;
   z-index: 0;
 }
-.hextra-max-page-width > main#content::before {
-  background: var(--hero-wash);
-}
-.hextra-max-page-width > main#content::after {
-  background-image: url("/images/grain.svg");
-  background-size: 160px 160px;
-  opacity: var(--grain-opacity);
-  mix-blend-mode: overlay;
-}
-/* Lift the hero content above the atmosphere layers. */
-.hextra-max-page-width > main#content > * {
+.manual-cover {
   position: relative;
   z-index: 1;
+  min-height: calc(100vh - var(--navbar-height, 4rem));
+  padding: 0 max(env(safe-area-inset-left), 1.5rem) 0 max(env(safe-area-inset-right), 1.5rem);
 }
 
-/* ── Feature grid: justified wrap, no orphan cell ───────────────────────
-   Hextra lays 5 cards on a fixed 3×400px grid, which orphans an empty
-   cell on the second row. Re-flow as a justified wrap so each row fills
-   the width — 3 up top, 2 below — with no hole. The 24rem basis keeps it
-   at ≤3 per row within the 90rem page cap, and collapses to 2 then 1. */
-.hextra-feature-grid {
-  display: flex !important;
-  flex-wrap: wrap;
-  gap: 1rem;
+/* Cover plate */
+.mc-cover {
+  text-align: center;
+  padding-top: clamp(3.5rem, 9vh, 6.5rem);
 }
-.hextra-feature-grid > .hextra-feature-card {
-  flex: 1 1 24rem;
+.mc-series {
+  font-size: .78rem;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--hx-color-gray-600);
 }
+.dark .mc-series { color: var(--hx-color-gray-500); }
+.mc-rule {
+  display: block;
+  width: 3.5rem;
+  height: 1px;
+  background: var(--acc-600);
+  margin: 1.6rem auto;
+}
+.mc-title {
+  font-weight: 700;
+  font-size: clamp(3.1rem, 7vw, 5.5rem);
+  line-height: .98;
+  letter-spacing: -.05em;
+  color: var(--hx-color-slate-900);
+  margin: 0 auto;
+}
+.dark .mc-title { color: var(--hx-color-gray-100); }
+.mc-title span { display: block; }
+.mc-colophon {
+  margin-top: 1.9rem;
+  font-size: 1.05rem;
+  color: var(--hx-color-gray-600);
+}
+.dark .mc-colophon { color: var(--hx-color-gray-400); }
+.mc-colophon strong {
+  font-weight: 600;
+  color: var(--hx-color-slate-900);
+}
+.dark .mc-colophon strong { color: var(--hx-color-gray-100); }
 
-/* ── Feature cards: raised surface + satisfying hover ───────────────────── */
-.hextra-feature-card {
-  background: var(--card-surface) !important;
-  border-color: var(--card-border) !important;
-  box-shadow: var(--card-shadow);
-  transition: transform .22s cubic-bezier(.16, 1, .3, 1),
-              box-shadow .22s cubic-bezier(.16, 1, .3, 1),
-              border-color .22s ease;
-}
-.hextra-feature-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--card-shadow-hover);
-  border-color: var(--card-border-hover) !important;
-}
-/* Icon carries the accent and nudges up on hover. */
-.hextra-feature-card h3 svg {
-  color: var(--acc-600);
-  transition: transform .22s cubic-bezier(.16, 1, .3, 1);
-}
-.hextra-feature-card:hover h3 svg {
-  transform: translateY(-1px) scale(1.06);
-}
-
-/* ── One authored load moment ───────────────────────────────────────────
-   The home hero rises in as a single sequence: headline, subtitle, CTAs,
-   then the cards stagger. Everything is visible by default — the motion
-   only exists where motion is welcome. */
-@media (prefers-reduced-motion: no-preference) {
-  .hextra-max-page-width > main#content > h1,
-  .hextra-max-page-width > main#content > p,
-  .hextra-feature-card {
-    animation: hero-rise .7s cubic-bezier(.16, 1, .3, 1) backwards;
-  }
-  .hextra-max-page-width > main#content > h1 { animation-delay: .02s; }
-  .hextra-max-page-width > main#content > p:nth-of-type(1) { animation-delay: .10s; }
-  .hextra-max-page-width > main#content > p:nth-of-type(2) { animation-delay: .18s; }
-  .hextra-feature-card { animation-duration: .6s; }
-  .hextra-feature-card:nth-child(1) { animation-delay: .26s; }
-  .hextra-feature-card:nth-child(2) { animation-delay: .32s; }
-  .hextra-feature-card:nth-child(3) { animation-delay: .38s; }
-  .hextra-feature-card:nth-child(4) { animation-delay: .44s; }
-  .hextra-feature-card:nth-child(5) { animation-delay: .50s; }
-}
-@keyframes hero-rise {
-  from { opacity: 0; transform: translateY(18px); filter: blur(8px); }
-  to   { opacity: 1; transform: none; filter: none; }
-}
-
-/* ── Hero CTAs ──────────────────────────────────────────────────────────
-   Scoped to the home hero: only the two rounded-full buttons match. */
-.hextra-max-page-width > main#content a[class*="rounded-full"] {
+/* One filled clay action. Light mode deepens the fill one ramp step so
+   ivory text clears 4.5:1; dark mode inverts to ink-on-terracotta. */
+.mc-begin { margin-top: 2.1rem; }
+.mc-btn {
+  display: inline-block;
+  padding: 13px 28px;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.5;
+  text-decoration: none;
+  background: hsl(var(--primary-hue) var(--primary-saturation) calc(var(--primary-lightness) * .84));
+  color: #faf9f5;
   box-shadow: 0 1px 2px rgba(120, 55, 30, .12), 0 6px 16px rgba(160, 74, 46, .18);
-  transition: transform .2s cubic-bezier(.16, 1, .3, 1),
-              box-shadow .2s ease, background-color .2s ease, color .2s ease;
+  transition: transform .2s cubic-bezier(.16, 1, .3, 1), box-shadow .2s ease;
 }
-.hextra-max-page-width > main#content a[class*="rounded-full"]:hover {
+.dark .mc-btn {
+  background: var(--acc-600);
+  color: #1a1210;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 22px rgba(217, 121, 89, .22);
+}
+.mc-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 3px 8px rgba(120, 55, 30, .16), 0 12px 28px rgba(160, 74, 46, .26);
 }
-.hextra-max-page-width > main#content a[class*="rounded-full"]:active {
-  transform: translateY(0);
+.dark .mc-btn:hover {
+  box-shadow: 0 3px 8px rgba(0, 0, 0, .35), 0 12px 30px rgba(217, 121, 89, .3);
 }
-/* Secondary CTA ("Setup Guide"): the source asks for style="outline" but
-   this Hextra build renders it as a second filled primary, leaving the
-   hero with two competing actions. Restore the outline so there is one
-   clear primary. The ring is an inset shadow so the box never resizes. */
-.hextra-max-page-width > main#content a[href*="setup-guide"] {
-  background: transparent !important;
-  color: var(--acc-600) !important;
-  box-shadow: inset 0 0 0 1.5px var(--acc-600);
+.mc-btn:active { transform: translateY(0); }
+.mc-btn:focus-visible,
+.mc-entry:focus-visible,
+.mc-machine:focus-visible {
+  outline: 2px solid var(--acc-600);
+  outline-offset: 3px;
+  border-radius: 6px;
 }
-.hextra-max-page-width > main#content a[href*="setup-guide"]:hover {
-  background: var(--acc-600) !important;
-  color: #fff !important;
-  box-shadow: inset 0 0 0 1.5px transparent,
-              0 3px 8px rgba(120, 55, 30, .16), 0 12px 28px rgba(160, 74, 46, .26);
+.mc-btn:focus-visible { border-radius: 9999px; }
+
+/* Contents — the whole navigation, ruled like a printed TOC */
+.mc-contents {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: clamp(2.8rem, 7vh, 4.5rem) 0 5.5rem;
+}
+.mc-contents-h {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: .78rem;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--hx-color-gray-600);
+  margin-bottom: 1.1rem;
+}
+.dark .mc-contents-h { color: var(--hx-color-gray-500); }
+.mc-contents-h::before,
+.mc-contents-h::after {
+  content: "";
+  height: 1px;
+  background: var(--card-border);
+  flex: 1;
+}
+.mc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.mc-entry {
+  display: flex;
+  align-items: baseline;
+  gap: .85rem;
+  padding: .95rem 0;
+  text-decoration: none;
+  color: inherit;
+}
+.mc-entry-t {
+  font-weight: 600;
+  font-size: 1.15rem;
+  letter-spacing: -.01em;
+  color: var(--hx-color-slate-900);
+  transition: color .2s ease;
+}
+.dark .mc-entry-t { color: var(--hx-color-gray-100); }
+.mc-entry-n {
+  font-size: .9rem;
+  color: var(--hx-color-gray-600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+}
+.dark .mc-entry-n { color: var(--hx-color-gray-500); }
+.mc-entry-lead {
+  flex: 1;
+  min-width: 2.5rem;
+  border-bottom: 1px dotted var(--hx-color-gray-400);
+  transform: translateY(-4px);
+}
+.dark .mc-entry-lead { border-bottom-color: var(--hx-color-gray-600); }
+.mc-entry-f {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .9rem;
+  color: var(--acc-600);
+}
+.mc-entry:hover .mc-entry-t { color: var(--acc-600); }
+
+/* Machine path — the llms.txt colophon chip */
+.mc-machine {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2.2rem;
+  padding: 1rem 1.4rem;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  text-decoration: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .85rem;
+  color: var(--hx-color-gray-600);
+  transition: border-color .2s ease;
+}
+.dark .mc-machine { color: var(--hx-color-gray-400); }
+.mc-machine-p { color: var(--acc-600); }
+.mc-machine:hover { border-color: var(--acc-600); }
+
+/* ── The cover composes itself once ─────────────────────────────────────
+   One authored moment: series line, rule, title, colophon, begin, then
+   the contents entries in reading order. Fully visible without motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .mc-series, .mc-title, .mc-colophon, .mc-begin,
+  .mc-contents-h, .mc-entry-li, .mc-machine {
+    animation: mc-rise .65s cubic-bezier(.16, 1, .3, 1) backwards;
+  }
+  .mc-rule {
+    animation: mc-rule-grow .5s cubic-bezier(.16, 1, .3, 1) .08s backwards;
+  }
+  .mc-series { animation-delay: .02s; }
+  .mc-title { animation-delay: .12s; }
+  .mc-colophon { animation-delay: .24s; }
+  .mc-begin { animation-delay: .32s; }
+  .mc-contents-h { animation-delay: .40s; }
+  .mc-entry-li:nth-child(1) { animation-delay: .46s; }
+  .mc-entry-li:nth-child(2) { animation-delay: .51s; }
+  .mc-entry-li:nth-child(3) { animation-delay: .56s; }
+  .mc-entry-li:nth-child(4) { animation-delay: .61s; }
+  .mc-entry-li:nth-child(5) { animation-delay: .66s; }
+  .mc-entry-li:nth-child(6) { animation-delay: .71s; }
+  .mc-machine { animation-delay: .80s; }
+}
+@keyframes mc-rise {
+  from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
+  to   { opacity: 1; transform: none; filter: none; }
+}
+@keyframes mc-rule-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* Small screens: the note drops to its own line under the title; the
+   leader keeps ruling the title-to-folio line above it. */
+@media (max-width: 640px) {
+  .mc-entry {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "t lead f" "n n n";
+    row-gap: .2rem;
+  }
+  .mc-entry-t { grid-area: t; }
+  .mc-entry-lead { grid-area: lead; align-self: end; margin-bottom: .55em; transform: none; }
+  .mc-entry-f { grid-area: f; }
+  .mc-entry-n { grid-area: n; white-space: normal; }
+  .mc-machine { flex-direction: column; align-items: flex-start; gap: .3rem; }
+  /* Clear the floating pen + scroll-to-top column (right 2rem, up to
+     7.5rem tall) so the last contents rows and the machine chip can
+     scroll out from under it — same clearance the docs TOC carries. */
+  .mc-contents { padding-bottom: 7.5rem; }
 }
 
 /* ── Docs tables ────────────────────────────────────────────────────────
@@ -747,9 +841,8 @@ body .hextra-feature-grid {
 
 /* Respect reduced-motion for the hover micro-lifts too. */
 @media (prefers-reduced-motion: reduce) {
-  .hextra-feature-card,
-  .hextra-feature-card:hover,
-  .hextra-max-page-width > main#content a[class*="rounded-full"]:hover {
+  .mc-btn,
+  .mc-btn:hover {
     transform: none;
   }
 }
