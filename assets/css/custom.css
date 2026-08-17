@@ -245,6 +245,38 @@ a.bookmark-info {
   overflow-wrap: break-word;
 }
 
+/* Hextra renders markdown tables as `display: block` so oversized grids can
+   scroll sideways on small screens. Side effect: `width: 100%` then sizes the
+   scroll box, not the grid, so each table shrinks to its own max-content and
+   tables on the same page all end at different widths. Where the column has
+   room, restore real table layout so grids fill it edge-to-edge; below md
+   keep the theme's block+scroll fallback. */
+@media (min-width: 768px) {
+  .content table {
+    display: table;
+  }
+}
+
+/* Browsers center <th> by default while the cells below stay left-aligned;
+   one alignment axis per column reads faster. Explicit `:---:` alignment
+   from markdown still wins — goldmark emits it as inline style. */
+.content table th {
+  text-align: left;
+}
+
+/* With real table layout, a cell holding an unbreakable token (a pasted URL,
+   a long install command) sets the column's min-content and can push the
+   grid past the article edge — `break-word` wraps text but does NOT shrink
+   min-content; `anywhere` does. Scope `anywhere` to the tokens that actually
+   get long (link text, inline code), NOT whole cells: on the cell it would
+   zero every column's min-content and auto layout then crushes short prose
+   columns into mid-word breaks ("Conte/xt7"). Plain text keeps word-boundary
+   wrapping from the table's `break-word` above. */
+.content table td a,
+.content table td code {
+  overflow-wrap: anywhere;
+}
+
 /* Hero section spacing — body prefix adds specificity to beat theme defaults */
 body main#content > div > h1:first-child {
   margin-top: 2rem;
@@ -684,9 +716,33 @@ body .hextra-feature-grid {
 .content :not(pre) > code {
   background: var(--code-inline-bg);
   border-color: var(--code-inline-border);
+  /* When a chip wraps across lines, give every fragment its own padding and
+     rounded corners instead of an open-ended box torn at the line break. */
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 .content pre {
   border: 1px solid var(--code-block-border);
+}
+
+/* ── Docs wayfinding ────────────────────────────────────────────────────
+   The sidebar already marks the active page in clay; mirror that on the
+   TOC's active entry, which the theme only brightens (white vs warm gray —
+   easy to lose in a 40-entry list). Color only, no weight change, so the
+   list never reflows as the reader scrolls. */
+.hextra-toc a.hextra-toc-active {
+  /* The theme pins this color with unlayered !important (gray-900 / gray-50
+     per mode); matching importance at equal specificity lets later source
+     order — this file — decide. */
+  color: var(--acc-600) !important;
+}
+
+/* The floating pen + scroll-to-top buttons (right 2rem, up to 7.5rem tall
+   as a column) sit over the TOC's bottom entries on long pages. Give the
+   TOC's own scroll box matching bottom clearance so its last items can
+   always scroll out from under them. */
+.hextra-toc .hextra-scrollbar {
+  padding-bottom: 7.5rem;
 }
 
 /* Respect reduced-motion for the hover micro-lifts too. */

@@ -3,7 +3,7 @@ title: Agentic Coding in Terminal
 weight: 1
 ---
 
-**Apex Builders Collective** × **Info PC • April** 2026
+**Apex Builders Collective** × **Info PC** • April 2026
 
 [Pre-Workshop Setup Guide](/docs/setup-guide/)
 
