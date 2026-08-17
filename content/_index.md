@@ -8,7 +8,7 @@ layout: hextra-home
 {{< /hextra/hero-headline >}}
 
 {{< hextra/hero-subtitle >}}
-  Workshop materials — Apex Builders Collective × Info PC • April 2026
+  Workshop materials: Apex Builders Collective × Info PC • April 2026
 {{< /hextra/hero-subtitle >}}
 
 {{< hextra/hero-button text="Get Started" link="docs/agentic-coding-in-terminal/" >}}

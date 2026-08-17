@@ -57,7 +57,7 @@ params:
   # Site description. Read by Hextra's opengraph and page-description
   # partials via .Site.Params.description (top-level `description` is not
   # mirrored into Site.Params, so it must live here to be picked up).
-  description: "Workshop materials — Apex Builders Collective × Info PC"
+  description: "Workshop materials: Apex Builders Collective × Info PC"
 
   # Used by Hextra's opengraph partial and Hugo's internal twitter_cards
   # partial to populate og:image / twitter:image for link previews

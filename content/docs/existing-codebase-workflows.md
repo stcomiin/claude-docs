@@ -398,7 +398,7 @@ What you should notice:
 
 - The auto-verifier catches "compiles but doesn't satisfy spec" without re-prompting.
 - Phase boundaries and `.planning/` keep a category addition from sprawling into an items-module rewrite.
-- `/gsd-verify-work` is where you confirm the feature actually does what you wanted — not just that tests pass. Tests go green and the spec can still be wrong.
+- `/gsd-verify-work` is where you confirm the feature actually does what you wanted, not just that tests pass. Tests go green and the spec can still be wrong.
 
 ### Run It Through BMAD
 
@@ -411,7 +411,7 @@ Same feature, BMAD this time.
 
 What you should notice:
 
-- **Win:** brainstorming the category model surfaces decisions a solo prompt skips — per-user vs global, single vs multi-category, soft-delete vs hard-delete. The architecture step catches the migration tradeoff (default category vs nullable FK) before code locks it in.
+- **Win:** brainstorming the category model surfaces decisions a solo prompt skips: per-user vs global, single vs multi-category, soft-delete vs hard-delete. The architecture step catches the migration tradeoff (default category vs nullable FK) before code locks it in.
 - **Cost:** manual verification gates between `/bmad-create-story`, `/bmad-dev-story`, and `/bmad-code-review`. After GSD's auto-verifier, doing it by hand at every step is slow.
 
 After running both, most people land in the same place: BMAD for upstream shaping, GSD for downstream execution.

@@ -52,22 +52,6 @@ Standard workflow:
 
 Do not skip this step "because the change is small" — small CSS, layout, or link edits are exactly where regressions hide.
 
-## Structure
-
-```
-content/_index.md          → Landing page (hextra-home layout)
-content/docs/_index.md     → Docs section index
-content/docs/*.md          → Doc pages (weight controls sidebar order)
-static/images/             → Content images
-static/                    → Favicons, CNAME
-assets/css/custom.css      → Custom CSS overrides (auto-loaded by Hextra)
-layouts/shortcodes/        → Custom shortcodes (e.g. bookmark.html)
-layouts/partials/custom/   → Head injections, banners
-hugo.yaml                  → Site config
-go.mod / go.sum            → Hugo module (Hextra theme)
-.github/workflows/pages.yaml → GitHub Pages deployment
-```
-
 ## Adding Pages
 
 Create `content/docs/my-page.md` with front matter:

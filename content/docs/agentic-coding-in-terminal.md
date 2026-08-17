@@ -7,15 +7,15 @@ weight: 1
 
 [Pre-Workshop Setup Guide](/docs/setup-guide/)
 
-> 💁 **Workshop materials** — Use the navigation to browse all sections.
+> 💁 **Workshop materials**: Use the navigation to browse all sections.
 
 ## Foundations
 
 ## What is Agentic Coding?
 
 - Level 1 of AI coding, which was "let's take this code and paste into ChatGPT and ask for help".
-- Level 2 could perhaps be autocomplete — your early GitHub Copilot, and Cursor.
-- Level 3 is where we're at (though some might say we've gone way beyond this level by now) — the AI has the full context of your codebase, and can call *tools* to act as an agent to edit and write your code.
+- Level 2 could perhaps be autocomplete: your early GitHub Copilot, and Cursor.
+- Level 3 is where we're at (though some might say we've gone way beyond this level by now): the AI has the full context of your codebase, and can call *tools* to act as an agent to edit and write your code.
 
 ### Moving away from Vibe Coding, towards Agentic Coding and Spec-Driven Development
 
@@ -68,7 +68,7 @@ Before we go deeper, here are some commands / CLI flags that are useful.
 
 | Command | What it does |
 | --- | --- |
-| `/help` | Lists every command available in your setup — built-in, custom, plugin, and MCP-provided |
+| `/help` | Lists every command available in your setup: built-in, custom, plugin, and MCP-provided |
 | `/init` | Scans the repo and generates a starter `CLAUDE.md`. NOT RECOMMENDED FOR USE |
 | `/clear` | Wipes conversation history (CLAUDE.md stays loaded). Use when switching tasks or when you find that the context is filling up. This should be your most used command. Always start fresh whenever possible. |
 | `/compact [focus]` | Summarizes history instead of wiping it. Pass instructions: `/compact keep the auth decisions`. NOT RECOMMENDED FOR USE |
@@ -79,7 +79,7 @@ Before we go deeper, here are some commands / CLI flags that are useful.
 | **`Ctrl+U` \|\| `Ctrl+Y`** | Cuts the current Input \|\| Paste the Cut prompt |
 | `Ctrl+S` | Prompt stashing - best for when you're mid-prompt and need to ask something else first. Press `Ctrl+S` again on an empty prompt to bring the stash back. |
 | `Esc Esc` (Empty prompt) | Open the rewind menu (selective: code only, conversation only, or both). You can also use `/rewind` |
-| `@filepath` | Reference a file or directory inline — `@src/auth/login.ts fix the JWT check` |
+| `@filepath` | Reference a file or directory inline: `@src/auth/login.ts fix the JWT check` |
 
 **One-liner to remember:** type `/` on an empty prompt to see everything available in your setup, including custom and MCP commands. You'll rarely need to memorize a full list.
 
@@ -145,7 +145,7 @@ Before we go deeper, here are some commands / CLI flags that are useful.
 
 Please open Claude Code, and ask it to give you a CRUD app of some kind. 
 
-- CRUD: Create, Read, Update, Delete — your quintessential database app.
+- CRUD: Create, Read, Update, Delete. Your quintessential database app.
 - Examples of CRUD apps you can build:
     - **Job applications tracker**: roles, companies, stages, and interview notes.
     - **Personal library tracker**: manage books, authors, reading status, and notes.
@@ -169,14 +169,14 @@ Please open Claude Code, and ask it to give you a CRUD app of some kind.
 
 ## 🧠 Context & Memory
 
-Agentic coding tools like Claude Code maintain context across a session, but understanding **where** memory lives — and how to shape it — is key to getting consistent, high-quality results.
+Agentic coding tools like Claude Code maintain context across a session, but understanding **where** memory lives, and how to shape it, is key to getting consistent, high-quality results.
 
 ### CLAUDE.md and AGENTS.md
 
 - **`CLAUDE.md`** is a special file Claude Code reads automatically when it starts in a project. Use it to encode persistent instructions: coding conventions, architecture decisions, preferred libraries, things Claude should never do, and so on. The contents of this is injected at the start of the conversation, in one of the many system prompts.
 - **`AGENTS.md`** serves a similar purpose for other agent runtimes (e.g. OpenAI Codex). If you're working across multiple agents, keeping both in sync is good practice using symlink.
 - **Claude Code reads `CLAUDE.md`, not `AGENTS.md`, directly.** If another tool already uses `AGENTS.md`, import it from `CLAUDE.md` with `@AGENTS.md` or link the two files with `ln -s AGENTS.md CLAUDE.md`. `/init` reads existing Cursor and Copilot rule files by default; with `CLAUDE_CODE_NEW_INIT=1`, it also incorporates `AGENTS.md` and `.windsurfrules`.
-- Think of these files as your **onboarding doc for the AI** — the same way you'd brief a new contractor on how your codebase works, but not quite. Normally briefs would be done using actual documentation. CLAUDE.md is more for project specific stuff.
+- Think of these files as your **onboarding doc for the AI**, the same way you'd brief a new contractor on how your codebase works, but not quite. Normally briefs would be done using actual documentation. CLAUDE.md is more for project specific stuff.
 - Good things to put in `CLAUDE.md`:
     - Tech stack and versions
     - Folder structure conventions
@@ -249,11 +249,11 @@ Test it out! Prompt Claude Code to add a feature. Check whether if follows the r
 - Claude Code handles the context window automatically (that's the whole point of CC: context engineering for agentic tasks), but you can influence it in some ways:
     - Always start a **new session** for any task that is not related to your current session.
     - Use `/clear` to reset context without restarting (when hitting ~300k context)
-    - Keep `CLAUDE.md` tight and relevant — it's loaded at the start of every session, so bloat here costs you tokens every time
+    - Keep `CLAUDE.md` tight and relevant: it's loaded at the start of every session, so bloat here costs you tokens every time
     - Use the `/handoff` skill from Matt Pocock to generate a handoff document. https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md
     - Just ask it to create a handoff document.
     - Use /context to check what's in your current context
-- If the agent starts "forgetting" earlier decisions, it's often a sign you've hit compaction — re-state the key constraints explicitly. Disable compaction.
+- If the agent starts "forgetting" earlier decisions, it's often a sign you've hit compaction. Re-state the key constraints explicitly. Disable compaction.
 
 ### Commands for keeping context healthy
 
@@ -266,19 +266,19 @@ Test it out! Prompt Claude Code to add a feature. Check whether if follows the r
 
 ### Cost, Token & Usage Awareness
 
-- Every message, file read, and tool call consumes tokens — which translates directly to cost and latency.
+- Every message, file read, and tool call consumes tokens, which translates directly to cost and latency.
 - Subscription vs API billing, and what "usage limits" actually mean. Agentic coding creates sustained high token throughput, which makes two billing models meaningfully different:
     - API billing: pay per token. Flexible but expensive at agentic-coding volumes; easy to burn $20+ in a single long session.
     - Subscription (Claude Pro/Max, ChatGPT Pro): flat monthly fee with two usage caps you need to know:
         - Session/block limit: a rolling window (e.g. a 5-hour block) that resets automatically
         - Weekly limit: the hard ceiling across all your blocks in a 7-day window
             
-            > 💡 **Third-party providers don't expose these limits the same way.** If you're routing Claude through a non-Anthropic provider, `/usage` won't show meaningful numbers — that reporting is only available on official subscriptions and API access.
+            > 💡 **Third-party providers don't expose these limits the same way.** If you're routing Claude through a non-Anthropic provider, `/usage` won't show meaningful numbers: that reporting is only available on official subscriptions and API access.
             
 - Practical tips:
     - Reference specific files with `@` rather than asking Claude to explore broadly
     - Avoid pasting entire large files when only a section is relevant
-    - Use plan mode (see below) to scope work before execution begins — cheap to plan, expensive to re-do
+    - Use plan mode (see below) to scope work before execution begins: cheap to plan, expensive to re-do
     - Check token usage in the dashboard if running at scale or via API (doesn't apply for our case)
     - A five-minute cache write costs 1.25× the base input price; a cache hit costs 0.1×. You pay the write rate when content is first cached and the read rate when a later request reuses it. Continuing within the cache window can therefore reduce cost.
     - Sonnet 5 is priced at $2/$10 per MTok through 2026-08-31, then $3/$15. Claude 4.7 and later models can produce about 30% more tokens than earlier models for the same text, depending on the workload, so compare the cost of a completed task, not only the per-million-token rate.
@@ -309,7 +309,7 @@ The quality of your prompt is the biggest lever you have on output quality. Thes
 #### Plan Mode
 
 - Before Claude starts writing or changing code, ask it to **plan first**: `"Think through the approach before making any changes."`
-- In Claude Code, you can explicitly enter **plan mode** to get a structured breakdown of what it intends to do — review it, push back, then approve execution.
+- In Claude Code, you can explicitly enter **plan mode** to get a structured breakdown of what it intends to do. Review it, push back, then approve execution.
 - Use plan mode when a task spans several files or could make changes that are hard to undo.
 - A good plan includes: what files will be changed, what the success condition looks like, and any risks or unknowns.
 - Press `Shift+Tab` to cycle through `default`, `acceptEdits`, and `plan`. If auto mode is available for your account, it appears as a fourth option.
@@ -366,25 +366,25 @@ Read More: https://code.claude.com/docs/en/permission-modes#eliminate-prompts-wi
 
 #### Steering Mid-Task
 
-- You don't have to wait for the agent to finish before correcting course — interrupt and redirect if it's heading the wrong way.
+- You don't have to wait for the agent to finish before correcting course: interrupt and redirect if it's heading the wrong way.
 - For **chained tasks** (e.g. with Codex or multi-step pipelines): define clear handoff points and verify outputs at each step before proceeding.
 - For Claude Code:
     - `Ctrl+C` or `Esc` once to interrupt the current action.
     - `Esc + Esc` to rewind to previous user inputs.
 
-**`Esc Esc` (or `/rewind`) — the rewind menu**
+**`Esc Esc` (or `/rewind`): the rewind menu**
 
-Double-tap `Esc` on an empty input to open the rewind menu. Scroll back with `↑` to pick a checkpoint, press `Enter`, and you get a set of options — each with a single-letter shortcut:
+Double-tap `Esc` on an empty input to open the rewind menu. Scroll back with `↑` to pick a checkpoint, press `Enter`, and you get a set of options, each with a single-letter shortcut:
 
 | Option | What it does |
 | --- | --- |
 | **Restore code and conversation** | Roll back both files and chat to this point |
 | **Restore conversation only** | Keep files as-is, rewind the chat |
 | **Restore code only** | Revert files, keep the conversation intact |
-| **Summarize from here** | Condense everything from this point forward — a surgical `/compact` |
+| **Summarize from here** | Condense everything from this point forward, a surgical `/compact` |
 | **Never mind** | Cancel and return to where you were |
 
-**The "code only" option** is the most useful one people don't know about. Try an aggressive refactor, discuss it with Claude, decide it didn't land, roll back just the files — and keep all the diagnostic conversation intact. Replaces a lot of `git stash` gymnastics.
+**The "code only" option** is the most useful one people don't know about. Try an aggressive refactor, discuss it with Claude, decide it didn't land, roll back just the files, and keep all the diagnostic conversation intact. Replaces a lot of `git stash` gymnastics.
 
 **/btw** 
 
@@ -397,25 +397,25 @@ Double-tap `Esc` on an empty input to open the rewind menu. Scroll back with `�
 ### Visual Inputs
 
 - keystoke - `alt-v`
-- Claude Code accepts **screenshots and mockups** as direct inputs — drag in a Figma export, a browser screenshot, or even a hand-drawn sketch.
+- Claude Code accepts **screenshots and mockups** as direct inputs: drag in a Figma export, a browser screenshot, or even a hand-drawn sketch.
 - Great for: "Make this component look like this", "Why is this layout broken?", "Reproduce this UI".
 - Combine with `@` file references to point at the code you want changed alongside the visual.
 
 ### `@` File / Folder References & `#` Shortcut
 
-- **`@filename`** — bring a specific file or folder into context. More precise than "look at my codebase."
-- **`#`** — shortcut for referencing or updating your `CLAUDE.md` instructions mid-session. Use it to update the agent's standing instructions without leaving the conversation: `"# always use named exports from now on"`
+- **`@filename`**: bring a specific file or folder into context. More precise than "look at my codebase."
+- **`#`**: shortcut for referencing or updating your `CLAUDE.md` instructions mid-session. Use it to update the agent's standing instructions without leaving the conversation: `"# always use named exports from now on"`
 - Building the habit of using `@` references makes your prompts faster to write and easier for the agent to act on.
 
 | Command | What it does |
 | --- | --- |
-| `/plan` or `Shift+Tab` | Enter plan mode — Claude becomes read-only and proposes each change for approval |
+| `/plan` or `Shift+Tab` | Enter plan mode: Claude becomes read-only and proposes each change for approval |
 | `claude --permission-mode auto` | Start the session directly in auto mode |
 | `claude --dangerously-skip-permissions` | Skip all permission prompts (dangerous) |
 | `/btw` | Ask a side question without polluting conversation context. |
 | `/branch` / `/fork` | `/branch` switches to a new conversation timeline from this point. `/fork` copies the conversation into a background session. |
 | `/copy [N]` | Copy last response to clipboard |
-| **`Esc + Esc` / `/rewind`** | Rewind menu — code only, convo only, both, summarize from |
+| **`Esc + Esc` / `/rewind`** | Rewind menu: code only, convo only, both, summarize from |
 | `Alt + v` | Paste Screenshots / images |
 | `@file` | Inline file/directory reference |
 | `Alt + P` | Switch Model |
@@ -424,21 +424,21 @@ Double-tap `Esc` on an empty input to open the rewind menu. Scroll back with `�
 
 Good agentic prompts answer three questions:
 
-1. **What do I want?** — the task, clearly stated
-2. **What are the constraints?** — what must be true (language, style, must not break X)
-3. **How does the agent know it succeeded?** — a concrete definition of done, verifiable
+1. **What do I want?** The task, clearly stated
+2. **What are the constraints?** What must be true (language, style, must not break X)
+3. **How does the agent know it succeeded?** A concrete definition of done, verifiable
 
-**Example — vague:**
+**Example, vague:**
 
 > "Refactor the auth module"
 
-**Example — better:**
+**Example, better:**
 
 > "Refactor `src/auth/session.ts` to use the new `UserSession` type from `@src/types/user.ts`. Do not change the public API. All existing tests in `auth.test.ts` must still pass. Add JSDoc comments to exported functions."
 
 Including an explicit success condition (passing tests, a specific output, a diff that meets a criterion) lets the agent self-verify and reduces back-and-forth.
 
-## 🔧 Tools — What Claude Code Can Actually Do
+## 🔧 Tools: What Claude Code Can Actually Do
 
 When Claude Code acts on your codebase, it calls **tools**. Tools that only read don't need permission; tools that modify things do (unless pre-approved or in auto mode).
 
@@ -457,7 +457,7 @@ These are the tools used most often in the workshop. See the [tools reference](h
 | | `NotebookEdit` | Modify Jupyter notebook cells | Yes |
 | **Shell** | `Bash` | Run shell commands (2 min timeout, background mode available) | Yes |
 | | `PowerShell` | Native PowerShell (Windows) | Yes |
-| | `Monitor` | Background watcher — tail logs, poll CI, watch files | Yes |
+| | `Monitor` | Background watcher: tail logs, poll CI, watch files | Yes |
 | **Web** | `WebFetch` | Fetch URL → markdown → extract via prompt | Yes |
 | | `WebSearch` | Web search (returns URLs, doesn't fetch pages) | Yes |
 | **Agentic** | `Agent` | Spawn sub-agent with own context window | No |
@@ -512,7 +512,7 @@ gh auth login
 
 Useful Claude Code + `gh` workflows:
 
-- Create a branch, implement a feature, push and open a PR — all in one prompt
+- Create a branch, implement a feature, push and open a PR, all in one prompt
 - Fetch open issues and triage them
 - Review a PR diff and leave comments
 - Check CI status and fix failing tests
@@ -587,7 +587,7 @@ Codex, Gemini and Claude review bots have been added to the organisation on GitH
 
 ### Working with Other Agents (Sub-agents & Agent Teams)
 
-- Claude Code can **spawn sub-agents** to work on parallel tasks — useful for large features where multiple independent pieces can be built simultaneously.
+- Claude Code can **spawn sub-agents** to work on parallel tasks, useful for large features where multiple independent pieces can be built simultaneously.
 - A subagent has its own context, separate from the conversation that spawned it. It starts with the instructions and context passed to it.
 - Subagents can nest three levels below the main conversation by default.
 - In a **multi-agent setup**, the main claude code agent acts as the orchestrator (breaking down tasks, reviewing outputs) while dispatched agents act as workers (implementing specific pieces).
@@ -598,7 +598,7 @@ Codex, Gemini and Claude review bots have been added to the organisation on GitH
 
 ### Worktrees & Working in Parallel
 
-- Git worktrees let you check out multiple branches of the same repo in separate directories simultaneously — no stashing, no branch-switching.
+- Git worktrees let you check out multiple branches of the same repo in separate directories simultaneously, no stashing, no branch-switching.
 - Combine with Claude Code to run parallel agentic sessions on different features at the same time.
 - Claude Code has a built-in worktree function
     
@@ -657,7 +657,7 @@ Read more: [code.claude.com/docs/en/workflows](https://code.claude.com/docs/en/w
 
 ![Hooks diagram](/images/hooks-diagram.png)
 
-- Configure hooks in `settings.json` — global (`~/.claude/`), project (`.claude/`), or local (`.claude/settings.local.json`, gitignored). Matchers are case-sensitive; use regex like `Edit|Write` to match multiple tools.
+- Configure hooks in `settings.json`: global (`~/.claude/`), project (`.claude/`), or local (`.claude/settings.local.json`, gitignored). Matchers are case-sensitive; use regex like `Edit|Write` to match multiple tools.
 - **How they work:** Your hook reads JSON from stdin, including fields such as `tool_name`, `tool_input`, and `cwd`. For `PreToolUse`, return `hookSpecificOutput.permissionDecision` as `"allow"`, `"deny"`, or `"ask"`. `"defer"` is limited to non-interactive `claude -p` handling. Exit code 2 is handled differently across events, so check the [event reference](https://code.claude.com/docs/en/hooks) before relying on it.
 - **Hook to add:** Prevent destructive delete by requiring user approval:
 
@@ -688,7 +688,7 @@ Read more: [code.claude.com/docs/en/workflows](https://code.claude.com/docs/en/w
 | Hook | Event | What It Does |
 |------|-------|--------------|
 | **Protect Secrets** | `PreToolUse` (matcher: `Read\|Edit\|Write\|Bash`) | Block access to `.env`, SSH keys, credentials files |
-| **Auto-Stage Changes** | `PostToolUse` (matcher: `Edit\|Write`) | `git add` every file Claude touches — `git diff --staged` becomes a live changelog |
+| **Auto-Stage Changes** | `PostToolUse` (matcher: `Edit\|Write`) | `git add` every file Claude touches: `git diff --staged` becomes a live changelog |
 | **Slack Notifications** | `Notification` (matcher: `permission_prompt\|idle_prompt`) | Alert when Claude needs your input |
 | **Branch Protection** | `PreToolUse` | Prevent changes on `main`/`master` |
 | **Quality Gates** | `PostToolUse` | Run tests/linting after every edit |
@@ -698,15 +698,15 @@ Read more: [code.claude.com/docs/en/workflows](https://code.claude.com/docs/en/w
 
 #### ✍️ Hands-on: Add Safety Hooks (10 minutes)
 
-**Step 1 — Destructive-delete hook.** Open Claude Code's settings (`~\.claude\settings.json`) and add the destructive-delete hook above under `PreToolUse`. Test it by asking Claude to delete a file:
+**Step 1: Destructive-delete hook.** Open Claude Code's settings (`~\.claude\settings.json`) and add the destructive-delete hook above under `PreToolUse`. Test it by asking Claude to delete a file:
 
 ```
-Delete the file `src/components/OldComponent.tsx` — it's no longer used.
+Delete the file `src/components/OldComponent.tsx`. It's no longer used.
 ```
 
 You should see a confirmation prompt before anything gets deleted.
 
-**Step 2 — Protect-secrets hook.** Clone the hooks repo and add the secret-file protection hook:
+**Step 2: Protect-secrets hook.** Clone the hooks repo and add the secret-file protection hook:
 
 ```bash
 git clone https://github.com/karanb192/claude-code-hooks.git ~/.claude/hooks-repo
@@ -745,7 +745,7 @@ Your `settings.json` should now have both hooks under `PreToolUse`:
 }
 ```
 
-This hook blocks Claude from reading `.env`, SSH keys, AWS credentials, `.pem` files, and catches sneaky commands like `cat .env` or `printenv`. It has three safety levels (`critical`, `high`, `strict`) — defaults to `high`.
+This hook blocks Claude from reading `.env`, SSH keys, AWS credentials, `.pem` files, and catches sneaky commands like `cat .env` or `printenv`. It has three safety levels (`critical`, `high`, `strict`). Defaults to `high`.
 
 **Test it** by asking Claude to read a secrets file:
 
@@ -788,7 +788,7 @@ In Claude Code, run:
 claude mcp add <server-name>
 ```
 
-Or configure manually in your `claude_desktop_config.json` (or equivalent settings file). Each MCP server has its own setup guide — check the server's repo or the Claude documentation.
+Or configure manually in your `claude_desktop_config.json` (or equivalent settings file). Each MCP server has its own setup guide: check the server's repo or the Claude documentation.
 
 > **For offline environments:** any MCP server that uses `npx` will try to pull the package on first run. Pre-install packages globally with `npm install -g <package>` on a machine with internet, then copy to the offline machine and update config to use the local binary path directly.
 
@@ -798,7 +798,7 @@ Or configure manually in your `claude_desktop_config.json` (or equivalent settin
 
 Install the **Context7** MCP server, which gives Claude access to up-to-date library documentation:
 
-Now use it. Pick a library your CRUD app depends on (e.g. React, Express, FastAPI, Pydantic) and ask Claude to implement something using the **latest** API — something you'd normally have to look up in the docs yourself:
+Now use it. Pick a library your CRUD app depends on (e.g. React, Express, FastAPI, Pydantic) and ask Claude to implement something using the **latest** API, something you'd normally have to look up in the docs yourself:
 
 ```text
 Using the latest FastAPI and Pydantic docs, add soft-delete to my app. 
@@ -827,23 +827,23 @@ See the following Github repo for living doc: https://github.com/luongnv89/claud
 
 > ⚠️ **Security warning:** Skills can execute arbitrary code in your environment. Before installing a community skill, **review SKILL.md and every bundled script yourself**. A malicious skill can access your shell, exfiltrate data, or modify files from a few lines of Markdown. Install only from sources you trust. The same risk applies to skills used by OpenClaw and other coding CLIs.
 
-This is a growing list of community and official skills worth knowing about. Not all of these are endorsed — they're here as references for what's possible.
+This is a growing list of community and official skills worth knowing about. Not all of these are endorsed. They're here as references for what's possible.
 
 | Category | Skill | Repo | Purpose |
 | --- | --- | --- | --- |
-| Documents | docx, pptx, pdf, xlsx | [anthropics/skills](https://github.com/anthropics/skills/tree/main/skills) | Create and edit common office document formats — same skills that power Claude's document capabilities on web and desktop. [Blog post](https://claude.com/blog/create-files). Might require pip and npm to install some dependencies |
+| Documents | docx, pptx, pdf, xlsx | [anthropics/skills](https://github.com/anthropics/skills/tree/main/skills) | Create and edit common office document formats, same skills that power Claude's document capabilities on web and desktop. [Blog post](https://claude.com/blog/create-files). Might require pip and npm to install some dependencies |
 | Tooling | Skill Creator | [anthropics/skills](https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md) | Meta-skill for creating, evaluating, improving, and benchmarking other skills. Built into Claude.ai (paid plans). Already installed by default |
 | DevOps | KubeShark Kubernetes Skill | [LukasNiessen/kubernetes-skill](https://github.com/LukasNiessen/kubernetes-skill) | Failure-mode-first Kubernetes manifest generation, review, and hardening for Claude Code and Codex. Reduces deprecated APIs, unsafe defaults, weak RBAC, and rollout or networking issues |
-| Frontend | React Best Practices | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills/tree/main/skills/react-best-practices) | Vercel's official React conventions — component patterns, hooks usage, performance best practices |
+| Frontend | React Best Practices | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills/tree/main/skills/react-best-practices) | Vercel's official React conventions: component patterns, hooks usage, performance best practices |
 | Frontend | React View Transitions | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills/tree/main/skills/react-view-transitions) | Implements view transitions in React apps using the View Transitions API |
-| Frontend | Impeccable | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) | Frontend-design toolkit that expands Anthropic's frontend-design skill — reusable product/design context (`PRODUCT.md`, `DESIGN.md`), 23 design commands, browser-assisted variant iteration, and 59 deterministic detector rules for recurring AI frontend anti-patterns. Covers design critique, accessibility/performance audits, typography, layout, responsive behavior, i18n/edge-case hardening, and final polish. Install: `npx impeccable install`, then `/impeccable init` (plugin marketplace also supported) |
-| Security | OWASP Security | [agamm/claude-code-owasp](https://github.com/agamm/claude-code-owasp) | OWASP security best practices (2025–2026) — Top 10:2025, ASVS 5.0, Agentic AI security, 20+ language-specific security quirks |
+| Frontend | Impeccable | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) | Frontend-design toolkit that expands Anthropic's frontend-design skill: reusable product/design context (`PRODUCT.md`, `DESIGN.md`), 23 design commands, browser-assisted variant iteration, and 59 deterministic detector rules for recurring AI frontend anti-patterns. Covers design critique, accessibility/performance audits, typography, layout, responsive behavior, i18n/edge-case hardening, and final polish. Install: `npx impeccable install`, then `/impeccable init` (plugin marketplace also supported) |
+| Security | OWASP Security | [agamm/claude-code-owasp](https://github.com/agamm/claude-code-owasp) | OWASP security best practices (2025–2026): Top 10:2025, ASVS 5.0, Agentic AI security, 20+ language-specific security quirks |
 | Security | SecLists & Agents | [awesome-claude-skills-security](https://github.com/Eyadkelleh/awesome-claude-skills-security) | More security skills: curated SecLists wordlists, injection payloads, and expert agents for authorized pentesting, CTFs, and bug bounties |
 | Data & Research | DSPY | [OmidZamani/dspy-skills](https://github.com/OmidZamani/dspy-skills) | Automatic prompt optimization using the DSPY framework |
 | Data & Research | Web Scraper | [yfe404/web-scraper](https://github.com/yfe404/web-scraper) | Intelligent web scraping with automatic strategy selection and TypeScript-first Apify Actor development |
-| Data & Research | OSINT | [smixs/osint-skill](https://github.com/smixs/osint-skill) | Open-source intelligence — from a name to a scored dossier with psychoprofile, career map, and confidence grades. 55+ Apify actors, 7 search APIs. Early beta. |
+| Data & Research | OSINT | [smixs/osint-skill](https://github.com/smixs/osint-skill) | Open-source intelligence: from a name to a scored dossier with psychoprofile, career map, and confidence grades. 55+ Apify actors, 7 search APIs. Early beta. |
 | Data & Research | Hyperresearch | [jordan-gibbs/hyperresearch](https://github.com/jordan-gibbs/hyperresearch) | Deep research harness for Claude Code with tier-adaptive pipelines, adversarial review, source provenance, and a persistent searchable vault. |
-| Data & Research | last30days | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill) | Researches what people have discussed and engaged with recently across Reddit, Hacker News, GitHub, YouTube, X, arXiv, and more — synthesizes cross-source findings into a cited brief. Covers topic/person/company research, tool comparisons, trend discovery, meeting prep, watchlists, and recurring briefings. Several sources work without configuration; optional sources require their own credentials or browser sessions. Install: `/plugin marketplace add mvanhorn/last30days-skill`, then `/plugin install last30days` |
+| Data & Research | last30days | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill) | Researches what people have discussed and engaged with recently across Reddit, Hacker News, GitHub, YouTube, X, arXiv, and more. Synthesizes cross-source findings into a cited brief. Covers topic/person/company research, tool comparisons, trend discovery, meeting prep, watchlists, and recurring briefings. Several sources work without configuration; optional sources require their own credentials or browser sessions. Install: `/plugin marketplace add mvanhorn/last30days-skill`, then `/plugin install last30days` |
 | Notebook-LM | Knowledge Management | [Notebook-LM skill](https://github.com/PleasePrompto/notebooklm-skill) | LLM to manage your NotebookLM, start research, generate infographics |
 | Code Review | Devil's Advocate | [Devil's Advocate](https://github.com/notmanas/claude-code-skills/tree/main/skills/devils-advocate) | Challenge and poke holes from previous reviews with defined frameworks |
 
@@ -853,7 +853,7 @@ This is a growing list of community and official skills worth knowing about. Not
 
 ### Curated Lists & Articles
 
-These aren't individual skills — they're roundups and deep dives that reference multiple skills worth exploring.
+These aren't individual skills; they're roundups and deep dives that reference multiple skills worth exploring.
 
 | Article | Source | What It Covers |
 | --- | --- | --- |
@@ -871,24 +871,24 @@ The convenience of skills comes with real risk.
 
 - Snyk's research on the [ClawHavoc campaign](https://snyk.io/articles/skill-md-shell-access/) demonstrated how a malicious SKILL.md file can escalate from Markdown instructions to full shell access in three lines.
 - Hidden instructions in a PDF file included with the skill alters the default skill instructions [https://blog.sondera.ai/p/claude-skill-hijack-invisible-sentence](https://blog.sondera.ai/p/claude-skill-hijack-invisible-sentence)
-- **Skills can include executable scripts** — a `scripts/` directory can contain anything that runs on your machine
-- **Prompt injection via SKILL.md** — malicious instructions can tell the agent to exfiltrate environment variables, API keys, or source code
-- **Supply chain attacks** — a skill you installed from GitHub can be updated by the author at any time after you've added it
-- **No sandbox by default** — unlike MCP servers, skills run with the same permissions as your Claude Code session
+- **Skills can include executable scripts**: a `scripts/` directory can contain anything that runs on your machine
+- **Prompt injection via SKILL.md**: malicious instructions can tell the agent to exfiltrate environment variables, API keys, or source code
+- **Supply chain attacks**: a skill you installed from GitHub can be updated by the author at any time after you've added it
+- **No sandbox by default**: unlike MCP servers, skills run with the same permissions as your Claude Code session
 
 **Practices to be followed before installing any community skill:**
 
-1. **Read the SKILL.md** — the full file, not just the front-matter description
-2. **Check the scripts/ directory** — if it has executable code, read every file
-3. **Review the repo** — check commit history, contributors, and whether the repo is actively maintained
-4. **Pin versions** — clone or fork rather than referencing a live repo that can change under you
-5. **Use `--dangerously-skip-permissions` with caution** — this flag + a malicious skill = full access to your machine
+1. **Read the SKILL.md**: the full file, not just the front-matter description
+2. **Check the scripts/ directory**: if it has executable code, read every file
+3. **Review the repo**: check commit history, contributors, and whether the repo is actively maintained
+4. **Pin versions**: clone or fork rather than referencing a live repo that can change under you
+5. **Use `--dangerously-skip-permissions` with caution**: this flag + a malicious skill = full access to your machine
 
 > 🔗 For securing the **apps Claude builds** (OWASP web/API/LLM/Agentic Top 10s, MCP & Claude Code CVEs, ready-to-paste pre-commit and CI guards, the LMDeploy 12h-to-exploit advisory), see [Cybersecurity & Production Hardening](/docs/security/).
 
 ## 🧩 Plugins
 
-Plugins extend Claude Code with additional capabilities — language intelligence, platform integrations, workflow automation, and more.
+Plugins extend Claude Code with additional capabilities: language intelligence, platform integrations, workflow automation, and more.
 
 > 🗒️ Some plugins install the MCP servers they depend on. Official plugins are available through the `claude-plugins-official` marketplace.
 
@@ -897,7 +897,7 @@ Plugins extend Claude Code with additional capabilities — language intelligenc
 | Plugin | What it does | Link |
 | --- | --- | --- |
 | **Superpowers** | A collection of power-user enhancements for Claude Code | [https://github.com/obra/superpowers](https://github.com/obra/superpowers) |
-| **Skills for Real Engineers** | Matt Pocock's composable collection of engineering-discipline skills — requirements grilling, domain modeling, specs and ticket decomposition, TDD, debugging, code review, and codebase architecture | [GitHub](https://github.com/mattpocock/skills/tree/main/skills)<br><code>/plugin install mattpocock-skills</code> (or <code>npx skills@latest add mattpocock/skills</code> for editable project-local copies — pick one method to avoid duplicate skills) |
+| **Skills for Real Engineers** | Matt Pocock's composable collection of engineering-discipline skills: requirements grilling, domain modeling, specs and ticket decomposition, TDD, debugging, code review, and codebase architecture | [GitHub](https://github.com/mattpocock/skills/tree/main/skills)<br><code>/plugin install mattpocock-skills</code> (or <code>npx skills@latest add mattpocock/skills</code> for editable project-local copies. Pick one method to avoid duplicate skills) |
 | **Security Guidance** | Official plugin that automatically reviews code changes for vulnerabilities on edits, commits, or pushes | [Docs](https://code.claude.com/docs/en/security-guidance#on-each-commit-or-push-claude-makes)<br><code>/plugin install security-guidance@claude-plugins-official</code> |
 | **Codex Security** | OpenAI Codex plugin for authorized repository, deep, and diff-focused security scans, plus minimal fixes for validated findings | [Docs](https://developers.openai.com/codex/security/plugin)<br><code>$codex-security:security-scan</code> / <code>$codex-security:security-diff-scan</code> |
 | **GSD Core** | Phase-based spec, implementation, and verification workflow | [https://github.com/open-gsd/gsd-core](https://github.com/open-gsd/gsd-core) |
@@ -907,7 +907,7 @@ Plugins extend Claude Code with additional capabilities — language intelligenc
 | **GitLab** | GitLab-native version of the GitHub integration | via claude-plugins-official marketplace |
 | **Codex for CC** | Call Codex CLI for a second review or delegated task | [GitHub](https://github.com/openai/codex-plugin-cc)<br><code>/plugin marketplace add openai/codex-plugin-cc</code><br><code>/plugin install codex@openai-codex</code> |
 | **Playwright** | Browser automation and end-to-end testing MCP server | via claude-plugins-official marketplace |
-| **Language Servers (LSP)** | Gives Claude real-time access to your language server — hover info, go-to-definition, diagnostics | via claude-plugins-official marketplace |
+| **Language Servers (LSP)** | Gives Claude real-time access to your language server: hover info, go-to-definition, diagnostics | via claude-plugins-official marketplace |
 
 ### Plugin Marketplace
 
@@ -951,7 +951,7 @@ Read the [Skills and Plugins Reference](/docs/skills-plugins-deep-dive/).
 
 > 🔗 [https://github.com/luongnv89/claude-howto](https://github.com/luongnv89/claude-howto)
 
-> 🔗 [https://github.com/rtk-ai/rtk](https://github.com/rtk-ai/rtk) — Min-max token counts by using a CLI proxy to remove unnecessary outputs from tool calls
+> 🔗 [https://github.com/rtk-ai/rtk](https://github.com/rtk-ai/rtk): Min-max token counts by using a CLI proxy to remove unnecessary outputs from tool calls
 
 ## Alternative providers
 
@@ -965,7 +965,7 @@ Some thoughts about agentic coding.
 
 - [Home-Cooked Software](https://maggieappleton.com/home-cooked-software), Maggie Appleton: Building apps just for yourself, or your community.
 - [Boring Tiny Tools](https://vaughntan.org/boringtinytools), Vaughn Tan: Business implications of vibe coding.
-- [Jevons' Paradox for Software](https://x.com/addyosmani/status/2005768629691019544), Addy Osmani: When something becomes cheaper, there's more demand for it — and this should apply to software.
+- [Jevons' Paradox for Software](https://x.com/addyosmani/status/2005768629691019544), Addy Osmani: When something becomes cheaper, there's more demand for it, and this should apply to software.
 - [What happens when the floor rises?](https://yewjin.substack.com/p/i-placed-4th-in-a-kaggle-competition?utm_campaign=post), a different, more eloquent, YJ:
     
     *"When you can have anything built, the bottleneck isn't capability. It's imagination. It's curiosity. It's the willingness to be wrong in public while you figure out what works.*

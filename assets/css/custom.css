@@ -234,9 +234,13 @@ a.bookmark-info {
   }
 }
 
-/* ── Tables: full width, no horizontal scroll ──────────────────────── */
-.hextra-content table {
-  table-layout: fixed;
+/* ── Tables: full width, wrap long tokens (no horizontal scroll) ──────
+   Hextra wraps prose in `.content`, not `.hextra-content` (which does not
+   exist in this theme), so the original selector never matched — this is
+   the corrected target. `table-layout: fixed` is intentionally omitted:
+   these are two-column reference tables whose first column should hug its
+   short command text, and a fixed layout would balloon it to an even split. */
+.content table {
   width: 100%;
   overflow-wrap: break-word;
 }
@@ -480,5 +484,216 @@ body .hextra-feature-grid {
   .presenter-pen,
   .presenter-toolbar {
     display: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Expressive polish — home landing + docs reading surface
+   ───────────────────────────────────────────────────────────────────────
+   Everything below stays inside the incumbent warm-Anthropic world: the
+   accent is pulled straight from Hextra's derived primary-* ramp (so it
+   re-tints per theme from the variables at the top of this file), and no
+   new hues are introduced. Motion is a single authored moment — one load
+   choreography on the home hero — and is gated behind
+   prefers-reduced-motion; content is fully visible without it.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Accent tracks the theme's primary ramp automatically. */
+  --acc-600: var(--hx-color-primary-600);
+
+  /* Raised card surface: a hair warmer/lighter than the ivory body so a
+     soft shadow reads as elevation instead of a drawn outline. */
+  --card-surface: #fffdfa;
+  --card-border: #e7e2d6;
+  --card-shadow: 0 1px 2px rgba(63, 52, 40, .05), 0 5px 14px rgba(63, 52, 40, .05);
+  --card-shadow-hover: 0 3px 8px rgba(63, 52, 40, .07), 0 18px 34px rgba(150, 74, 46, .13);
+  --card-border-hover: rgba(193, 95, 59, .5);
+
+  /* Home hero atmosphere: a warm clay glow from the top-left, plus grain. */
+  --hero-wash: radial-gradient(115% 78% at 12% -8%, rgba(193, 95, 59, .11), rgba(193, 95, 59, .035) 32%, transparent 66%);
+  --grain-opacity: .28;
+
+  /* Docs reading surface. */
+  --table-head: #f2efe6;
+  --table-row-hover: rgba(193, 95, 59, .045);
+  --code-inline-bg: rgba(60, 50, 40, .06);
+  --code-inline-border: rgba(60, 50, 40, .10);
+  --code-block-border: rgba(63, 52, 40, .10);
+}
+
+.dark {
+  --card-surface: #221f1a;
+  --card-border: #35312a;
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+  --card-shadow-hover: 0 2px 6px rgba(0, 0, 0, .35), 0 20px 40px rgba(0, 0, 0, .5);
+  --card-border-hover: rgba(217, 119, 87, .55);
+
+  --hero-wash: radial-gradient(115% 78% at 12% -8%, rgba(217, 119, 87, .15), rgba(217, 119, 87, .045) 36%, transparent 68%);
+  --grain-opacity: .22;
+
+  --table-head: #2a2621;
+  --table-row-hover: rgba(217, 119, 87, .06);
+  --code-inline-bg: rgba(255, 255, 255, .07);
+  --code-inline-border: rgba(255, 255, 255, .10);
+  --code-block-border: rgba(255, 255, 255, .07);
+}
+
+/* ── Home hero atmosphere ───────────────────────────────────────────────
+   `.hextra-max-page-width > main#content` matches ONLY the home layout —
+   doc pages nest <main> inside <article> — so the wash and grain never
+   touch the reading surface. */
+.hextra-max-page-width > main#content {
+  position: relative;
+  isolation: isolate;
+}
+.hextra-max-page-width > main#content::before,
+.hextra-max-page-width > main#content::after {
+  content: "";
+  position: absolute;
+  inset: -6rem 0 0; /* bleed up under the navbar so the glow starts off-screen */
+  pointer-events: none;
+  z-index: 0;
+}
+.hextra-max-page-width > main#content::before {
+  background: var(--hero-wash);
+}
+.hextra-max-page-width > main#content::after {
+  background-image: url("/images/grain.svg");
+  background-size: 160px 160px;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: overlay;
+}
+/* Lift the hero content above the atmosphere layers. */
+.hextra-max-page-width > main#content > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Feature grid: justified wrap, no orphan cell ───────────────────────
+   Hextra lays 5 cards on a fixed 3×400px grid, which orphans an empty
+   cell on the second row. Re-flow as a justified wrap so each row fills
+   the width — 3 up top, 2 below — with no hole. The 24rem basis keeps it
+   at ≤3 per row within the 90rem page cap, and collapses to 2 then 1. */
+.hextra-feature-grid {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.hextra-feature-grid > .hextra-feature-card {
+  flex: 1 1 24rem;
+}
+
+/* ── Feature cards: raised surface + satisfying hover ───────────────────── */
+.hextra-feature-card {
+  background: var(--card-surface) !important;
+  border-color: var(--card-border) !important;
+  box-shadow: var(--card-shadow);
+  transition: transform .22s cubic-bezier(.16, 1, .3, 1),
+              box-shadow .22s cubic-bezier(.16, 1, .3, 1),
+              border-color .22s ease;
+}
+.hextra-feature-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--card-border-hover) !important;
+}
+/* Icon carries the accent and nudges up on hover. */
+.hextra-feature-card h3 svg {
+  color: var(--acc-600);
+  transition: transform .22s cubic-bezier(.16, 1, .3, 1);
+}
+.hextra-feature-card:hover h3 svg {
+  transform: translateY(-1px) scale(1.06);
+}
+
+/* ── One authored load moment ───────────────────────────────────────────
+   The home hero rises in as a single sequence: headline, subtitle, CTAs,
+   then the cards stagger. Everything is visible by default — the motion
+   only exists where motion is welcome. */
+@media (prefers-reduced-motion: no-preference) {
+  .hextra-max-page-width > main#content > h1,
+  .hextra-max-page-width > main#content > p,
+  .hextra-feature-card {
+    animation: hero-rise .7s cubic-bezier(.16, 1, .3, 1) backwards;
+  }
+  .hextra-max-page-width > main#content > h1 { animation-delay: .02s; }
+  .hextra-max-page-width > main#content > p:nth-of-type(1) { animation-delay: .10s; }
+  .hextra-max-page-width > main#content > p:nth-of-type(2) { animation-delay: .18s; }
+  .hextra-feature-card { animation-duration: .6s; }
+  .hextra-feature-card:nth-child(1) { animation-delay: .26s; }
+  .hextra-feature-card:nth-child(2) { animation-delay: .32s; }
+  .hextra-feature-card:nth-child(3) { animation-delay: .38s; }
+  .hextra-feature-card:nth-child(4) { animation-delay: .44s; }
+  .hextra-feature-card:nth-child(5) { animation-delay: .50s; }
+}
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(18px); filter: blur(8px); }
+  to   { opacity: 1; transform: none; filter: none; }
+}
+
+/* ── Hero CTAs ──────────────────────────────────────────────────────────
+   Scoped to the home hero: only the two rounded-full buttons match. */
+.hextra-max-page-width > main#content a[class*="rounded-full"] {
+  box-shadow: 0 1px 2px rgba(120, 55, 30, .12), 0 6px 16px rgba(160, 74, 46, .18);
+  transition: transform .2s cubic-bezier(.16, 1, .3, 1),
+              box-shadow .2s ease, background-color .2s ease, color .2s ease;
+}
+.hextra-max-page-width > main#content a[class*="rounded-full"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(120, 55, 30, .16), 0 12px 28px rgba(160, 74, 46, .26);
+}
+.hextra-max-page-width > main#content a[class*="rounded-full"]:active {
+  transform: translateY(0);
+}
+/* Secondary CTA ("Setup Guide"): the source asks for style="outline" but
+   this Hextra build renders it as a second filled primary, leaving the
+   hero with two competing actions. Restore the outline so there is one
+   clear primary. The ring is an inset shadow so the box never resizes. */
+.hextra-max-page-width > main#content a[href*="setup-guide"] {
+  background: transparent !important;
+  color: var(--acc-600) !important;
+  box-shadow: inset 0 0 0 1.5px var(--acc-600);
+}
+.hextra-max-page-width > main#content a[href*="setup-guide"]:hover {
+  background: var(--acc-600) !important;
+  color: #fff !important;
+  box-shadow: inset 0 0 0 1.5px transparent,
+              0 3px 8px rgba(120, 55, 30, .16), 0 12px 28px rgba(160, 74, 46, .26);
+}
+
+/* ── Docs tables ────────────────────────────────────────────────────────
+   Hextra ships a transparent header and no row feedback. Give the header
+   a warm tint and add a quiet row hover — these pages carry many dense
+   reference tables (the cheat sheet alone has ten). The theme wraps prose
+   in `.content` (not `.hextra-content`, which no longer exists here). */
+.content table th {
+  background: var(--table-head);
+  font-weight: 600;
+}
+.content table tbody tr {
+  transition: background-color .12s ease;
+}
+.content table tbody tr:hover {
+  background: var(--table-row-hover);
+}
+
+/* ── Code: a touch more definition ──────────────────────────────────────
+   Inline tokens get a warm, legible surface (kept neutral — there are 100+
+   on a single page); fenced blocks get a hairline to seat them. */
+.content :not(pre) > code {
+  background: var(--code-inline-bg);
+  border-color: var(--code-inline-border);
+}
+.content pre {
+  border: 1px solid var(--code-block-border);
+}
+
+/* Respect reduced-motion for the hover micro-lifts too. */
+@media (prefers-reduced-motion: reduce) {
+  .hextra-feature-card,
+  .hextra-feature-card:hover,
+  .hextra-max-page-width > main#content a[class*="rounded-full"]:hover {
+    transform: none;
   }
 }

@@ -189,9 +189,9 @@ Before writing a skill, the useful question to ask is: what is the lightest enfo
 
 | Layer | What it is | What it catches |
 | --- | --- | --- |
-| **CLAUDE.md** | Always-on rules and conventions for the project | Background context loaded into every session — e.g. "this repo uses Bun, not Node" |
+| **CLAUDE.md** | Always-on rules and conventions for the project | Background context loaded into every session: e.g. "this repo uses Bun, not Node" |
 | **Skill** | Folder that loads when triggered by a description match | Multi-step workflows or checklists that only matter for specific tasks |
-| **Hook** | Mechanical command that fires on tool use or session events | Anything you need enforced regardless of what the agent decides — formatters, type checks, secret scanning |
+| **Hook** | Mechanical command that fires on tool use or session events | Anything you need enforced regardless of what the agent decides: formatters, type checks, secret scanning |
 | **Task scope** | Per-job instructions in the prompt or task brief | One-off constraints that do not generalize across sessions |
 
 The general drift we have found: if the rule must apply every time and the agent might rationalize skipping it, put it in a hook. If the rule needs context and only fires on certain tasks, put it in a skill. If the rule is project-wide background, put it in CLAUDE.md. If the rule is purely for the current job, keep it in the prompt.
@@ -344,7 +344,7 @@ The important check is simple: open the generated file and inspect it. Document 
 
 **Project:** [obra/superpowers](https://github.com/obra/superpowers) · by Jesse Vincent (MIT)
 
-Unlike BMAD and GSD, Superpowers is less command-driven. Its skills fire based on what you're doing — brainstorming, planning, debugging, TDD, or verification — without you having to remember which command to type. A session-start bootstrap (the `using-superpowers` skill) teaches Claude to check for a relevant skill before each task.
+Unlike BMAD and GSD, Superpowers is less command-driven. Its skills fire based on what you're doing (brainstorming, planning, debugging, TDD, or verification) without you having to remember which command to type. A session-start bootstrap (the `using-superpowers` skill) teaches Claude to check for a relevant skill before each task.
 
 ### Install
 
@@ -602,11 +602,11 @@ BMAD's `_bmad-output/` is more of a working folder. Keep files that still guide 
 
 ### Why this matters for production
 
-Treat `.planning/` and `_bmad-output/` as **the agentic decision log** — the audit trail for why the code looks the way it does. Six months from now, "Claude wrote it" is not a maintenance answer; the PRD, the discussion notes, the plan, and the verification report are.
+Treat `.planning/` and `_bmad-output/` as **the agentic decision log**, the audit trail for why the code looks the way it does. Six months from now, "Claude wrote it" is not a maintenance answer; the PRD, the discussion notes, the plan, and the verification report are.
 
 Two practical consequences:
 
-- Commit `.planning/` by default for production work — it survives team turnover, and the next engineer can read decisions instead of guessing them.
+- Commit `.planning/` by default for production work. It survives team turnover, and the next engineer can read decisions instead of guessing them.
 - Include `.planning/` in PR review. The diff is half the change; the plan and verification report are the other half, and that is where scope, assumptions, and tradeoffs live.
 
 ---
@@ -661,9 +661,9 @@ Use these exercises after the sections above. Each lab is designed to make a spe
 
 | Workshop | Time | What it demonstrates | Guide |
 | --- | --- | --- | --- |
-| Research report generation | 20-30 minutes | Subagents, web research, and document skills — skills are more than prompt snippets | [Starter workspace](https://github.com/stcomiin/claude-docs-workshop-handson/tree/main/research-report-generation-workflow-starter) |
+| Research report generation | 20-30 minutes | Subagents, web research, and document skills: skills are more than prompt snippets | [Starter workspace](https://github.com/stcomiin/claude-docs-workshop-handson/tree/main/research-report-generation-workflow-starter) |
 | Existing app with GSD | 25-60 minutes | Scope control on a real codebase via codebase mapping, phase boundaries, and auto-verification | [Hands-on Lab → GSD](https://github.com/stcomiin/claude-docs-workshop-handson) |
-| Existing app with BMAD | 35-75 minutes | Same app and feature as the GSD lab — feel where BMAD's brainstorming pays off and where the manual dev gates slow you down | [Hands-on Lab → BMAD](https://github.com/stcomiin/claude-docs-workshop-handson) |
+| Existing app with BMAD | 35-75 minutes | Same app and feature as the GSD lab: feel where BMAD's brainstorming pays off and where the manual dev gates slow you down | [Hands-on Lab → BMAD](https://github.com/stcomiin/claude-docs-workshop-handson) |
 
 The existing-app labs are run against [`fastapi/full-stack-fastapi-template`](https://github.com/fastapi/full-stack-fastapi-template) directly, fork or clone it before the session.
 
@@ -686,12 +686,12 @@ Review the result by asking:
 
 ### Existing app with GSD or BMAD
 
-The hands-on lab for using GSD and BMAD on a real existing codebase — same sample app, same feature, both workflows — lives in [Existing Codebase Workflows: Hands-on Lab](/docs/existing-codebase-workflows/#hands-on-lab-same-feature-both-workflows). It is structured as the practice counterpart to the GSD and BMAD step-by-step in that doc.
+The hands-on lab for using GSD and BMAD on a real existing codebase (same sample app, same feature, both workflows) lives in [Existing Codebase Workflows: Hands-on Lab](/docs/existing-codebase-workflows/#hands-on-lab-same-feature-both-workflows). It is structured as the practice counterpart to the GSD and BMAD step-by-step in that doc.
 
 The lab covers:
 
 - The sample codebase pick ([`fastapi/full-stack-fastapi-template`](https://github.com/fastapi/full-stack-fastapi-template))
-- The feature scope (item categories with filter — touches frontend, backend, and a database migration)
+- The feature scope (item categories with filter: touches frontend, backend, and a database migration)
 - Why this feature surfaces real brownfield discipline (scope control, AI slop prevention, pattern adherence, migration discipline)
 - Two paths per workflow (short via `/gsd-quick` or `/bmad-quick-dev`, full via the complete phase or product flow)
 
