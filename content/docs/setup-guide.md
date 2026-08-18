@@ -1,6 +1,6 @@
 ---
 title: Pre-Workshop Setup Guide
-weight: 2
+weight: 1
 ---
 
 **Agentic Coding in Terminal**: Apex Builders Collective × Info PC
@@ -296,4 +296,4 @@ If you get stuck on any step:
 
 ---
 
-[← Back to main page](/docs/)
+[← Back to the contents](/docs/)

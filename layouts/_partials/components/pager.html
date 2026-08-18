@@ -1,0 +1,59 @@
+{{- /* Chapter crossing — overrides Hextra's prev/next pager on docs pages.
+
+     The stock chevron pager becomes a ruled index row in the manual's
+     voice: each side is a tracked micro-label over the chapter title, and
+     the cover's dotted leader bridges the gap between them (or runs from
+     the margin when only one side exists). Hover shifts the title to clay,
+     color only, exactly like the cover's contents entries.
+
+     The prev/next resolution below is carried over from the theme
+     verbatim (including front-matter `prev`/`next` and the blog's
+     reversePagination store flag) so behavior is unchanged.
+
+     Semantic classes only — Hextra's Tailwind bundle is precompiled.
+     Styled in assets/css/custom.css under "Chapter grammar". */ -}}
+
+{{- $reversePagination := .Store.Get "reversePagination" | default false -}}
+
+{{- $prev := cond $reversePagination .PrevInSection .NextInSection -}}
+{{- $next := cond $reversePagination .NextInSection .PrevInSection -}}
+
+{{- if eq .Params.prev false }}
+  {{- if $reversePagination }}{{ $next = false }}{{ else }}{{ $prev = false }}{{ end -}}
+{{ else }}
+  {{- with .Params.prev -}}
+    {{- with $.Site.GetPage . -}}
+      {{- if $reversePagination }}{{ $next = . }}{{ else }}{{ $prev = . }}{{ end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if eq .Params.next false }}
+  {{- if $reversePagination }}{{ $prev = false }}{{ else }}{{ $next = false }}{{ end -}}
+{{ else }}
+  {{- with .Params.next -}}
+    {{- with $.Site.GetPage . -}}
+      {{- if $reversePagination }}{{ $prev = . }}{{ else }}{{ $next = . }}{{ end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- if or $prev $next -}}
+  <nav class="doc-pager" aria-label="{{ (T "paginationNav") | default "Previous and next chapter" }}">
+    {{- if $prev -}}
+      {{- $linkTitle := partial "utils/title" $prev -}}
+      <a class="doc-pgr doc-pgr-prev" href="{{ $prev.RelPermalink }}" rel="prev">
+        <span class="doc-pgr-k">{{ (T "prevPage") | default "Previous" }}</span>
+        <span class="doc-pgr-t">{{ $linkTitle }}</span>
+      </a>
+    {{- end -}}
+    <span class="doc-pgr-lead" aria-hidden="true"></span>
+    {{- if $next -}}
+      {{- $linkTitle := partial "utils/title" $next -}}
+      <a class="doc-pgr doc-pgr-next" href="{{ $next.RelPermalink }}" rel="next">
+        <span class="doc-pgr-k">{{ (T "nextPage") | default "Next" }}</span>
+        <span class="doc-pgr-t">{{ $linkTitle }}</span>
+      </a>
+    {{- end -}}
+  </nav>
+{{- end -}}

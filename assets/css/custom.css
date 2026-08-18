@@ -839,6 +839,200 @@ a.bookmark-info {
   padding-bottom: 7.5rem;
 }
 
+/* ── Chapter grammar — docs pages as chapters of the manual ─────────────
+   The home is the cover; every docs page is a chapter of the same bound
+   book. The cover's drawn devices (tracked series line, dotted leader,
+   mono clay folio, short clay rule) recur here as reading-surface
+   structure: a running head above the H1, a clay rule closing the chapter
+   title, and a ruled crossing where the stock pager was. All of it is
+   flat and still — hairlines and tints only, no lift, no compose-in;
+   the reading room stays quiet per DESIGN.md. */
+
+/* Running head: series ……… folio. Rendered by the breadcrumb override. */
+.doc-runhead {
+  display: flex;
+  align-items: baseline;
+  gap: .85rem;
+  margin: .5rem 0 2.2rem;
+}
+.doc-runhead-series {
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--hx-color-gray-600);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+  transition: color .2s ease;
+}
+.dark .doc-runhead-series { color: var(--hx-color-gray-500); }
+.doc-runhead-series:hover { color: var(--acc-600); }
+.doc-runhead-lead {
+  flex: 1;
+  min-width: 1.5rem;
+  border-bottom: 1px dotted var(--hx-color-gray-400);
+  transform: translateY(-3px);
+}
+.dark .doc-runhead-lead { border-bottom-color: var(--hx-color-gray-600); }
+.doc-runhead-f {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .85rem;
+  /* Small static text: deepen one ramp step (×.84, the Begin-pill recipe)
+     so the folio clears 4.5:1 on ivory; dark's terracotta already does. */
+  color: hsl(var(--primary-hue) var(--primary-saturation) calc(var(--primary-lightness) * .84));
+}
+.dark .doc-runhead-f { color: var(--acc-600); }
+@media (max-width: 480px) {
+  .doc-runhead-series { font-size: .64rem; }
+}
+
+/* The chapter title closes with the cover's short clay rule. Scoped to
+   .content so the cover's own H1 (.mc-title) is untouched. */
+.content h1::after {
+  content: "";
+  display: block;
+  width: 3.5rem;
+  height: 1px;
+  background: var(--acc-600);
+  margin-top: 1.15rem;
+}
+
+/* Chapter crossing: PREVIOUS / NEXT as a ruled index row. The dotted
+   leader bridges the two titles — or runs from the margin when the
+   chapter is first or last. Hover is color-only, like the cover rows. */
+.doc-pager {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.1rem;
+  margin: 3.5rem 0 2rem;
+  padding-top: 1.7rem;
+  border-top: 1px solid var(--card-border);
+}
+.doc-pgr {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  max-width: 46%;
+  text-decoration: none;
+}
+.doc-pgr-next {
+  margin-left: auto;
+  align-items: flex-end;
+  text-align: right;
+}
+.doc-pgr-k {
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--hx-color-gray-600);
+}
+.dark .doc-pgr-k { color: var(--hx-color-gray-500); }
+.doc-pgr-t {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  line-height: 1.35;
+  color: var(--hx-color-slate-900);
+  transition: color .2s ease;
+}
+.dark .doc-pgr-t { color: var(--hx-color-gray-100); }
+.doc-pgr:hover .doc-pgr-t { color: var(--acc-600); }
+.doc-pgr-lead {
+  flex: 1;
+  min-width: 2.5rem;
+  border-bottom: 1px dotted var(--hx-color-gray-400);
+  margin-bottom: .5em;
+}
+.dark .doc-pgr-lead { border-bottom-color: var(--hx-color-gray-600); }
+.doc-runhead-series:focus-visible,
+.doc-pgr:focus-visible {
+  outline: 2px solid var(--acc-600);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+@media (max-width: 640px) {
+  .doc-pager {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.2rem;
+  }
+  .doc-pgr { max-width: none; }
+  .doc-pgr-lead { display: none; }
+}
+@media print {
+  .doc-pager { display: none; }
+}
+
+/* Blockquotes: the reading surface allows no border thicker than 1px.
+   Hextra ships border-s-2; thin it to the standard hairline. */
+.content blockquote {
+  border-inline-start-width: 1px;
+  border-inline-start-color: var(--hx-color-gray-300);
+  padding-inline-start: 1.35rem;
+}
+.dark .content blockquote {
+  border-inline-start-color: var(--hx-color-gray-700);
+}
+
+/* Task-list checkboxes: printed form squares — 1px hairline, the ladder's
+   4px corner. Checked state fills clay with a drawn check (mask, so no
+   color is baked into the data URI). */
+.content input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.05em;
+  height: 1.05em;
+  border: 1px solid var(--hx-color-gray-300);
+  border-radius: 4px;
+  background: transparent;
+  vertical-align: -0.18em;
+}
+.dark .content input[type="checkbox"] {
+  border-color: var(--hx-color-gray-700);
+}
+.content input[type="checkbox"]:checked {
+  background: var(--acc-600);
+  border-color: var(--acc-600);
+}
+.content input[type="checkbox"]:checked::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--hx-color-white);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center / 72% no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center / 72% no-repeat;
+}
+
+/* TOC heading joins the label voice — the tracked imprint micro-label,
+   here as chrome wayfinding. Color-only theming; no reflow risk. */
+.hextra-toc .hextra-scrollbar > p:first-child {
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--hx-color-gray-600);
+  margin-bottom: 1rem;
+}
+.dark .hextra-toc .hextra-scrollbar > p:first-child {
+  color: var(--hx-color-gray-500);
+}
+
+/* Footer: rule the band off like everything else, and set the copyright
+   line in the machine-chip's mono voice — the manual's back colophon. */
+.hextra-footer {
+  border-top: 1px solid var(--card-border);
+}
+.hextra-footer .hx\:text-xs {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .02em;
+}
+
 /* Respect reduced-motion for the hover micro-lifts too. */
 @media (prefers-reduced-motion: reduce) {
   .mc-btn,

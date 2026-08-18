@@ -73,11 +73,11 @@ git switch -c feature/my-change
 
 If `git status --short` prints anything, commit, stash, or move the work to a separate worktree before starting. Dirty changes follow you onto a new branch.
 
-1. Check current project instructions and baseline docs that already exist (if any).
+2. Check current project instructions and baseline docs that already exist (if any).
 
 Check files such as `CLAUDE.md`, `AGENTS.md`, `README.md`, architecture notes, and nearby feature docs. Keep persistent agent instructions short and specific. Do not turn `CLAUDE.md` or `AGENTS.md` into a generated codebase summary. For examples, see [CLAUDE.md and AGENTS.md](/docs/agentic-coding-in-terminal/#claudemd-and-agentsmd).
 
-1. Run the baseline checks.
+3. Run the baseline checks.
 
 ```bash
 # Examples only. Use the commands from the repo you are working in.
@@ -87,11 +87,11 @@ npm run lint
 
 If the baseline already fails, record the failure before asking the agent to work. That gives you something to compare against after implementation.
 
-1. Start a fresh agent session for the change.
+4. Start a fresh agent session for the change.
 
 Reusing a long or unrelated session makes it easier for old assumptions to leak into the work.
 
-1. Write the task in one or two sentences.
+5. Write the task in one or two sentences.
 
 A good existing-codebase task names the user-facing change, likely files or areas, hard limits, and verification command.
 
@@ -443,4 +443,4 @@ Related GSD 2 reading: [Brownfield Reality](https://getshitdone.help/solo-guide/
 
 ---
 
-[Back to main page](/)
+[← Back to the contents](/docs/)

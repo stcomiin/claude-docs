@@ -174,7 +174,7 @@ The difference matters for how much enforcement each one can carry. Think of it 
 
 Custom skills are often more useful than public ones because they encode your team's real habits.
 
-Potentially Good skills include:
+Good candidates include:
 
 - Specific Team PR review rules
 - release checklists
@@ -697,4 +697,4 @@ The lab covers:
 
 ---
 
-[Back to main page](/)
+[← Back to the contents](/docs/)

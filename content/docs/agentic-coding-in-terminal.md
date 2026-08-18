@@ -1,15 +1,11 @@
 ---
 title: Agentic Coding in Terminal
-weight: 1
+weight: 2
 ---
 
 **Apex Builders Collective** × **Info PC** • April 2026
 
 [Pre-Workshop Setup Guide](/docs/setup-guide/)
-
-> 💁 **Workshop materials**: Use the navigation to browse all sections.
-
-## Foundations
 
 ## What is Agentic Coding?
 
@@ -76,7 +72,7 @@ Before we go deeper, here are some commands / CLI flags that are useful.
 | `/usage` | Shows usage and limits. `/cost` and `/stats` remain available as aliases. |
 | `/resume` | Pick up a previous session. `claude -c` from the shell resumes the most recent. e.g `claude --resume <some-session-id>` |
 | `Esc` | Stop Claude mid-action. |
-| **`Ctrl+U` \|\| `Ctrl+Y`** | Cuts the current Input \|\| Paste the Cut prompt |
+| `Ctrl+U` / `Ctrl+Y` | Cut the current input / paste it back |
 | `Ctrl+S` | Prompt stashing - best for when you're mid-prompt and need to ask something else first. Press `Ctrl+S` again on an empty prompt to bring the stash back. |
 | `Esc Esc` (Empty prompt) | Open the rewind menu (selective: code only, conversation only, or both). You can also use `/rewind` |
 | `@filepath` | Reference a file or directory inline: `@src/auth/login.ts fix the JWT check` |
@@ -92,7 +88,7 @@ Before we go deeper, here are some commands / CLI flags that are useful.
 
 ### Useful Claude Code Customisation
 
-1. cc-status line
+1. ccstatusline
     
     Use ccstatusline to keep the session metrics you care about in the status bar.
     GitHub *repo:* https://github.com/sirmalloc/ccstatusline
@@ -101,13 +97,13 @@ Before we go deeper, here are some commands / CLI flags that are useful.
     npx -y ccstatusline@latest
     ```
     
-    Install cc-status-line via npx
+    Install ccstatusline via npx
     
     Sample Config:
     
     Line 1:  Model | Context Length | Context % (usable) | Git Branch | Skills | Thinking Effort 
     
-    ![cc-status-line sample](/images/statusline-sample.png)
+    ![ccstatusline sample](/images/statusline-sample.png)
     
     - Installation step by step:
         1. Run `npx -y ccstatusline@latest` and select `Edit Lines` option (via pressing enter)
@@ -141,7 +137,7 @@ Before we go deeper, here are some commands / CLI flags that are useful.
     ![Toast notification sample](/images/statusline-toast.png)
     
 
-## ✍️ But first, let's just make something (✍️Hands-on: 15 minutes)
+## But first, let's just make something (Hands-on: 15 minutes)
 
 Please open Claude Code, and ask it to give you a CRUD app of some kind. 
 
@@ -165,16 +161,14 @@ Please open Claude Code, and ask it to give you a CRUD app of some kind.
 
 ---
 
-## Working with Agentic Coding
-
-## 🧠 Context & Memory
+## Context & Memory
 
 Agentic coding tools like Claude Code maintain context across a session, but understanding **where** memory lives, and how to shape it, is key to getting consistent, high-quality results.
 
 ### CLAUDE.md and AGENTS.md
 
 - **`CLAUDE.md`** is a special file Claude Code reads automatically when it starts in a project. Use it to encode persistent instructions: coding conventions, architecture decisions, preferred libraries, things Claude should never do, and so on. The contents of this is injected at the start of the conversation, in one of the many system prompts.
-- **`AGENTS.md`** serves a similar purpose for other agent runtimes (e.g. OpenAI Codex). If you're working across multiple agents, keeping both in sync is good practice using symlink.
+- **`AGENTS.md`** serves a similar purpose for other agent runtimes (e.g. OpenAI Codex). If you're working across multiple agents, keeping the two in sync (for example with a symlink) is good practice.
 - **Claude Code reads `CLAUDE.md`, not `AGENTS.md`, directly.** If another tool already uses `AGENTS.md`, import it from `CLAUDE.md` with `@AGENTS.md` or link the two files with `ln -s AGENTS.md CLAUDE.md`. `/init` reads existing Cursor and Copilot rule files by default; with `CLAUDE_CODE_NEW_INIT=1`, it also incorporates `AGENTS.md` and `.windsurfrules`.
 - Think of these files as your **onboarding doc for the AI**, the same way you'd brief a new contractor on how your codebase works, but not quite. Normally briefs would be done using actual documentation. CLAUDE.md is more for project specific stuff.
 - Good things to put in `CLAUDE.md`:
@@ -225,7 +219,7 @@ Claude Code has some built-in skills to manage CLAUDE.md
 1.  `/claude-md-management:revise-claude-md`  - Run this slash command in a specific session when you find something that should be updated for future sessions
 2. `/claude-md-improver` - Use this slash command when wanting to add general stuff to the CLAUDE.md
 
-#### ✍️ Hands-on: Craft Your CLAUDE.md (10 minutes)
+#### Hands-on: Craft Your CLAUDE.md (10 minutes)
 
 Now that you understand how context and memory work, let's put it into practice. Open the CRUD app you built earlier and create a `CLAUDE.md` file in the project root.
 
@@ -235,17 +229,17 @@ Your `CLAUDE.md` should include:
 - **Folder structure**: Where routes, components, models, etc. live
 - **Top rules**: At least 3 rules the agent must always follow (e.g. "always add Function Docstring to functions", "never use `any` types", "run tests before committing")
 
-Test it out! Prompt Claude Code to add a feature. Check whether if follows the rules that you set. If it doesn't, tweak the file. 
+Test it out! Prompt Claude Code to add a feature. Check whether it follows the rules that you set. If it doesn't, tweak the file. 
 
 > 😜 Example md file: "Always reply in Singlish!" 
 
 ### Compaction & Context Window Management
 
-- LLMs have a finite context window. In long sessions, older conversation turns get summarised ("compacted") to free up context, and is not desirable.
+- LLMs have a finite context window. In long sessions, older conversation turns get summarised ("compacted") to free up context, which is not desirable.
 - What goes into the context? Visualize it - [https://code.claude.com/docs/en/context-window](https://code.claude.com/docs/en/context-window)
 - [Claude Code History Viewer](https://github.com/jhlee0409/claude-code-history-viewer) lets you browse past sessions and project statistics. Install the MSI from the [latest release](https://github.com/jhlee0409/claude-code-history-viewer/releases). Despite the name, it also reads sessions from tools such as Codex and reports token usage.
 - Do not let conversations get to the point where your conversation needs to be compacted. Always /clear around 300k context if possible. Claude models have 1M context now by default but performance still degrades in longer context, no matter how good they say it is.
-- Do not use the compaction feature. Compaction is simply passing the chat history to a model and asking it to summarize the history. The session then continues from that summarized conversation, which is lossy and important details gleamed over the session may be stripped out.
+- Do not use the compaction feature. Compaction is simply passing the chat history to a model and asking it to summarize the history. The session then continues from that summarized conversation, which is lossy and important details gleaned over the session may be stripped out.
 - Claude Code handles the context window automatically (that's the whole point of CC: context engineering for agentic tasks), but you can influence it in some ways:
     - Always start a **new session** for any task that is not related to your current session.
     - Use `/clear` to reset context without restarting (when hitting ~300k context)
@@ -396,7 +390,7 @@ Double-tap `Esc` on an empty input to open the rewind menu. Scroll back with `�
 
 ### Visual Inputs
 
-- keystoke - `alt-v`
+- Keystroke: `Alt+V`
 - Claude Code accepts **screenshots and mockups** as direct inputs: drag in a Figma export, a browser screenshot, or even a hand-drawn sketch.
 - Great for: "Make this component look like this", "Why is this layout broken?", "Reproduce this UI".
 - Combine with `@` file references to point at the code you want changed alongside the visual.
@@ -438,7 +432,7 @@ Good agentic prompts answer three questions:
 
 Including an explicit success condition (passing tests, a specific output, a diff that meets a criterion) lets the agent self-verify and reduces back-and-forth.
 
-## 🔧 Tools: What Claude Code Can Actually Do
+## Tools: What Claude Code Can Actually Do
 
 When Claude Code acts on your codebase, it calls **tools**. Tools that only read don't need permission; tools that modify things do (unless pre-approved or in auto mode).
 
@@ -537,7 +531,7 @@ Pick the lightest review that fits the change:
 | --- | --- |
 | `/review <pr>` | Fast, single-pass review of a pull request |
 | `/code-review` | Looks for correctness bugs and cleanup opportunities in a background subagent by default |
-| `/code-review ultra` | Runs the cloud review; `/ultrareview` is also a supported alias. Only 3 few runs are included once in the subscription plans, and do not refresh |
+| `/code-review ultra` | Runs the cloud review; `/ultrareview` is also a supported alias. Only 3 runs are included in the subscription plans, and they do not refresh |
 | `/simplify` | Runs four cleanup agents that check reuse, code quality, and efficiency |
 
 For a second-model pass, ask Codex to review a narrow set of risks. For example:
@@ -590,7 +584,7 @@ Codex, Gemini and Claude review bots have been added to the organisation on GitH
 - Claude Code can **spawn sub-agents** to work on parallel tasks, useful for large features where multiple independent pieces can be built simultaneously.
 - A subagent has its own context, separate from the conversation that spawned it. It starts with the instructions and context passed to it.
 - Subagents can nest three levels below the main conversation by default.
-- In a **multi-agent setup**, the main claude code agent acts as the orchestrator (breaking down tasks, reviewing outputs) while dispatched agents act as workers (implementing specific pieces).
+- In a **multi-agent setup**, the main Claude Code agent acts as the orchestrator (breaking down tasks, reviewing outputs) while dispatched agents act as workers (implementing specific pieces).
 - Keep inter-agent communication structured: have each sub-agent produce a clear output summary the orchestrator can evaluate.
 - **Agent teams** remain experimental and are gated behind `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in the shell or the `settings.json` `env` block. Each session has one implicit team; spawn named teammates directly and Claude Code cleans up the team state when the session ends.
 
@@ -696,7 +690,7 @@ Read more: [code.claude.com/docs/en/workflows](https://code.claude.com/docs/en/w
 
 > 💡 **Further reading:** For full implementations of these hooks, see [Karan Bansal's Claude Code Hooks deep dive](https://karanbansal.in/blog/claude-code-hooks/).
 
-#### ✍️ Hands-on: Add Safety Hooks (10 minutes)
+#### Hands-on: Add Safety Hooks (10 minutes)
 
 **Step 1: Destructive-delete hook.** Open Claude Code's settings (`~\.claude\settings.json`) and add the destructive-delete hook above under `PreToolUse`. Test it by asking Claude to delete a file:
 
@@ -792,7 +786,7 @@ Or configure manually in your `claude_desktop_config.json` (or equivalent settin
 
 > **For offline environments:** any MCP server that uses `npx` will try to pull the package on first run. Pre-install packages globally with `npm install -g <package>` on a machine with internet, then copy to the offline machine and update config to use the local binary path directly.
 
-### ✍️ Hands-on: Install and Use an MCP Server
+### Hands-on: Install and Use an MCP Server
 
 **Context7 for Updated Documentation**
 
@@ -816,8 +810,6 @@ use the chrome devtools mcp, open duckduckgo and search for the best claude code
 ```
 
 ## Skills
-
-### Skills are simple, open format for giving agents new capabilities and expertise.
 
 Agent Skills are folders of instructions, scripts, and resources that agents can discover and use to do things more accurately and efficiently.
 
@@ -886,7 +878,7 @@ The convenience of skills comes with real risk.
 
 > 🔗 For securing the **apps Claude builds** (OWASP web/API/LLM/Agentic Top 10s, MCP & Claude Code CVEs, ready-to-paste pre-commit and CI guards, the LMDeploy 12h-to-exploit advisory), see [Cybersecurity & Production Hardening](/docs/security/).
 
-## 🧩 Plugins
+## Plugins
 
 Plugins extend Claude Code with additional capabilities: language intelligence, platform integrations, workflow automation, and more.
 
@@ -941,13 +933,9 @@ The sections above explain how skills and plugins work and how to install them. 
 
 Read the [Skills and Plugins Reference](/docs/skills-plugins-deep-dive/).
 
-## More Things
-
-## Useful Resources
+## More resources
 
 [Cheat Sheet for Claude Code](/docs/cheat-sheet/)
-
-## Good Resources
 
 > 🔗 [https://github.com/luongnv89/claude-howto](https://github.com/luongnv89/claude-howto)
 

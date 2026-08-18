@@ -221,6 +221,18 @@
         "value": ".85rem",
         "createdAt": "2026-08-17T18:29:55.724Z",
         "reason": "user locked the Manual Cover render (2026-08-18 surface round, seed 40257c2b); cover type steps of the approved comp — DESIGN.md refresh lands at finish via documenter"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": ".7rem",
+        "createdAt": "2026-08-18T01:52:20.081Z",
+        "reason": "Chapter-grammar chrome label step (running head, pager labels, TOC heading); will be documented in DESIGN.md typography this session"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": ".64rem",
+        "createdAt": "2026-08-18T01:52:20.130Z",
+        "reason": "Narrow-viewport squeeze of the .7rem chrome label so the running-head series clears the folio at 320-480px; documented alongside it"
       }
     ]
   }

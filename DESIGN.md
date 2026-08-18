@@ -45,6 +45,12 @@ typography:
     fontWeight: 600
     lineHeight: 1.5
     letterSpacing: "0.22em"
+  label-small:
+    fontFamily: "ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.7rem"
+    fontWeight: 600
+    lineHeight: 1.5
+    letterSpacing: "0.22em"
   code:
     fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
     fontSize: "0.7875em"
@@ -129,7 +135,8 @@ One fired-clay voice over a family of warm stones; the palette re-tints per them
 - **Headline** (700, 2.25rem/1.11, -0.025em): docs page titles (the H1 rendered from front matter; never duplicated in the body).
 - **Title** (600, 1.875rem/1.2): section H2s; each carries a full-width hairline underline as a structural divider.
 - **Body** (400, 1rem/1.75): prose, list items, table cells. The article column caps at ~832px (~90ch), inside the 72rem content cap.
-- **Label** (600, 0.78rem, 0.22em tracking, uppercase): the cover's series line and Contents heading — a tracked micro-label, the imprint voice of the manual masthead. The only uppercase tracked label in the system, and scoped to the cover.
+- **Label** (600, 0.78rem, 0.22em tracking, uppercase): the cover's series line and Contents heading — a tracked micro-label, the imprint voice of the manual masthead.
+- **Label-small** (600, 0.7rem, 0.22em tracking, uppercase): the same imprint voice sized for the reading pages' chrome — the chapter running head's series line, the chapter crossing's PREVIOUS/NEXT, and the TOC's "On this page". Squeezes to 0.64rem below 480px so the running head clears its folio.
 - **Code** (mono, 0.7875em inline): inline chips and fenced blocks; blocks at 12px-equivalent with 16px padding.
 
 The Manual Cover also carries a small set of cover-scoped steps beneath the roles above: colophon at 1.05rem, Contents entry titles at 1.15rem/600, entry notes and mono clay folios at 0.9rem, and the machine-path chip at 0.85rem mono.
@@ -162,7 +169,9 @@ Breakpoints that matter: 768px (mobile nav, banner in-flow, tables switch to blo
 
 A four-step radius ladder keyed to interactivity: 4px (nav items), 6px (inline code chips, framed bookmark images, cover focus rings), 8px (bookmark cards, lightbox), 12px (code blocks, the cover's machine chip), and full pills (9999px) for the cover's Begin action and the presenter toolbar. Bigger, softer corners mark the most touchable objects.
 
-Borders are 1px hairlines everywhere, in stone or low-alpha white/black; no border is ever thicker than 1px and no colored left-border accents exist. The bookmark card's signature device is an inner frame: the preview image floats inset 12px on all sides with its own 6px radius, sitting "matted" inside the card. The Manual Cover adds three drawn hairline devices of its own: a 3.5rem × 1px clay rule under the series line, 1px dotted leaders between each Contents entry and its folio (gray-400 light / gray-600 dark), and the hairline flanks of the Contents heading.
+Borders are 1px hairlines everywhere, in stone or low-alpha white/black; no border is ever thicker than 1px (blockquotes included — the theme's 2px quote bar is thinned to a 1px stone hairline) and no colored left-border accents exist. The bookmark card's signature device is an inner frame: the preview image floats inset 12px on all sides with its own 6px radius, sitting "matted" inside the card. The Manual Cover adds three drawn hairline devices of its own: a 3.5rem × 1px clay rule under the series line, 1px dotted leaders between each Contents entry and its folio (gray-400 light / gray-600 dark), and the hairline flanks of the Contents heading.
+
+The same devices recur on every docs page as the **chapter grammar**: a running head above the H1 (Label-small series line linking to the cover, dotted leader, mono clay folio), the 3.5rem clay rule closing the chapter H1 (`.content h1::after`), and a ruled chapter crossing in place of the stock pager. Folio numbers are read from the home page's `contents` front matter — the cover's own index — so cover and chapters can never disagree; the docs index page, as unnumbered front matter, carries the series line alone. Short clay rule = chapter start, full stone hairline = section: that is the page's rule vocabulary.
 
 The home ground is a single full-bleed clay bloom, not a texture and not a capped band. `--cover-bloom` is `radial-gradient(120% 55% at 50% -12%, rgba(193,95,59,.085), transparent 58%)` in light and `rgba(217,119,87,.12)` in dark, painted on `.manual-cover-page::before` at `inset: 0` across the entire viewport with `overflow: hidden` so it never mints a horizontal scrollbar. Because the glow spans the full width, there is no edge to seam — which is exactly what retired the old capped wash+grain band (and its deleted `grain.svg`). The bloom is strictly home-only and never touches the reading surface.
 
@@ -188,14 +197,21 @@ Component philosophy: **quiet until touched**. Rest states are hairline-and-tint
 - **State:** quiet clay row hover (`rgba(193,95,59,.045)` light / `rgba(217,119,87,.06)` dark, 0.12s).
 - **Overflow:** real table layout ≥768px; long tokens (link text, inline code) wrap via `overflow-wrap: anywhere`; below 768px tables fall back to block scroll.
 
+### Task-list Checkboxes
+- **Style:** printed form squares — appearance-none, 1.05em, 1px stone hairline (gray-300 light / gray-700 dark), 4px radius. Checked fills clay with a drawn check (SVG mask, no baked-in color).
+
+### Footer
+- **Style:** the band rules itself off with a 1px `--card-border` hairline; the copyright line sets in the machine-chip's mono voice at the theme's 0.75rem. The manual's back colophon.
+
 ### Inline Code
 - **Style:** warm translucent chip (`rgba(60,50,40,.06)` light / `rgba(255,255,255,.07)` dark) with matching 1px border, 6px radius, `box-decoration-break: clone` so wrapped chips keep per-line corners. Fenced blocks: 12px radius, 1px hairline, syntax theme on the warm surface.
 
 ### Navigation
 - **Navbar:** translucent body-color glass with backdrop blur, uncapped width; site title at 700. The llms banner leads with a drawn inline SVG document glyph (1.8 stroke, currentColor), not an emoji.
-- **Sidebar:** 14px items, muted stone at rest; active page in clay text on a soft clay tint, 4px radius.
-- **TOC:** "On this page", 14px; active entry in clay (color-only change, no weight shift, so the list never reflows while scrolling).
-- **Breadcrumb:** stone muted, current page in ink.
+- **Sidebar:** 14px items, muted stone at rest; active page in clay text on a soft clay tint, 4px radius. Page order is setup-first (weights match the cover's folio order), so sidebar, pager, cover, and folios tell one 01–06 story.
+- **TOC:** heading "On this page" set in Label-small; entries 14px; active entry in clay (color-only change, no weight shift, so the list never reflows while scrolling).
+- **Chapter running head** (replaces the breadcrumb, `layouts/_partials/breadcrumb.html`): Label-small series line linking to the cover · dotted leader · 0.85rem mono clay folio. In light mode the folio deepens one ramp step (×0.84, the Begin-pill recipe) to clear 4.5:1 on ivory; leader and folio are aria-hidden like the cover's.
+- **Chapter crossing** (replaces the pager, `layouts/_partials/components/pager.html`): above a 1px stone hairline, PREVIOUS and NEXT as two-deck entries — Label-small over a 1.05rem/600 title — bridged by the dotted leader (or ruled from the margin when the chapter is first or last). Hover shifts the title to clay, color only. Below 640px the sides stack, verso left-aligned, recto right-aligned, leader retired.
 
 ### Manual Cover (signature)
 The home is the title page of a bound field manual (`layout: manual-cover`), not a hero-plus-feature-cards landing. Its parts, top to bottom:
