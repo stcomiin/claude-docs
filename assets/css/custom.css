@@ -100,12 +100,16 @@
      it would un-tighten reading lines on ultrawide screens. */
 }
 
-/* ── Bookmark embed cards (Notion-style link previews) ──────────────── */
+/* ── Bookmark embed cards (Notion-style link previews) ────────────────
+   Border rides the shared stone hairline token (re-scoped per theme
+   further down), replacing the old neutral rgba borders that composited
+   to a cool gray on ivory — every hairline on the reading surface is a
+   warm stone. Hover reuses the site-wide quiet clay tint. */
 .bookmark-card {
   display: flex;
   align-items: stretch;
   text-decoration: none !important;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--card-border);
   border-radius: 8px;
   overflow: hidden;
   margin: 1.25rem 0;
@@ -115,15 +119,7 @@
   box-sizing: border-box;
 }
 .bookmark-card:hover {
-  background: rgba(255, 255, 255, 0.035);
-}
-
-/* Light mode overrides */
-:root:not(.dark) .bookmark-card {
-  border-color: rgba(0, 0, 0, 0.15);
-}
-:root:not(.dark) .bookmark-card:hover {
-  background: rgba(0, 0, 0, 0.025);
+  background: var(--table-row-hover);
 }
 
 a.bookmark-info {
@@ -518,6 +514,7 @@ a.bookmark-info {
 
   /* Docs reading surface. */
   --table-head: #f2efe6;
+  /* The site-wide quiet clay hover tint: table rows and bookmark cards. */
   --table-row-hover: rgba(193, 95, 59, .045);
   --code-inline-bg: rgba(60, 50, 40, .06);
   --code-inline-border: rgba(60, 50, 40, .10);
@@ -966,6 +963,14 @@ a.bookmark-info {
 }
 @media print {
   .doc-pager { display: none; }
+}
+
+/* Legacy anchor shims (empty spans planted where a heading's pre-rename
+   id used to live) are plain in-flow targets: without an offset, jumping
+   to one buries the following heading under the 64px sticky navbar.
+   Match Hextra's own heading-anchor offset (-mt-20 = 5rem). */
+.content span[id]:empty {
+  scroll-margin-top: 5rem;
 }
 
 /* Blockquotes: the reading surface allows no border thicker than 1px.
