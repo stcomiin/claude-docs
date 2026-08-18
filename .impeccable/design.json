@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-18T03:10:00Z",
+  "title": "Design System: Agentic Coding in Terminal",
+  "extensions": {
+    "colorMeta": {
+      "book-cloth-clay": {
+        "role": "primary",
+        "displayName": "Book-Cloth Clay",
+        "canonical": "hsl(16 53% 55%)",
+        "tonalRamp": ["#3b1d12", "#62301e", "#89432a", "#b05636", "#c9704f", "#d59076", "#e7bfb1", "#f7e9e4"]
+      },
+      "claude-terracotta": {
+        "role": "primary",
+        "displayName": "Claude Terracotta",
+        "canonical": "hsl(15 63% 66.7%)",
+        "tonalRamp": ["#3b1d12", "#62301e", "#89432a", "#b05636", "#c9704f", "#d97959", "#e7bfb1", "#f7e9e4"]
+      },
+      "ivory-paper": {
+        "role": "neutral",
+        "displayName": "Ivory Paper",
+        "canonical": "#faf9f5",
+        "tonalRamp": ["#211f1a", "#37342d", "#4b473f", "#635f55", "#837f73", "#a39f93", "#d1ccc0", "#faf9f5"]
+      },
+      "warm-charcoal": {
+        "role": "neutral",
+        "displayName": "Warm Charcoal",
+        "canonical": "#1a1815",
+        "tonalRamp": ["#1a1815", "#252220", "#322f28", "#454138", "#635f55", "#837f73", "#b9b5a7", "#f3f1e9"]
+      },
+      "stone-mist": {
+        "role": "neutral",
+        "displayName": "Stone Mist",
+        "canonical": "#f7f5ef",
+        "tonalRamp": ["#211f1a", "#37342d", "#4b473f", "#635f55", "#837f73", "#a39f93", "#d1ccc0", "#f7f5ef"]
+      },
+      "stone-dusk": {
+        "role": "neutral",
+        "displayName": "Stone Dusk",
+        "canonical": "#b9b5a7",
+        "tonalRamp": ["#211f1a", "#37342d", "#4b473f", "#635f55", "#837f73", "#a09b8d", "#b9b5a7", "#f3f1e9"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The home cover title only; three stacked lines at clamp(3.1-5.5rem)/0.98 with -0.05em tracking for a monumental bound-title mass." },
+      "headline": { "displayName": "Headline", "purpose": "Docs page titles rendered from front matter; never duplicated in the body." },
+      "title": { "displayName": "Title", "purpose": "Section H2s; each carries a full-width hairline underline as a structural divider." },
+      "body": { "displayName": "Body", "purpose": "Prose, lists, table cells at 1rem/1.75 in a ~832px column." },
+      "label": { "displayName": "Label", "purpose": "The cover's series line and Contents heading; a 0.78rem uppercase label at 0.22em tracking, the imprint voice of the manual masthead, scoped to the cover." },
+      "code": { "displayName": "Code", "purpose": "Inline chips and fenced blocks; the mono voice of the terminal subject matter, and the cover's clay folios." }
+    },
+    "shadows": [
+      { "name": "card-rest-light", "value": "0 1px 2px rgba(63,52,40,.05), 0 5px 14px rgba(63,52,40,.05)", "purpose": "Raised cards at rest on ivory; the warm raised-paper recipe, never neutral black." },
+      { "name": "card-hover-light", "value": "0 3px 8px rgba(63,52,40,.07), 0 18px 34px rgba(150,74,46,.13)", "purpose": "Raised-card hover deepening with clay tint; pairs with -3px lift and clay border." },
+      { "name": "card-rest-dark", "value": "0 1px 2px rgba(0,0,0,.3)", "purpose": "Raised cards at rest on charcoal." },
+      { "name": "card-hover-dark", "value": "0 2px 6px rgba(0,0,0,.35), 0 20px 40px rgba(0,0,0,.5)", "purpose": "Dark-room raised-card hover deepening." },
+      { "name": "cta-rest-light", "value": "0 1px 2px rgba(120,55,30,.12), 0 6px 16px rgba(160,74,46,.18)", "purpose": "The Begin pill at rest (light)." },
+      { "name": "cta-hover-light", "value": "0 3px 8px rgba(120,55,30,.16), 0 12px 28px rgba(160,74,46,.26)", "purpose": "Begin pill hover (light) with -2px lift." },
+      { "name": "cta-rest-dark", "value": "0 1px 2px rgba(0,0,0,.3), 0 8px 22px rgba(217,121,89,.22)", "purpose": "The Begin pill at rest (dark); clay-tinted glow under terracotta." },
+      { "name": "cta-hover-dark", "value": "0 3px 8px rgba(0,0,0,.35), 0 12px 30px rgba(217,121,89,.3)", "purpose": "Begin pill hover (dark) with -2px lift." },
+      { "name": "chrome-float", "value": "0 2px 10px rgba(0,0,0,.45)", "purpose": "Floating pen, scroll-to-top, and presenter toolbar; same recipe in both themes." }
+    ],
+    "motion": [
+      { "name": "ease-expo-out", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Default easing for every lift and entrance; 0.2-0.22s for micro-interactions." },
+      { "name": "mc-rise", "value": "mc-rise .65s cubic-bezier(.16,1,.3,1) backwards; from { opacity:0; transform:translateY(14px); filter:blur(6px) }", "purpose": "The one authored moment: the home cover composes itself in, in reading order - series (.02s) -> rule (mc-rule-grow) -> title (.12s) -> colophon (.24s) -> Begin (.32s) -> Contents heading (.40s) -> entries 1-6 (.46-.71s) -> machine chip (.80s). Gated behind prefers-reduced-motion; fully visible without it." },
+      { "name": "mc-rule-grow", "value": "mc-rule-grow .5s cubic-bezier(.16,1,.3,1) .08s backwards; from { transform: scaleX(0) }", "purpose": "The 3.5rem clay rule grows in under the cover's series line." },
+      { "name": "row-hover", "value": "background-color .12s ease", "purpose": "Quiet clay table-row hover." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "480px" },
+      { "name": "cover-sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The cover's single filled clay action (Begin - Setup Guide). Light: fill deepened one ramp step (#b45937) so ivory text clears 4.5:1; dark inverts to terracotta fill (#d97959) with near-black ink (#1a1210). One filled action per cover; no outline pill.",
+      "html": "<a href=\"#\" class=\"ds-btn-primary\">Begin — Setup Guide</a>",
+      "css": ".ds-btn-primary { display: inline-block; background: #b45937; color: #faf9f5; padding: 13px 28px; border-radius: 9999px; font-weight: 600; font-size: 16px; line-height: 1.5; text-decoration: none; box-shadow: 0 1px 2px rgba(120,55,30,.12), 0 6px 16px rgba(160,74,46,.18); transition: transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s ease; } .ds-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 3px 8px rgba(120,55,30,.16), 0 12px 28px rgba(160,74,46,.26); } .ds-btn-primary:active { transform: translateY(0); } .ds-btn-primary:focus-visible { outline: 2px solid #c15f3c; outline-offset: 3px; }"
+    },
+    {
+      "name": "Cover Contents Entry",
+      "kind": "nav",
+      "description": "The Manual Cover's signature ruled-index row: entry title + note + 1px dotted leader + mono clay folio, in setup-first order. Title shifts to clay on hover (color only, no reflow).",
+      "html": "<a href=\"#\" class=\"ds-mc-entry\"><span class=\"ds-mc-t\">Setup Guide</span><span class=\"ds-mc-n\">arrive ready — accounts, installs, checks</span><span class=\"ds-mc-lead\" aria-hidden=\"true\"></span><span class=\"ds-mc-f\" aria-hidden=\"true\">01</span></a>",
+      "css": ".ds-mc-entry { display: flex; align-items: baseline; gap: .85rem; padding: .95rem 0; text-decoration: none; color: inherit; } .ds-mc-t { font-weight: 600; font-size: 1.15rem; letter-spacing: -.01em; color: #211f1a; transition: color .2s ease; } .ds-mc-n { font-size: .9rem; color: #635f55; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 1; } .ds-mc-lead { flex: 1; min-width: 2.5rem; border-bottom: 1px dotted #b9b5a7; transform: translateY(-4px); } .ds-mc-f { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9rem; color: #c15f3c; } .ds-mc-entry:hover .ds-mc-t { color: #c15f3c; }"
+    },
+    {
+      "name": "Machine Path Chip",
+      "kind": "custom",
+      "description": "The cover's llms.txt colophon: a mono, bordered row whose path renders in clay, linking /llms-full.txt. Surfaces the binding machine-readable path on the title page.",
+      "html": "<a href=\"#\" class=\"ds-mc-machine\"><span class=\"ds-mc-machine-l\">For AI assistants — the whole workshop, plain text</span><span class=\"ds-mc-machine-p\">/llms-full.txt</span></a>",
+      "css": ".ds-mc-machine { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1rem 1.4rem; border: 1px solid #e7e2d6; border-radius: 12px; text-decoration: none; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85rem; color: #635f55; transition: border-color .2s ease; } .ds-mc-machine-p { color: #c15f3c; } .ds-mc-machine:hover { border-color: #c15f3c; }"
+    },
+    {
+      "name": "Bookmark Card",
+      "kind": "custom",
+      "description": "Notion-style link preview with the signature matted inner-frame image.",
+      "html": "<a href=\"#\" class=\"ds-bookmark\"><span class=\"ds-bookmark-info\"><span class=\"ds-bookmark-title\">A postmortem of three recent issues</span><span class=\"ds-bookmark-desc\">A technical report on three bugs that intermittently degraded responses.</span><span class=\"ds-bookmark-url\">anthropic.com</span></span><span class=\"ds-bookmark-media\"></span></a>",
+      "css": ".ds-bookmark { display: flex; align-items: stretch; border: 1px solid rgba(0,0,0,.15); border-radius: 8px; overflow: hidden; text-decoration: none; color: inherit; transition: background .15s ease; } .ds-bookmark:hover { background: rgba(0,0,0,.025); } .ds-bookmark-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; padding: 16px 18px 14px; } .ds-bookmark-title { font-size: 14px; font-weight: 500; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-bookmark-desc { font-size: 12.8px; line-height: 1.45; opacity: .55; } .ds-bookmark-url { margin-top: auto; padding-top: 6px; font-size: 12px; opacity: .45; } .ds-bookmark-media { flex: 0 0 120px; position: relative; margin: 12px; border-radius: 6px; background: linear-gradient(135deg, #f2efe6, #e7bfb1); }"
+    },
+    {
+      "name": "Reference Table",
+      "kind": "custom",
+      "description": "Full-width docs table: tinted left-aligned header, quiet clay row hover.",
+      "html": "<table class=\"ds-table\"><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody><tr><td><code class=\"ds-code\">/init</code></td><td>Create a starter CLAUDE.md</td></tr><tr><td><code class=\"ds-code\">/memory</code></td><td>Open the CLAUDE.md files in scope</td></tr></tbody></table>",
+      "css": ".ds-table { width: 100%; border-collapse: collapse; font-size: 16px; color: #211f1a; } .ds-table th { background: #f2efe6; font-weight: 600; text-align: left; padding: 8px 12px; border: 1px solid #d1ccc0; } .ds-table td { padding: 8px 12px; border: 1px solid #d1ccc0; overflow-wrap: anywhere; } .ds-table tbody tr { transition: background-color .12s ease; } .ds-table tbody tr:hover { background: rgba(193,95,59,.045); }"
+    },
+    {
+      "name": "Inline Code Chip",
+      "kind": "chip",
+      "refersTo": "code-chip",
+      "description": "Warm translucent chip; clones its corners per line when wrapped.",
+      "html": "<p class=\"ds-prose\">Run <code class=\"ds-code\">claude mcp add --transport http context7</code> to install.</p>",
+      "css": ".ds-prose { font-size: 16px; line-height: 1.75; color: #211f1a; margin: 0; } .ds-code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .7875em; background: rgba(60,50,40,.06); border: 1px solid rgba(60,50,40,.10); border-radius: 6px; padding: 2px 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }"
+    },
+    {
+      "name": "Floating Chrome Button",
+      "kind": "button",
+      "description": "Raised dark circle for pen and scroll-to-top; dark chrome in both themes by design.",
+      "html": "<button class=\"ds-float\" aria-label=\"Scroll to top\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M4.5 15.75l7.5-7.5 7.5 7.5\"/></svg></button>",
+      "css": ".ds-float { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(148,148,158,.5); background: rgba(48,48,52,.92); color: #d4d4d8; box-shadow: 0 2px 10px rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(8px); transition: background .15s, color .15s, border-color .15s; } .ds-float svg { width: 17.6px; height: 17.6px; } .ds-float:hover { background: rgba(66,66,72,.95); border-color: rgba(180,180,190,.6); color: #fff; } .ds-float:focus-visible { outline: 2px solid #c15f3c; outline-offset: 2px; }"
+    },
+    {
+      "name": "TOC Nav",
+      "kind": "nav",
+      "description": "On-this-page list; active entry in clay, color-only so the list never reflows.",
+      "html": "<nav class=\"ds-toc\"><p class=\"ds-toc-head\">On this page</p><a href=\"#\" class=\"ds-toc-link\">Session hygiene</a><a href=\"#\" class=\"ds-toc-link ds-toc-active\">Memory &amp; project setup</a><a href=\"#\" class=\"ds-toc-link\">Writing better prompts</a></nav>",
+      "css": ".ds-toc { display: flex; flex-direction: column; gap: 8px; font-size: 14px; } .ds-toc-head { font-weight: 600; color: #211f1a; margin: 0 0 4px; } .ds-toc-link { color: #837f73; text-decoration: none; transition: color .15s; } .ds-toc-link:hover { color: #211f1a; } .ds-toc-active { color: #c15f3c; } .ds-toc-link:focus-visible { outline: 2px solid #c15f3c; outline-offset: 2px; border-radius: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Warm Terminal",
+    "overview": "Terminal-native subject matter deliberately wrapped in warm ivory and clay instead of cold hacker black. The contrast is the identity: a site about shells, agents, and CLI flags that reads like a well-bound manual on a sunlit desk. Every neutral carries a warm stone cast, the single accent is a fired clay, and the two themes are the same room at different hours, warm charcoal at night rather than void black.\n\nThe personality is cozy, practical, craftsman. Density serves the mid-task reader: reference tables, copy-ready commands, and firm hierarchy come first, and comfort comes from material warmth rather than from whitespace luxury. Nothing shouts; interactive surfaces reveal their character only when touched.",
+    "keyCharacteristics": [
+      "One clay accent over an all-warm stone neutral family; no second hue anywhere in the UI",
+      "System font stacks only; character comes from color, spacing, and material, not typefaces",
+      "Flat reading surface; soft warm lift reserved for interactive surfaces",
+      "Dual-theme parity: every surface tuned for warm ivory and warm charcoal alike",
+      "Built to be projected and annotated live (presenter kit is part of the design)"
+    ],
+    "rules": [
+      { "name": "The One-Clay Rule", "body": "Clay is the only hue in the UI. States, emphasis, and accents re-tint from the primary ramp; no blues, greens, or a second brand color, ever. (Presenter ink colors are user annotation content, not UI, and are exempt.)", "section": "colors" },
+      { "name": "The Warm Stone Rule", "body": "Every gray is a warm stone. The ramp overrides Tailwind's cool gray/neutral/slate globally; if a new element ships with a blue-gray, it is a bug.", "section": "colors" },
+      { "name": "The System-Voice Rule", "body": "No webfonts. The system stacks are a commitment, not a fallback: they keep the terminal-adjacent voice, zero font-loading shift, and clean llms.txt parity between what humans and machines read.", "section": "typography" },
+      { "name": "The Paper-On-A-Desk Rule", "body": "The reading surface is flat: hairline borders and tonal tints do the structural work. Shadows exist only on things you can pick up: cards, CTA pills, and floating chrome, with a soft ambient rest state that deepens on hover alongside a small lift.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do derive every accent use from the primary ramp so both themes re-tint from the three HSL variables in custom.css; new hues are never introduced per-component. When a fill needs more contrast (the Begin pill on ivory), deepen along the ramp (x0.84 lightness) rather than reaching for a new color.",
+      "Do keep light-mode shadows warm (brown/clay rgba values), with a real offset and soft blur; follow the rest to hover deepening pattern with a -2/-3px lift at 0.2s expo-out.",
+      "Do keep the home ground full-bleed and seam-free: the clay bloom paints .manual-cover-page::before at inset: 0 across the viewport, the cover plate is centered at full width, and only the Contents column caps (46rem).",
+      "Do draw icons as inline SVG (currentColor, ~1.8-2 stroke weight); never ship an emoji or icon font as a UI glyph.",
+      "Do verify every surface in both themes before shipping; dark is the default and light is a peer, and the dark text tiers stay at their lifted contrast values (Stone Dusk secondary at ~8.6:1).",
+      "Do keep tables full-width with tinted left-aligned headers and quiet clay row hover; reference density is the product.",
+      "Do gate all motion behind prefers-reduced-motion and keep content fully visible without it."
+    ],
+    "donts": [
+      "Don't use pure black backgrounds, neon green/cyan accents, glow effects, or terminal-cliche styling; the warm room is the identity (confirmed anti-reference).",
+      "Don't use blue-purple gradients, glassmorphism panels, or 3D blob decoration; SaaS gloss is the other confirmed anti-reference.",
+      "Don't introduce cool grays anywhere; every neutral comes from the warm stone ramp.",
+      "Don't add webfonts; the system stacks are a commitment (The System-Voice Rule).",
+      "Don't let the home's clay bloom or its mc-rise compose-in choreography touch the docs reading surfaces; the reading room stays flat and still.",
+      "Don't reintroduce a capped wash/grain band or any full-width seam on the home; the ground is one full-bleed bloom, seam-free at any width.",
+      "Don't add a second filled CTA to the cover; it carries exactly one clay action (Begin), and secondary paths are the ruled Contents rows, never a competing or outline button."
+    ]
+  }
+}

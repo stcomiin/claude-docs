@@ -1,0 +1,31 @@
+{{- /* Running head — overrides Hextra's breadcrumb on docs pages.
+
+     Each docs page opens like a chapter of the bound manual whose title
+     page is the home cover: the series line (site title, linking back to
+     the cover), a dotted leader, and the chapter's mono clay folio. The
+     folio comes from the home page's `contents` front matter — the same
+     list that numbers the cover's ruled Contents — so the two can never
+     drift apart. Pages absent from that list (the docs index) render the
+     series line alone.
+
+     Semantic classes only: Hextra's Tailwind bundle is precompiled, so new
+     hx:* utilities would not exist. Styled in assets/css/custom.css under
+     "Chapter grammar". */ -}}
+{{- $page := .page -}}
+{{- $enable := .enable -}}
+{{- if (default $enable $page.Params.breadcrumbs) -}}
+  {{- $folio := "" -}}
+  {{- $current := strings.TrimSuffix "/" $page.RelPermalink -}}
+  {{- range $i, $e := site.Home.Params.contents -}}
+    {{- if eq (strings.TrimSuffix "/" $e.url) $current -}}
+      {{- $folio = printf "%02d" (add $i 1) -}}
+    {{- end -}}
+  {{- end -}}
+  <p class="doc-runhead">
+    <a class="doc-runhead-series" href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a>
+    {{- if $folio }}
+    <span class="doc-runhead-lead" aria-hidden="true"></span>
+    <span class="doc-runhead-f" aria-hidden="true">{{ $folio }}</span>
+    {{- end }}
+  </p>
+{{- end -}}

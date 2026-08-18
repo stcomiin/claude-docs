@@ -5,7 +5,7 @@ weight: 5
 
 Shipping faster doesn't change what auditors, attackers, or your on-call rotation expect of the code that lands in production. This page is the workshop's pointer page for **securing the apps Claude builds for you** *and* **securing the Claude Code session itself** - frameworks, ready-to-paste guards, and recent advisories you should be reading.
 
-## 🧭 Why this matters
+## Why this matters
 
 Recent empirical work paints a consistent picture:
 
@@ -20,7 +20,7 @@ And the window to fix what ships is shrinking:
 
 The agent makes you faster at writing the bug *and* faster at convincing yourself it isn't there. Meanwhile attackers are using the same LLM tooling to find your bugs faster than ever. The mitigation is process: defensive prompts up front, scoped review skills before merge, and standing CI guards.
 
-## 🎯 Two-layer threat model
+## Two-layer threat model
 
 > ⚠️ **Treat security as two layers - every later section is tagged with which layer it covers.**
 >
@@ -31,7 +31,7 @@ A hardened app on a compromised agent is still a breach - the attacker just exfi
 
 ---
 
-## 🛡️ Layer 1 - Securing the app you ship
+## Layer 1 - Securing the app you ship
 
 The reference frameworks below cover overlapping ground. Use the web Top 10 as your floor; add API and LLM Top 10s as soon as your app exposes either; layer ASVS / NIST AI RMF / MITRE ATLAS on top for regulated or higher-stakes systems.
 
@@ -52,7 +52,9 @@ The reference frameworks below cover overlapping ground. Use the web Top 10 as y
 
 ---
 
-## 🔓 Layer 2 - Securing the agent itself
+<span id="-layer-2---securing-the-agent-itself"></span>
+
+## Layer 2 - Securing the agent itself
 
 Claude Code, like every agent runtime, sits between the public internet (web fetches, MCP responses, skill files) and your laptop's full filesystem and credential store. The published advisory record is now substantial - **read at least one advisory per category below before granting a session `--dangerously-skip-permissions`.**
 
@@ -96,7 +98,7 @@ What makes this dangerous is how little it takes to land in a session you trust.
 
 ---
 
-## 🧱 Defensive patterns *in the initial prompt*
+## Defensive patterns *in the initial prompt*
 
 Most of the wins here are upstream of code generation. Bake them into `CLAUDE.md` so every session inherits them.
 
@@ -260,7 +262,7 @@ Constraints:
 
 ---
 
-## 🔍 Post-implementation review workflow
+## Post-implementation review workflow
 
 | Stage | Command | Use when |
 | --- | --- | --- |
@@ -295,7 +297,9 @@ Instead of context-switching to a vendor UI, wire the scanner into Claude Code a
 
 ---
 
-## ⚙️ Pre-commit & CI hardening (ready-to-paste)
+<span id="-pre-commit--ci-hardening-ready-to-paste"></span>
+
+## Pre-commit & CI hardening (ready-to-paste)
 
 Three layers of guards: **PreToolUse hooks** in Claude Code itself, **pre-commit hooks** on the dev machine, and **GitHub Actions** in CI. Stack all three.
 
@@ -540,7 +544,7 @@ Add [Dependabot](https://docs.github.com/en/code-security/dependabot) and [GitHu
 
 ---
 
-## 📦 Validating what Claude generates - deps, containers, and IaC
+## Validating what Claude generates - deps, containers, and IaC
 
 Claude Code installs packages, generates Dockerfiles, writes Terraform, and scaffolds CI pipelines. Each output needs validation before it ships. Rather than learning a dozen tools independently, **use Claude Code itself to run these scans** - it can invoke the tools, interpret findings, and propose fixes inline.
 
@@ -602,7 +606,7 @@ Create GitHub issues when it finds something."
 
 ---
 
-## 🪱 Supply-chain risks specific to agentic coding
+## Supply-chain risks specific to agentic coding
 
 Claude Code installs packages, suggests dependencies, and runs lifecycle scripts - creating supply-chain exposure that's **amplified** compared to manual coding because the agent acts faster and with more confidence than a human scanning a registry page.
 
@@ -699,13 +703,13 @@ npm audit --audit-level=high
 osv-scanner scan source -r .
 ```
 
-If anything looks wrong, run the `incident-triage` subagent defined in [Layer 2](#-layer-2---securing-the-agent-itself) - it produces a timeline + IOCs + blast-radius report.
+If anything looks wrong, run the `incident-triage` subagent defined in [Layer 2](#layer-2---securing-the-agent-itself) - it produces a timeline + IOCs + blast-radius report.
 
 ---
 
-## 🎯 Testing what Claude builds - DAST and LLM red-teaming
+## Testing what Claude builds - DAST and LLM red-teaming
 
-Static analysis (covered in [Pre-commit & CI hardening](#-pre-commit--ci-hardening-ready-to-paste)) catches what the code *says*. Dynamic testing catches what it *does* once it's running. Use Claude Code to wire these tools into your workflow.
+Static analysis (covered in [Pre-commit & CI hardening](#pre-commit--ci-hardening-ready-to-paste)) catches what the code *says*. Dynamic testing catches what it *does* once it's running. Use Claude Code to wire these tools into your workflow.
 
 ### Use Claude to set up DAST on your staging environment
 
@@ -757,7 +761,7 @@ redteam:
     - jailbreak         # DAN, persona, encoding attacks
 ```
 
-## ✅ Pre-merge checklist (Claude Code edition)
+## Pre-merge checklist (Claude Code edition)
 
 Drop this into `PULL_REQUEST_TEMPLATE.md` - items are specific to Claude Code and agentic coding workflows:
 
@@ -781,7 +785,7 @@ Drop this into `PULL_REQUEST_TEMPLATE.md` - items are specific to Claude Code an
 
 ---
 
-## 📰 Feeds to watch
+## Feeds to watch
 
 - **Anthropic security advisories** - [anthropic.com/security](https://www.anthropic.com/security) and [code.claude.com/docs/en/security](https://code.claude.com/docs/en/security). Subscribe for Claude Code CVEs.
 - **Snyk Labs** - [snyk.io/articles](https://snyk.io/articles/) for Claude / agent-skill security research.

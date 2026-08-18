@@ -1,9 +1,9 @@
 ---
 title: Pre-Workshop Setup Guide
-weight: 2
+weight: 1
 ---
 
-**Agentic Coding in Terminal** — Apex Builders Collective × Info PC
+**Agentic Coding in Terminal**: Apex Builders Collective × Info PC
 
 Please finish these steps **before** the workshop. Allow about 15–20 minutes.
 
@@ -255,16 +255,16 @@ The older `get-shit-done-cc` and `@opengsd/get-shit-done-redux` package names ar
 
 None of these are required.
 
-**A code editor** — [VS Code](https://code.visualstudio.com/), [Cursor](https://cursor.com/), or whichever editor you already use. It helps when you want to inspect generated files outside the terminal.
+**A code editor**: [VS Code](https://code.visualstudio.com/), [Cursor](https://cursor.com/), or whichever editor you already use. It helps when you want to inspect generated files outside the terminal.
 
-**GitHub CLI** — If you want to follow along with the GitHub integration section:
+**GitHub CLI**: If you want to follow along with the GitHub integration section:
 
 ```bash
 # Install: https://cli.github.com/
 gh auth login
 ```
 
-**A few terminal basics** — If you rarely use a terminal, practice changing folders, listing files, creating a directory, and reading a text file before the workshop.
+**A few terminal basics**: If you rarely use a terminal, practice changing folders, listing files, creating a directory, and reading a text file before the workshop.
 
 ---
 
@@ -296,4 +296,4 @@ If you get stuck on any step:
 
 ---
 
-[← Back to main page](/docs/)
+[← Back to the contents](/docs/)

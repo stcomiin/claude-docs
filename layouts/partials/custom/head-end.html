@@ -10,10 +10,10 @@
 {{- $ogImage := index site.Params.images 0 -}}
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="{{ site.Title }}{{ with site.Params.description }} — {{ . }}{{ end }}">
+<meta property="og:image:alt" content="{{ site.Title }}{{ with site.Params.description }}, {{ . }}{{ end }}">
 <meta property="og:image:type" content="image/png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image:alt" content="{{ site.Title }}{{ with site.Params.description }} — {{ . }}{{ end }}">
+<meta name="twitter:image:alt" content="{{ site.Title }}{{ with site.Params.description }}, {{ . }}{{ end }}">
 <link rel="image_src" href="{{ $ogImage | absURL }}">
 
 <!-- Notion-style image lightbox + TOC auto-scroll -->
@@ -156,11 +156,13 @@
     opacity: 0.7;
   }
   /* Hextra pins the banner to the top on mobile (hx:max-md:sticky), where it
-     overlaps the hero on scroll. Match the desktop behavior and let it scroll
-     away with the page. */
+     overlaps the hero on scroll. Use `relative`, not `static`, to keep it in
+     flow: static would void the shell's z-20, letting the home hero's glow
+     and grain pseudo-elements (which bleed 6rem up past main#content) paint
+     over the banner's lower rows. */
   @media (max-width: 767px) {
     .hextra-banner {
-      position: static !important;
+      position: relative !important;
     }
   }
 </style>

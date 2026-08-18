@@ -1,0 +1,6 @@
+# Project-level i18n overrides. Hugo merges these per-key over the Hextra
+# module's i18n/en.yaml, so only overridden keys need to appear here.
+#
+# `copyright` feeds the footer line. The theme default reads
+# "© 2026 Hextra Project." — crediting the theme, not this site.
+copyright: "© 2026 Agentic Coding in Terminal workshop."

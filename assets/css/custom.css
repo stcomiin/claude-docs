@@ -100,23 +100,16 @@
      it would un-tighten reading lines on ultrawide screens. */
 }
 
-/* Re-center the home layout. Doc pages wrap <main> inside <article>, so
-   <main> as a direct child of .hextra-max-page-width is unique to the
-   hextra-home layout. Re-introducing a max-width here restores the
-   centered hero + feature grid look that the page-width cap used to give
-   us before we lifted it on the chrome above. */
-.hextra-max-page-width > main#content {
-  max-width: 90rem;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* ── Bookmark embed cards (Notion-style link previews) ──────────────── */
+/* ── Bookmark embed cards (Notion-style link previews) ────────────────
+   Border rides the shared stone hairline token (re-scoped per theme
+   further down), replacing the old neutral rgba borders that composited
+   to a cool gray on ivory — every hairline on the reading surface is a
+   warm stone. Hover reuses the site-wide quiet clay tint. */
 .bookmark-card {
   display: flex;
   align-items: stretch;
   text-decoration: none !important;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--card-border);
   border-radius: 8px;
   overflow: hidden;
   margin: 1.25rem 0;
@@ -126,15 +119,7 @@
   box-sizing: border-box;
 }
 .bookmark-card:hover {
-  background: rgba(255, 255, 255, 0.035);
-}
-
-/* Light mode overrides */
-:root:not(.dark) .bookmark-card {
-  border-color: rgba(0, 0, 0, 0.15);
-}
-:root:not(.dark) .bookmark-card:hover {
-  background: rgba(0, 0, 0, 0.025);
+  background: var(--table-row-hover);
 }
 
 a.bookmark-info {
@@ -234,29 +219,47 @@ a.bookmark-info {
   }
 }
 
-/* ── Tables: full width, no horizontal scroll ──────────────────────── */
-.hextra-content table {
-  table-layout: fixed;
+/* ── Tables: full width, wrap long tokens (no horizontal scroll) ──────
+   Hextra wraps prose in `.content`, not `.hextra-content` (which does not
+   exist in this theme), so the original selector never matched — this is
+   the corrected target. `table-layout: fixed` is intentionally omitted:
+   these are two-column reference tables whose first column should hug its
+   short command text, and a fixed layout would balloon it to an even split. */
+.content table {
   width: 100%;
   overflow-wrap: break-word;
 }
 
-/* Hero section spacing — body prefix adds specificity to beat theme defaults */
-body main#content > div > h1:first-child {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+/* Hextra renders markdown tables as `display: block` so oversized grids can
+   scroll sideways on small screens. Side effect: `width: 100%` then sizes the
+   scroll box, not the grid, so each table shrinks to its own max-content and
+   tables on the same page all end at different widths. Where the column has
+   room, restore real table layout so grids fill it edge-to-edge; below md
+   keep the theme's block+scroll fallback. */
+@media (min-width: 768px) {
+  .content table {
+    display: table;
+  }
 }
 
-body main#content > div > p:nth-of-type(1) {
-  margin-bottom: 2rem;
+/* Browsers center <th> by default while the cells below stay left-aligned;
+   one alignment axis per column reads faster. Explicit `:---:` alignment
+   from markdown still wins — goldmark emits it as inline style. */
+.content table th {
+  text-align: left;
 }
 
-body main#content > div > p:nth-of-type(2) {
-  margin-bottom: 1rem;
-}
-
-body .hextra-feature-grid {
-  margin-top: 2.5rem;
+/* With real table layout, a cell holding an unbreakable token (a pasted URL,
+   a long install command) sets the column's min-content and can push the
+   grid past the article edge — `break-word` wraps text but does NOT shrink
+   min-content; `anywhere` does. Scope `anywhere` to the tokens that actually
+   get long (link text, inline code), NOT whole cells: on the cell it would
+   zero every column's min-content and auto layout then crushes short prose
+   columns into mid-word breaks ("Conte/xt7"). Plain text keeps word-boundary
+   wrapping from the table's `break-word` above. */
+.content table td a,
+.content table td code {
+  overflow-wrap: anywhere;
 }
 
 /* ── Presenter Kit: ephemeral ink overlay + projector mode ────────────
@@ -480,5 +483,565 @@ body .hextra-feature-grid {
   .presenter-pen,
   .presenter-toolbar {
     display: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Expressive polish — home landing + docs reading surface
+   ───────────────────────────────────────────────────────────────────────
+   Everything below stays inside the incumbent warm-Anthropic world: the
+   accent is pulled straight from Hextra's derived primary-* ramp (so it
+   re-tints per theme from the variables at the top of this file), and no
+   new hues are introduced. Motion is a single authored moment — one load
+   choreography on the home hero — and is gated behind
+   prefers-reduced-motion; content is fully visible without it.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Accent tracks the theme's primary ramp automatically. */
+  --acc-600: var(--hx-color-primary-600);
+
+  /* Raised card surface: a hair warmer/lighter than the ivory body so a
+     soft shadow reads as elevation instead of a drawn outline. */
+  --card-surface: #fffdfa;
+  --card-border: #e7e2d6;
+  --card-shadow: 0 1px 2px rgba(63, 52, 40, .05), 0 5px 14px rgba(63, 52, 40, .05);
+  --card-shadow-hover: 0 3px 8px rgba(63, 52, 40, .07), 0 18px 34px rgba(150, 74, 46, .13);
+  --card-border-hover: rgba(193, 95, 59, .5);
+
+  /* Home cover bloom: a faint full-bleed clay glow rising from the top. */
+  --cover-bloom: radial-gradient(120% 55% at 50% -12%, rgba(193, 95, 59, .085), transparent 58%);
+
+  /* Docs reading surface. */
+  --table-head: #f2efe6;
+  /* The site-wide quiet clay hover tint: table rows and bookmark cards. */
+  --table-row-hover: rgba(193, 95, 59, .045);
+  --code-inline-bg: rgba(60, 50, 40, .06);
+  --code-inline-border: rgba(60, 50, 40, .10);
+  --code-block-border: rgba(63, 52, 40, .10);
+}
+
+.dark {
+  --card-surface: #221f1a;
+  --card-border: #35312a;
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+  --card-shadow-hover: 0 2px 6px rgba(0, 0, 0, .35), 0 20px 40px rgba(0, 0, 0, .5);
+  --card-border-hover: rgba(217, 119, 87, .55);
+
+  --cover-bloom: radial-gradient(120% 55% at 50% -12%, rgba(217, 119, 87, .12), transparent 58%);
+
+  --table-head: #2a2621;
+  --table-row-hover: rgba(217, 119, 87, .06);
+  --code-inline-bg: rgba(255, 255, 255, .07);
+  --code-inline-border: rgba(255, 255, 255, .10);
+  --code-block-border: rgba(255, 255, 255, .07);
+}
+
+/* ── Manual Cover home ──────────────────────────────────────────────────
+   The landing page is the title page of a bound manual (layout:
+   manual-cover). The ground is full-bleed — the bloom spans the viewport,
+   never a capped column, which is what retired the old seam band. The
+   old hextra-home shortcodes (hero, feature grid) left this surface with
+   that layout; their rules are gone with them. */
+.manual-cover-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden; /* the bloom may not mint a horizontal scrollbar */
+}
+.manual-cover-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--cover-bloom);
+  pointer-events: none;
+  z-index: 0;
+}
+.manual-cover {
+  position: relative;
+  z-index: 1;
+  min-height: calc(100vh - var(--navbar-height, 4rem));
+  padding: 0 max(env(safe-area-inset-left), 1.5rem) 0 max(env(safe-area-inset-right), 1.5rem);
+}
+
+/* Cover plate */
+.mc-cover {
+  text-align: center;
+  padding-top: clamp(3.5rem, 9vh, 6.5rem);
+}
+.mc-series {
+  font-size: .78rem;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--hx-color-gray-600);
+}
+.dark .mc-series { color: var(--hx-color-gray-500); }
+.mc-rule {
+  display: block;
+  width: 3.5rem;
+  height: 1px;
+  background: var(--acc-600);
+  margin: 1.6rem auto;
+}
+.mc-title {
+  font-weight: 700;
+  font-size: clamp(3.1rem, 7vw, 5.5rem);
+  line-height: .98;
+  letter-spacing: -.05em;
+  color: var(--hx-color-slate-900);
+  margin: 0 auto;
+}
+.dark .mc-title { color: var(--hx-color-gray-100); }
+.mc-title span { display: block; }
+.mc-colophon {
+  margin-top: 1.9rem;
+  font-size: 1.05rem;
+  color: var(--hx-color-gray-600);
+}
+.dark .mc-colophon { color: var(--hx-color-gray-400); }
+.mc-colophon strong {
+  font-weight: 600;
+  color: var(--hx-color-slate-900);
+}
+.dark .mc-colophon strong { color: var(--hx-color-gray-100); }
+
+/* One filled clay action. Light mode deepens the fill one ramp step so
+   ivory text clears 4.5:1; dark mode inverts to ink-on-terracotta. */
+.mc-begin { margin-top: 2.1rem; }
+.mc-btn {
+  display: inline-block;
+  padding: 13px 28px;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.5;
+  text-decoration: none;
+  background: hsl(var(--primary-hue) var(--primary-saturation) calc(var(--primary-lightness) * .84));
+  color: #faf9f5;
+  box-shadow: 0 1px 2px rgba(120, 55, 30, .12), 0 6px 16px rgba(160, 74, 46, .18);
+  transition: transform .2s cubic-bezier(.16, 1, .3, 1), box-shadow .2s ease;
+}
+.dark .mc-btn {
+  background: var(--acc-600);
+  color: #1a1210;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 22px rgba(217, 121, 89, .22);
+}
+.mc-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(120, 55, 30, .16), 0 12px 28px rgba(160, 74, 46, .26);
+}
+.dark .mc-btn:hover {
+  box-shadow: 0 3px 8px rgba(0, 0, 0, .35), 0 12px 30px rgba(217, 121, 89, .3);
+}
+.mc-btn:active { transform: translateY(0); }
+.mc-btn:focus-visible,
+.mc-entry:focus-visible,
+.mc-machine:focus-visible {
+  outline: 2px solid var(--acc-600);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+.mc-btn:focus-visible { border-radius: 9999px; }
+
+/* Contents — the whole navigation, ruled like a printed TOC */
+.mc-contents {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: clamp(2.8rem, 7vh, 4.5rem) 0 5.5rem;
+}
+.mc-contents-h {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: .78rem;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--hx-color-gray-600);
+  margin-bottom: 1.1rem;
+}
+.dark .mc-contents-h { color: var(--hx-color-gray-500); }
+.mc-contents-h::before,
+.mc-contents-h::after {
+  content: "";
+  height: 1px;
+  background: var(--card-border);
+  flex: 1;
+}
+.mc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.mc-entry {
+  display: flex;
+  align-items: baseline;
+  gap: .85rem;
+  padding: .95rem 0;
+  text-decoration: none;
+  color: inherit;
+}
+.mc-entry-t {
+  font-weight: 600;
+  font-size: 1.15rem;
+  letter-spacing: -.01em;
+  color: var(--hx-color-slate-900);
+  transition: color .2s ease;
+}
+.dark .mc-entry-t { color: var(--hx-color-gray-100); }
+.mc-entry-n {
+  font-size: .9rem;
+  color: var(--hx-color-gray-600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+}
+.dark .mc-entry-n { color: var(--hx-color-gray-500); }
+.mc-entry-lead {
+  flex: 1;
+  min-width: 2.5rem;
+  border-bottom: 1px dotted var(--hx-color-gray-400);
+  transform: translateY(-4px);
+}
+.dark .mc-entry-lead { border-bottom-color: var(--hx-color-gray-600); }
+.mc-entry-f {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .9rem;
+  color: var(--acc-600);
+}
+.mc-entry:hover .mc-entry-t { color: var(--acc-600); }
+
+/* Machine path — the llms.txt colophon chip */
+.mc-machine {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2.2rem;
+  padding: 1rem 1.4rem;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  text-decoration: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .85rem;
+  color: var(--hx-color-gray-600);
+  transition: border-color .2s ease;
+}
+.dark .mc-machine { color: var(--hx-color-gray-400); }
+.mc-machine-p { color: var(--acc-600); }
+.mc-machine:hover { border-color: var(--acc-600); }
+
+/* ── The cover composes itself once ─────────────────────────────────────
+   One authored moment: series line, rule, title, colophon, begin, then
+   the contents entries in reading order. Fully visible without motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .mc-series, .mc-title, .mc-colophon, .mc-begin,
+  .mc-contents-h, .mc-entry-li, .mc-machine {
+    animation: mc-rise .65s cubic-bezier(.16, 1, .3, 1) backwards;
+  }
+  .mc-rule {
+    animation: mc-rule-grow .5s cubic-bezier(.16, 1, .3, 1) .08s backwards;
+  }
+  .mc-series { animation-delay: .02s; }
+  .mc-title { animation-delay: .12s; }
+  .mc-colophon { animation-delay: .24s; }
+  .mc-begin { animation-delay: .32s; }
+  .mc-contents-h { animation-delay: .40s; }
+  .mc-entry-li:nth-child(1) { animation-delay: .46s; }
+  .mc-entry-li:nth-child(2) { animation-delay: .51s; }
+  .mc-entry-li:nth-child(3) { animation-delay: .56s; }
+  .mc-entry-li:nth-child(4) { animation-delay: .61s; }
+  .mc-entry-li:nth-child(5) { animation-delay: .66s; }
+  .mc-entry-li:nth-child(6) { animation-delay: .71s; }
+  .mc-machine { animation-delay: .80s; }
+}
+@keyframes mc-rise {
+  from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
+  to   { opacity: 1; transform: none; filter: none; }
+}
+@keyframes mc-rule-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* Small screens: the note drops to its own line under the title; the
+   leader keeps ruling the title-to-folio line above it. */
+@media (max-width: 640px) {
+  .mc-entry {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "t lead f" "n n n";
+    row-gap: .2rem;
+  }
+  .mc-entry-t { grid-area: t; }
+  .mc-entry-lead { grid-area: lead; align-self: end; margin-bottom: .55em; transform: none; }
+  .mc-entry-f { grid-area: f; }
+  .mc-entry-n { grid-area: n; white-space: normal; }
+  .mc-machine { flex-direction: column; align-items: flex-start; gap: .3rem; }
+  /* Clear the floating pen + scroll-to-top column (right 2rem, up to
+     7.5rem tall) so the last contents rows and the machine chip can
+     scroll out from under it — same clearance the docs TOC carries. */
+  .mc-contents { padding-bottom: 7.5rem; }
+}
+
+/* ── Docs tables ────────────────────────────────────────────────────────
+   Hextra ships a transparent header and no row feedback. Give the header
+   a warm tint and add a quiet row hover — these pages carry many dense
+   reference tables (the cheat sheet alone has ten). The theme wraps prose
+   in `.content` (not `.hextra-content`, which no longer exists here). */
+.content table th {
+  background: var(--table-head);
+  font-weight: 600;
+}
+.content table tbody tr {
+  transition: background-color .12s ease;
+}
+.content table tbody tr:hover {
+  background: var(--table-row-hover);
+}
+
+/* ── Code: a touch more definition ──────────────────────────────────────
+   Inline tokens get a warm, legible surface (kept neutral — there are 100+
+   on a single page); fenced blocks get a hairline to seat them. */
+.content :not(pre) > code {
+  background: var(--code-inline-bg);
+  border-color: var(--code-inline-border);
+  /* When a chip wraps across lines, give every fragment its own padding and
+     rounded corners instead of an open-ended box torn at the line break. */
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.content pre {
+  border: 1px solid var(--code-block-border);
+}
+
+/* ── Docs wayfinding ────────────────────────────────────────────────────
+   The sidebar already marks the active page in clay; mirror that on the
+   TOC's active entry, which the theme only brightens (white vs warm gray —
+   easy to lose in a 40-entry list). Color only, no weight change, so the
+   list never reflows as the reader scrolls. */
+.hextra-toc a.hextra-toc-active {
+  /* The theme pins this color with unlayered !important (gray-900 / gray-50
+     per mode); matching importance at equal specificity lets later source
+     order — this file — decide. */
+  color: var(--acc-600) !important;
+}
+
+/* The floating pen + scroll-to-top buttons (right 2rem, up to 7.5rem tall
+   as a column) sit over the TOC's bottom entries on long pages. Give the
+   TOC's own scroll box matching bottom clearance so its last items can
+   always scroll out from under them. */
+.hextra-toc .hextra-scrollbar {
+  padding-bottom: 7.5rem;
+}
+
+/* ── Chapter grammar — docs pages as chapters of the manual ─────────────
+   The home is the cover; every docs page is a chapter of the same bound
+   book. The cover's drawn devices (tracked series line, dotted leader,
+   mono clay folio, short clay rule) recur here as reading-surface
+   structure: a running head above the H1, a clay rule closing the chapter
+   title, and a ruled crossing where the stock pager was. All of it is
+   flat and still — hairlines and tints only, no lift, no compose-in;
+   the reading room stays quiet per DESIGN.md. */
+
+/* Running head: series ……… folio. Rendered by the breadcrumb override. */
+.doc-runhead {
+  display: flex;
+  align-items: baseline;
+  gap: .85rem;
+  margin: .5rem 0 2.2rem;
+}
+.doc-runhead-series {
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--hx-color-gray-600);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+  transition: color .2s ease;
+}
+.dark .doc-runhead-series { color: var(--hx-color-gray-500); }
+.doc-runhead-series:hover { color: var(--acc-600); }
+.doc-runhead-lead {
+  flex: 1;
+  min-width: 1.5rem;
+  border-bottom: 1px dotted var(--hx-color-gray-400);
+  transform: translateY(-3px);
+}
+.dark .doc-runhead-lead { border-bottom-color: var(--hx-color-gray-600); }
+.doc-runhead-f {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .85rem;
+  /* Small static text: deepen one ramp step (×.84, the Begin-pill recipe)
+     so the folio clears 4.5:1 on ivory; dark's terracotta already does. */
+  color: hsl(var(--primary-hue) var(--primary-saturation) calc(var(--primary-lightness) * .84));
+}
+.dark .doc-runhead-f { color: var(--acc-600); }
+@media (max-width: 480px) {
+  .doc-runhead-series { font-size: .64rem; }
+}
+
+/* The chapter title closes with the cover's short clay rule. Scoped to
+   .content so the cover's own H1 (.mc-title) is untouched. */
+.content h1::after {
+  content: "";
+  display: block;
+  width: 3.5rem;
+  height: 1px;
+  background: var(--acc-600);
+  margin-top: 1.15rem;
+}
+
+/* Chapter crossing: PREVIOUS / NEXT as a ruled index row. The dotted
+   leader bridges the two titles — or runs from the margin when the
+   chapter is first or last. Hover is color-only, like the cover rows. */
+.doc-pager {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.1rem;
+  margin: 3.5rem 0 2rem;
+  padding-top: 1.7rem;
+  border-top: 1px solid var(--card-border);
+}
+.doc-pgr {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  max-width: 46%;
+  text-decoration: none;
+}
+.doc-pgr-next {
+  margin-left: auto;
+  align-items: flex-end;
+  text-align: right;
+}
+.doc-pgr-k {
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--hx-color-gray-600);
+}
+.dark .doc-pgr-k { color: var(--hx-color-gray-500); }
+.doc-pgr-t {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  line-height: 1.35;
+  color: var(--hx-color-slate-900);
+  transition: color .2s ease;
+}
+.dark .doc-pgr-t { color: var(--hx-color-gray-100); }
+.doc-pgr:hover .doc-pgr-t { color: var(--acc-600); }
+.doc-pgr-lead {
+  flex: 1;
+  min-width: 2.5rem;
+  border-bottom: 1px dotted var(--hx-color-gray-400);
+  margin-bottom: .5em;
+}
+.dark .doc-pgr-lead { border-bottom-color: var(--hx-color-gray-600); }
+.doc-runhead-series:focus-visible,
+.doc-pgr:focus-visible {
+  outline: 2px solid var(--acc-600);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+@media (max-width: 640px) {
+  .doc-pager {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.2rem;
+  }
+  .doc-pgr { max-width: none; }
+  .doc-pgr-lead { display: none; }
+}
+@media print {
+  .doc-pager { display: none; }
+}
+
+/* Legacy anchor shims (empty spans planted where a heading's pre-rename
+   id used to live) are plain in-flow targets: without an offset, jumping
+   to one buries the following heading under the 64px sticky navbar.
+   Match Hextra's own heading-anchor offset (-mt-20 = 5rem). */
+.content span[id]:empty {
+  scroll-margin-top: 5rem;
+}
+
+/* Blockquotes: the reading surface allows no border thicker than 1px.
+   Hextra ships border-s-2; thin it to the standard hairline. */
+.content blockquote {
+  border-inline-start-width: 1px;
+  border-inline-start-color: var(--hx-color-gray-300);
+  padding-inline-start: 1.35rem;
+}
+.dark .content blockquote {
+  border-inline-start-color: var(--hx-color-gray-700);
+}
+
+/* Task-list checkboxes: printed form squares — 1px hairline, the ladder's
+   4px corner. Checked state fills clay with a drawn check (mask, so no
+   color is baked into the data URI). */
+.content input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.05em;
+  height: 1.05em;
+  border: 1px solid var(--hx-color-gray-300);
+  border-radius: 4px;
+  background: transparent;
+  vertical-align: -0.18em;
+}
+.dark .content input[type="checkbox"] {
+  border-color: var(--hx-color-gray-700);
+}
+.content input[type="checkbox"]:checked {
+  background: var(--acc-600);
+  border-color: var(--acc-600);
+}
+.content input[type="checkbox"]:checked::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--hx-color-white);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center / 72% no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center / 72% no-repeat;
+}
+
+/* TOC heading joins the label voice — the tracked imprint micro-label,
+   here as chrome wayfinding. Color-only theming; no reflow risk. */
+.hextra-toc .hextra-scrollbar > p:first-child {
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--hx-color-gray-600);
+  margin-bottom: 1rem;
+}
+.dark .hextra-toc .hextra-scrollbar > p:first-child {
+  color: var(--hx-color-gray-500);
+}
+
+/* Footer: rule the band off like everything else, and set the copyright
+   line in the machine-chip's mono voice — the manual's back colophon. */
+.hextra-footer {
+  border-top: 1px solid var(--card-border);
+}
+.hextra-footer .hx\:text-xs {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .02em;
+}
+
+/* Respect reduced-motion for the hover micro-lifts too. */
+@media (prefers-reduced-motion: reduce) {
+  .mc-btn,
+  .mc-btn:hover {
+    transform: none;
   }
 }

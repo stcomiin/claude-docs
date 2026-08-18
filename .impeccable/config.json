@@ -1,0 +1,239 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "layouts/partials/custom/head-end.html"
+        ],
+        "createdAt": "2026-08-17T17:13:46.704Z",
+        "reason": "lightbox img template is intentionally src-less; openLightbox() sets src on click (see same file JS)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(148, 148, 158, 0.5)",
+        "createdAt": "2026-08-17T17:39:05.940Z",
+        "reason": "documented dark-chrome recipe: DESIGN.md Presenter Kit + sidecar Floating Chrome Button; intentionally off-palette in both themes"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(48, 48, 52, 0.92)",
+        "createdAt": "2026-08-17T17:39:05.988Z",
+        "reason": "documented dark-chrome recipe: DESIGN.md Presenter Kit + sidecar Floating Chrome Button; intentionally off-palette in both themes"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#d4d4d8",
+        "createdAt": "2026-08-17T17:39:06.036Z",
+        "reason": "documented dark-chrome recipe: DESIGN.md Presenter Kit + sidecar Floating Chrome Button; intentionally off-palette in both themes"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(66, 66, 72, 0.95)",
+        "createdAt": "2026-08-17T17:39:06.084Z",
+        "reason": "documented dark-chrome recipe: DESIGN.md Presenter Kit + sidecar Floating Chrome Button; intentionally off-palette in both themes"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(180, 180, 190, 0.6)",
+        "createdAt": "2026-08-17T17:39:06.133Z",
+        "reason": "documented dark-chrome recipe: DESIGN.md Presenter Kit + sidecar Floating Chrome Button; intentionally off-palette in both themes"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(40, 40, 44, 0.97)",
+        "files": [
+          "assets/css/custom.css"
+        ],
+        "createdAt": "2026-08-17T17:39:06.180Z",
+        "reason": "tooltip chip of the dark-chrome recipe"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#e5e5e5",
+        "files": [
+          "assets/css/custom.css"
+        ],
+        "createdAt": "2026-08-17T17:39:06.229Z",
+        "reason": "tooltip text / pressed-chip hover in the dark-chrome recipe"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#a1a1aa",
+        "files": [
+          "assets/css/custom.css"
+        ],
+        "createdAt": "2026-08-17T17:39:06.280Z",
+        "reason": "presenter kit annotation UI; DESIGN.md One-Clay Rule exempts presenter ink UI"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#ef4444",
+        "files": [
+          "assets/css/custom.css"
+        ],
+        "createdAt": "2026-08-17T17:39:06.330Z",
+        "reason": "presenter kit annotation UI; DESIGN.md One-Clay Rule exempts presenter ink UI (pen active ring)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(128, 128, 128, 0.6)",
+        "files": [
+          "assets/css/custom.css"
+        ],
+        "createdAt": "2026-08-17T17:39:06.381Z",
+        "reason": "presenter kit annotation UI; DESIGN.md One-Clay Rule exempts presenter ink UI (label editor outline)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "28px",
+        "files": [
+          "assets/css/custom.css"
+        ],
+        "createdAt": "2026-08-17T17:39:06.430Z",
+        "reason": "presenter kit annotation UI; DESIGN.md One-Clay Rule exempts presenter ink UI (annotation label type)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.75rem",
+        "files": [
+          "assets/css/custom.css"
+        ],
+        "createdAt": "2026-08-17T17:39:06.478Z",
+        "reason": "bookmark url + presenter action micro-labels; documented in sidecar"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.7rem",
+        "files": [
+          "assets/css/custom.css"
+        ],
+        "createdAt": "2026-08-17T17:39:06.526Z",
+        "reason": "tooltip micro-label of the dark-chrome recipe"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.7rem",
+        "files": [
+          "layouts/partials/custom/head-end.html"
+        ],
+        "createdAt": "2026-08-17T17:39:06.574Z",
+        "reason": "banner copy-button micro-label, banner chrome"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.875rem",
+        "files": [
+          "assets/css/custom.css"
+        ],
+        "createdAt": "2026-08-17T17:39:06.622Z",
+        "reason": "bookmark card component values documented in sidecar design.json (title)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "0.8rem",
+        "files": [
+          "assets/css/custom.css"
+        ],
+        "createdAt": "2026-08-17T17:39:06.669Z",
+        "reason": "bookmark card component values documented in sidecar design.json (description)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0, 0, 0, 0.15)",
+        "files": [
+          "assets/css/custom.css"
+        ],
+        "createdAt": "2026-08-17T17:39:06.718Z",
+        "reason": "bookmark card component values documented in sidecar design.json (light-mode hairline)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "20px",
+        "files": [
+          "assets/css/custom.css"
+        ],
+        "createdAt": "2026-08-17T17:39:06.765Z",
+        "reason": "projector-mode root bump documented in DESIGN.md Presenter Kit"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0, 0, 0, 0.85)",
+        "files": [
+          "layouts/partials/custom/head-end.html"
+        ],
+        "createdAt": "2026-08-17T17:39:06.815Z",
+        "reason": "lightbox overlay chrome; neutral scrim intentional so surround never tints the viewed image"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(0, 0, 0, 0.4)",
+        "files": [
+          "layouts/partials/custom/head-end.html"
+        ],
+        "createdAt": "2026-08-17T17:39:06.864Z",
+        "reason": "lightbox overlay chrome; neutral scrim intentional so surround never tints the viewed image (image shadow)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "2rem",
+        "files": [
+          "layouts/partials/custom/head-end.html"
+        ],
+        "createdAt": "2026-08-17T17:39:06.918Z",
+        "reason": "lightbox overlay chrome; neutral scrim intentional so surround never tints the viewed image (close glyph)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": ".78rem",
+        "createdAt": "2026-08-17T18:29:55.470Z",
+        "reason": "user locked the Manual Cover render (2026-08-18 surface round, seed 40257c2b); cover type steps of the approved comp — DESIGN.md refresh lands at finish via documenter"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "3.1rem",
+        "createdAt": "2026-08-17T18:29:55.523Z",
+        "reason": "user locked the Manual Cover render (2026-08-18 surface round, seed 40257c2b); cover type steps of the approved comp — DESIGN.md refresh lands at finish via documenter"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "1.05rem",
+        "createdAt": "2026-08-17T18:29:55.573Z",
+        "reason": "user locked the Manual Cover render (2026-08-18 surface round, seed 40257c2b); cover type steps of the approved comp — DESIGN.md refresh lands at finish via documenter"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "1.15rem",
+        "createdAt": "2026-08-17T18:29:55.625Z",
+        "reason": "user locked the Manual Cover render (2026-08-18 surface round, seed 40257c2b); cover type steps of the approved comp — DESIGN.md refresh lands at finish via documenter"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": ".9rem",
+        "createdAt": "2026-08-17T18:29:55.673Z",
+        "reason": "user locked the Manual Cover render (2026-08-18 surface round, seed 40257c2b); cover type steps of the approved comp — DESIGN.md refresh lands at finish via documenter"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": ".85rem",
+        "createdAt": "2026-08-17T18:29:55.724Z",
+        "reason": "user locked the Manual Cover render (2026-08-18 surface round, seed 40257c2b); cover type steps of the approved comp — DESIGN.md refresh lands at finish via documenter"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": ".7rem",
+        "createdAt": "2026-08-18T01:52:20.081Z",
+        "reason": "Chapter-grammar chrome label step (running head, pager labels, TOC heading); will be documented in DESIGN.md typography this session"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": ".64rem",
+        "createdAt": "2026-08-18T01:52:20.130Z",
+        "reason": "Narrow-viewport squeeze of the .7rem chrome label so the running-head series clears the folio at 320-480px; documented alongside it"
+      }
+    ]
+  }
+}

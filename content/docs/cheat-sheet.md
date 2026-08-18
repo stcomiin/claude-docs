@@ -5,7 +5,7 @@ weight: 4
 
 A compact reference for the commands and shortcuts that come up most often during the workshop, organized by the task at hand.
 
-## 🔎 Session hygiene
+## Session hygiene
 
 | Command | Description |
 | --- | --- |
@@ -15,7 +15,7 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `/context` | Show how the context window is being used |
 | `/recap` | Summarize a session when you come back to it |
 
-## 💰 Usage and models
+## Usage and models
 
 | Command | Description |
 | --- | --- |
@@ -26,7 +26,7 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `/effort [level]` | Set effort to low, medium, high (default), xhigh, max, or `ultracode` |
 | `/fast [on\|off]` | Toggle fast mode for Opus 5 and Opus 4.8: up to 2.5× faster, billed at $10 input and $50 output per MTok |
 
-## 🧠 Memory & project setup
+## Memory & project setup
 
 | Command | Description |
 | --- | --- |
@@ -37,7 +37,7 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `/doctor` | Diagnose setup issues and optionally fix them (alias `/checkup`) |
 | `/fewer-permission-prompts` | Scan recent transcripts and propose a read-only allowlist to cut permission prompts |
 
-## ✍️ Writing better prompts
+## Writing better prompts
 
 | Command | Description |
 | --- | --- |
@@ -46,7 +46,7 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `@file` | Add a file or directory to the prompt |
 | `Alt+T` | Toggle extended thinking for the rest of the session |
 
-## ⚡ Mid-task steering
+## Mid-task steering
 
 | Command | Description |
 | --- | --- |
@@ -59,7 +59,7 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `/subtask <prompt>` | Hand a side task to a subagent; its result returns into this conversation |
 | `/background` / `/bg` | Detach the current session to run as a background agent and free the terminal |
 
-## 🔍 Review & refactor
+## Review & refactor
 
 | Command | Description |
 | --- | --- |
@@ -72,7 +72,7 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `/batch <description>` | Split a migration or other repetitive change across worktree agents |
 | `/autofix-pr` | Work through PR review comments automatically |
 
-## 🤖 Automation
+## Automation
 
 | Flag / Command | Description |
 | --- | --- |
@@ -87,7 +87,7 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `/schedule` | Create a cloud routine triggered by a schedule, API call, or webhook |
 | `/sandbox` | Run with file and network isolation |
 
-## 🔌 Extension
+## Extending Claude Code
 
 | Command | Description |
 | --- | --- |
@@ -98,7 +98,7 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `/hooks` | Configure lifecycle hooks such as PreToolUse, PostToolUse, Stop, and Notification |
 | `/install-github-app` | Install Claude GitHub App for PR workflows |
 
-## 📦 Sessions
+## Sessions
 
 | Command | Description |
 | --- | --- |
@@ -111,7 +111,7 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `/export` | Export the session to a file or the clipboard |
 | `/color <name>` | Set the prompt-bar color for easier side-by-side work |
 
-## 🛠️ Useful CLI flags for CI
+## Useful CLI flags for CI
 
 ```bash
 # Set a hard cost cap
@@ -138,7 +138,7 @@ git diff main | claude -p "security review" --model haiku --max-budget-usd 1.00
 
 **CI tip:** combine `--max-budget-usd`, `--max-turns`, and an explicit `--model` so failed or underspecified jobs have clear limits.
 
-## ⌨️ Keyboard shortcuts
+## Keyboard shortcuts
 
 | Shortcut | Action |
 | --- | --- |
@@ -159,4 +159,4 @@ git diff main | claude -p "security review" --model haiku --max-budget-usd 1.00
 
 ---
 
-[← Back to main page](/docs/)
+[← Back to the contents](/docs/)

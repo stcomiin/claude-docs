@@ -1,0 +1,48 @@
+{{ define "main" }}
+{{- /* Go templates strip literal HTML comments, so the direction contract
+     is emitted via safeHTML; hugo.yaml keepComments carries it through
+     --minify into the deployed page. */ -}}
+{{ `<!-- impeccable:direction-contract seed:40257c2b
+THESIS: The home is the title page of a bound field manual; it refuses the stock hero-plus-feature-cards docs landing.
+OWN-WORLD: Warm Terminal — ivory/charcoal grounds, one clay accent from the primary ramp, system faces, 1px hairlines, dotted leaders, mono clay folios, full-bleed seam-free ground with a faint clay bloom (the capped wash+grain band is retired).
+STORY: A developer lands, reads what the workshop is, begins with Setup (01), and returns mid-task through the contents rows or /llms-full.txt.
+FIRST VIEWPORT: centered series line, short clay rule, monumental stacked title, colophon (Apex Builders Collective × Info PC — April 2026), one filled clay Begin pill; the ruled Contents opens at the fold.
+FORM: The Manual Cover — #4 on the ordered surface list, seed 40257c2b, user-locked from the rendered six-PoC hand with a setup-first contents order.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+-->` | safeHTML }}
+{{- /* Hextra's menu.js requires .hextra-sidebar-container on every page for
+     the mobile hamburger drawer; disableSidebar renders it drawer-only.
+     Kept outside .manual-cover-page so its off-canvas transform is never
+     clipped by the cover's overflow. */ -}}
+{{ partial "sidebar.html" (dict "context" . "disableSidebar" true) }}
+<div class="manual-cover-page">
+  <main id="content" class="manual-cover">
+    <header class="mc-cover">
+      <p class="mc-series">{{ .Params.coverline }}</p>
+      <span class="mc-rule" aria-hidden="true"></span>
+      <h1 class="mc-title"><span>Agentic</span> <span>Coding in</span> <span>Terminal</span></h1>
+      <p class="mc-colophon"><strong>Apex Builders Collective × Info&nbsp;PC</strong> <span class="mc-colophon-sep" aria-hidden="true">—</span> {{ .Params.cohort }} cohort</p>
+      <p class="mc-begin"><a class="mc-btn" href="{{ .Params.begin.url | relURL }}">{{ .Params.begin.label }}</a></p>
+    </header>
+    <nav class="mc-contents" aria-label="Contents">
+      <h2 class="mc-contents-h"><span>Contents</span></h2>
+      <ol class="mc-list">
+        {{ range $i, $e := .Params.contents }}
+        <li class="mc-entry-li">
+          <a class="mc-entry" href="{{ $e.url | relURL }}">
+            <span class="mc-entry-t">{{ $e.title }}</span>
+            <span class="mc-entry-n">{{ $e.note }}</span>
+            <span class="mc-entry-lead" aria-hidden="true"></span>
+            <span class="mc-entry-f" aria-hidden="true">{{ printf "%02d" (add $i 1) }}</span>
+          </a>
+        </li>
+        {{ end }}
+      </ol>
+      <a class="mc-machine" href="{{ .Params.machine.path | relURL }}">
+        <span class="mc-machine-l">{{ .Params.machine.label }}</span>
+        <span class="mc-machine-p">{{ .Params.machine.path }}</span>
+      </a>
+    </nav>
+  </main>
+</div>
+{{ end }}
