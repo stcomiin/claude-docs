@@ -199,7 +199,7 @@ function gitSignals(cwd) {
     isRepo: true,
     branch,
     base: diffBase,
-    changedFiles: changed.slice(0, 50),
+    changedFiles: changed,
     changedCount: changed.length,
   };
 }
@@ -289,6 +289,9 @@ function scanTargets(cwd, git) {
 export async function gatherSignals(cwd = process.cwd()) {
   const ctx = loadContext(cwd);
   const git = gitSignals(cwd);
+  // scanTargets must see the full changed-file list: truncating first can drop
+  // every scannable path when a large change sorts vendored dirs (.claude/...)
+  // ahead of the UI files. The 50-file cap is display-only, applied here.
   return {
     setup: {
       hasProduct: ctx.hasProduct,
@@ -299,7 +302,7 @@ export async function gatherSignals(cwd = process.cwd()) {
       platform: extractPlatform(ctx.product),
     },
     critique: { latest: latestCritique(cwd) },
-    git,
+    git: { ...git, changedFiles: git.changedFiles.slice(0, 50) },
     devServer: await devServerSignals(),
     scan: scanTargets(cwd, git),
   };

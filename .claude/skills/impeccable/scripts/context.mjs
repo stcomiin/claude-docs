@@ -61,7 +61,10 @@ const WORKSPACE_DISCOVERY_IGNORED_DIRS = new Set([
   'vendor',
   'vendors',
 ]);
-const VISUAL_SOURCE_DIRS = ['src', 'app', 'pages', 'components', 'site', 'public', 'styles'];
+// assets/layouts/static are where Hugo (and similar generators) keep authored
+// styles and templates; without them a Hugo tree reads as having no incumbent
+// visual implementation.
+const VISUAL_SOURCE_DIRS = ['src', 'app', 'pages', 'components', 'site', 'public', 'styles', 'assets', 'layouts', 'static'];
 const STYLE_EXTENSIONS = new Set(['.css', '.scss', '.sass', '.less', '.styl']);
 const UI_EXTENSIONS = new Set(['.html', '.htm', '.jsx', '.tsx', '.vue', '.svelte', '.astro']);
 const VISUAL_SCAN_FILE_LIMIT = 250;
