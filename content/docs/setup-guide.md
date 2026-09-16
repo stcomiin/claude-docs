@@ -5,17 +5,17 @@ weight: 1
 
 **Agentic Coding in Terminal**: Apex Builders Collective × Info PC
 
-Please finish these steps **before** the workshop. Allow about 15–20 minutes.
+Please finish these steps **before** the workshop. Allow about 15–20 minutes. We are mainly working with Claude Code in this workshop, so most info are Claude Code specific, but most things extrapolate to other harnesses. You can choose to use any agentic coding harness of your preference. 
 
 ---
 
 ## Setup checklist
 
-- [ ] Node.js v22+ installed (for npm/npx tooling like GSD)
+- [ ] Node.js v22+ installed
 - [ ] Git installed
 - [ ] A terminal you're comfortable with
 - [ ] Claude Code installed and working
-- [ ] Codex installed and working
+- [ ] (Optional) Codex installed and working
 - [ ] (Optional) A code editor you like
 
 ---
@@ -91,11 +91,11 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
     - Node.js 22 or later
     - npm (comes with Node.js)
     
-    npm is the default install method here because it also works in air-gapped environments: point npm at your internal registry mirror and install the same way.
+    npm is our recommended default install method here because it also works in air-gapped environments: point npm at your internal registry mirror and install the same way.
     
     ```bash
     # Install globally
-    npm install -g @anthropic-ai/claude-code@2.1.220 # verified 2026-07-27
+    npm install -g @anthropic-ai/claude-code@2.1.273 # verified 2026-09-16
     
     # Verify
     claude --version
@@ -104,9 +104,9 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
     npm install -g @anthropic-ai/claude-code@latest
     ```
     
-2. **Configure the gateway**
+2. **Configure the gateway in `settings.json`**
     
-    Edit `~/.claude/settings.json` and replace the example URL and key. In PowerShell, the same file is `$HOME\.claude\settings.json`. Claude Code sends requests to `ANTHROPIC_BASE_URL` and authenticates them with `ANTHROPIC_AUTH_TOKEN`.
+    Edit `~/.claude/settings.json`(Linux/MacOS), `%USERPROFILE%/.claude/settings.json`(Windows) and replace the example URL and key. In PowerShell, the same file is `$HOME\.claude\settings.json`. Claude Code sends requests to `ANTHROPIC_BASE_URL` and authenticates them with `ANTHROPIC_AUTH_TOKEN`.
     
     **LiteLLM proxy:**
     
@@ -146,9 +146,9 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
     
     Leave `ENABLE_TOOL_SEARCH` out unless your gateway forwards `tool_reference` blocks. If it does, add `"ENABLE_TOOL_SEARCH": "true"` to the `env` object. On Windows, add `"CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe"` only if Claude Code cannot find Git Bash.
 
-3. Run `claude`, then use `/model` to change models. As of 2026-07-27, the Claude Code lineup is Fable 5, Opus 5, Sonnet 5, and Haiku 4.5. These gateway examples use Opus 5. Use `/effort` when you need to change the reasoning depth.
+3. Run `claude` in a terminal, then use `/model` to change models. As of 2026-09-16, the Claude model lineup is Fable 5.1, Opus 5, Sonnet 5, and Haiku 4.5. These gateway examples use Opus 5. Use `/effort` when you need to change the reasoning depth.
 
-### Codex CLI
+### Codex CLI (Optional)
 
 1. **Install with npm**
 
@@ -231,23 +231,39 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
 
 ---
 
-## 3. Install GSD Core
+## 3. Install Skills by Matt Pocock
 
-The hands-on exercise uses [GSD Core](https://github.com/open-gsd/gsd-core). Install version 1.8.0 in the workshop project.
+The hands-on exercise uses some of the agent skills by [Matt Pocock](https://github.com/mattpocock/skills). Set it up in a project folder for this workshop. Follow the install instructions for the harness you are choosing to use.
+
+<details>
+<summary><strong>Claude Code</strong></summary>
 
 ```bash
-# Create a workshop project
-mkdir workshop-project
-cd workshop-project
-git init
-
-# Install GSD Core, verified 2026-07-27
-npx @opengsd/gsd-core@1.8.0
+claude plugins install mattpocock-skills
 ```
 
-Verify by opening Claude Code in that folder and typing `/gsd-help`.
+Or, from inside a session:
 
-The older `get-shit-done-cc` and `@opengsd/get-shit-done-redux` package names are deprecated.
+```
+/plugin install mattpocock-skills
+```
+
+It's in Claude Code's official marketplace, so there's nothing to add first, and updates arrive automatically.
+</details>
+
+
+<details>
+<summary><strong>Codex, and other agents</strong></summary>
+
+```bash
+npx skills@latest add mattpocock/skills
+```
+
+Pick the skills you want, and which coding agents to install them on. **The installer lets you choose which skills to take, so make sure `setup-matt-pocock-skills` is one of them.**
+
+A native Codex plugin is on the roadmap (see [`.agents/adr/0002-ship-as-a-claude-code-plugin.md`](./.agents/adr/0002-ship-as-a-claude-code-plugin.md)).
+
+</details>
 
 ---
 
@@ -282,7 +298,7 @@ For example:
 - A workout logger (exercises, sets, reps, progress)
 - Something completely useless that makes you smile
 
-Pick something you can describe in one sentence. The exercise is about the workflow, not a finished product.
+Pick something you can describe in one sentence. The exercise is about the workflow, so don't rack your brain thinking of an idea.
 
 ---
 
@@ -291,8 +307,7 @@ Pick something you can describe in one sentence. The exercise is about the workf
 If you get stuck on any step:
 
 1. Copy the error message
-2. Paste it into Claude or ChatGPT and ask for help
-3. If you're still stuck, ask in the workshop group chat. Someone may already have seen the same error.
+2. Paste it into Claude or ChatGPT and ask for help.
 
 ---
 
