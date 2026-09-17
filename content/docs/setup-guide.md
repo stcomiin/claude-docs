@@ -26,7 +26,7 @@ Install these first.
 
 ### Node.js (v22 or higher)
 
-Download the current LTS release from [nodejs.org](https://nodejs.org/). It includes npm and meets the Node.js 22+ requirement for Claude Code and the GSD installer below.
+Download the current LTS release from [nodejs.org](https://nodejs.org/). It includes npm and meets the Node.js 22+ requirement for Claude Code. The `npx skills` installer in step 3 needs Node.js too.
 
 Verify after install:
 
@@ -156,7 +156,7 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
     
     Leave `ENABLE_TOOL_SEARCH` out unless your gateway forwards `tool_reference` blocks. If it does, add `"ENABLE_TOOL_SEARCH": "true"` to the `env` object. On Windows, add `"CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe"` only if Claude Code cannot find Git Bash.
 
-3. Run `claude` in a terminal, then use `/model` to change models. As of 2026-09-16, the Claude model lineup is Fable 5.1, Opus 5, Sonnet 5, and Haiku 4.5. These gateway examples use Opus 5. Use `/effort` when you need to change the reasoning depth.
+3. Run `claude` in a terminal, then use `/model` to change models. As of 2026-09-16, the Claude model lineup is Fable 5.1, Opus 5, Sonnet 5, and Haiku 4.5. These gateway examples use Opus 4.8 with the 1M context window. Use `/effort` when you need to change the reasoning depth.
 
 ### Codex CLI (Optional)
 
@@ -249,7 +249,7 @@ The hands-on exercise uses some of the agent skills by [Matt Pocock](https://git
 <summary><strong>Claude Code</strong></summary>
 
 ```bash
-claude plugins install mattpocock-skills
+claude plugin install mattpocock-skills
 ```
 
 Or, from inside a session:
@@ -271,7 +271,7 @@ npx skills@latest add mattpocock/skills
 
 Pick the skills you want, and which coding agents to install them on. **The installer lets you choose which skills to take, so make sure `setup-matt-pocock-skills` is one of them.**
 
-A native Codex plugin is on the roadmap (see [`.agents/adr/0002-ship-as-a-claude-code-plugin.md`](./.agents/adr/0002-ship-as-a-claude-code-plugin.md)).
+A native Codex plugin is on the roadmap (see [`.agents/adr/0002-ship-as-a-claude-code-plugin.md`](https://github.com/mattpocock/skills/blob/main/.agents/adr/0002-ship-as-a-claude-code-plugin.md)).
 
 </details>
 

@@ -10,7 +10,7 @@ weight: 2
 
 ## Installation & Configuration
 
-> For step-by-step installation instructions (API key setup, Claude Code, Codex, GSD), see the **[Pre-Workshop Setup Guide](/docs/setup-guide/)**.
+> For step-by-step installation instructions (API key setup, Claude Code, Codex, Matt Pocock's skills), see the **[Pre-Workshop Setup Guide](/docs/setup-guide/)**.
 
 ### Claude Products Overview
 
@@ -319,7 +319,7 @@ The quality of your prompt is the biggest lever you have on output quality. Thes
 **Commands for running Claude with fewer interruptions**
 
 - The default "approve every action" flow is safe but slow, while `--dangerously-skip-permissions` is fast but genuinely dangerous. Auto Mode is the middle path.
-- Auto mode appears in the `Shift+Tab` cycle once it is available for your account: `default → acceptEdits → plan → auto`.
+- Auto mode appears in the `Shift+Tab` cycle if it is available for your account: `default → acceptEdits → plan → auto`.
     
     ```bash
     # Start a session directly in auto mode
@@ -353,7 +353,7 @@ Only user settings can select auto mode as the default; project and local settin
 
 **Availability:**
 
-- It is available on all plans. On Team and Enterprise, an Owner must enable it in the admin settings first. Only works with models newer than Opus 4.7. It also works with Amazon Bedrock, Google Cloud's Agent Platform, and Microsoft Foundry when you use Sonnet 5, Opus 4.7 or later, or Fable 5. Foundry still defaults to Sonnet 4.5, so switch models there first. Admins can disable it across the organization through managed settings (`disableAutoMode: "disable"`).
+- It is available on all plans, and on Team and Enterprise it is on by default. On the Anthropic API it needs Opus 4.6 or later, Sonnet 4.6 or later, or a Fable model. On Amazon Bedrock, Google Cloud's Agent Platform, and Microsoft Foundry it needs Sonnet 5, Opus 4.7 or later, or a Fable model. Foundry still defaults to Sonnet 4.5, so switch models there first. Admins can disable it across the organization through managed settings (`disableAutoMode: "disable"`).
 
 
 
@@ -392,7 +392,7 @@ Double-tap `Esc` on an empty input to open the rewind menu. Scroll back with `�
 ### Visual Inputs
 
 - Keystroke: `Alt+V`
-- Most AI harnesses accepts **screenshots and mockups** as direct inputs for the model: drag in a Figma export, a browser screenshot, or even a hand-drawn sketch.
+- Most AI harnesses accept **screenshots and mockups** as direct inputs for the model: drag in a Figma export, a browser screenshot, or even a hand-drawn sketch.
 - Great for: "Make this component look like this", "Why is this UI layout broken?", "Reproduce this UI".
 - Combine with `@` file references to point at the code you want changed alongside the visual.
 
