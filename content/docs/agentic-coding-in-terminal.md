@@ -392,7 +392,7 @@ Double-tap `Esc` on an empty input to open the rewind menu. Scroll back with `â†
 ### Visual Inputs
 
 - Keystroke: `Alt+V`
-- Claude Code and Codex accepts **screenshots and mockups** as direct inputs for the model: drag in a Figma export, a browser screenshot, or even a hand-drawn sketch.
+- Most AI harnesses accepts **screenshots and mockups** as direct inputs for the model: drag in a Figma export, a browser screenshot, or even a hand-drawn sketch.
 - Great for: "Make this component look like this", "Why is this UI layout broken?", "Reproduce this UI".
 - Combine with `@` file references to point at the code you want changed alongside the visual.
 
