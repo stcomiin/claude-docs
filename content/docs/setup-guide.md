@@ -5,7 +5,7 @@ weight: 1
 
 **Agentic Coding in Terminal**: Apex Builders Collective × Info PC
 
-Please finish these steps **before** the workshop. Allow about 15–20 minutes. We are mainly working with Claude Code in this workshop, so most info are Claude Code specific, but most things extrapolate to other harnesses. You can choose to use any agentic coding harness of your preference. 
+Please finish these steps **before** the workshop. Allow about 15–20 minutes. **We are mainly working with Claude Code in this workshop**, so most info are Claude Code specific, but most things extrapolate to other harnesses. You can choose to use any agentic coding harness of your preference for the workshop.
 
 ---
 
@@ -115,14 +115,19 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
       "env": {
         "ANTHROPIC_BASE_URL": "https://your-litellm-proxy.example.com",
         "ANTHROPIC_AUTH_TOKEN": "sk-your-api-key",
-        "ANTHROPIC_MODEL": "claude-opus-5",
-        "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5",
-        "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-opus-5",
-        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-opus-5",
-        "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-5",
+        "ANTHROPIC_MODEL": "claude-opus-4-8[1m]",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-8[1m]",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-opus-4-8[1m]",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-opus-4-8[1m]",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-4-8[1m]",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-        "CLAUDE_CODE_EFFORT_LEVEL": "max"
-      }
+        "CLAUDE_CODE_EFFORT_LEVEL": "max",
+        "CLAUDE_CODE_FORK_SUBAGENT": "0",
+        "CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
+        "CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING": "1"
+      },
+      "cleanupPeriodDays": 3650,
+      "autoCompactEnabled": false
     }
     ```
     
@@ -133,14 +138,19 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
       "env": {
         "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
         "ANTHROPIC_AUTH_TOKEN": "sk-or-your-openrouter-key",
-        "ANTHROPIC_MODEL": "anthropic/claude-opus-5",
-        "ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic/claude-opus-5",
-        "ANTHROPIC_DEFAULT_SONNET_MODEL": "anthropic/claude-opus-5",
-        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-opus-5",
-        "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-opus-5",
+        "ANTHROPIC_MODEL": "anthropic/claude-opus-4-8[1m]",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic/claude-opus-4-8[1m]",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "anthropic/claude-opus-4-8[1m]",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-opus-4-8[1m]",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-opus-4-8[1m]",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-        "CLAUDE_CODE_EFFORT_LEVEL": "max"
-      }
+        "CLAUDE_CODE_EFFORT_LEVEL": "max",
+        "CLAUDE_CODE_FORK_SUBAGENT": "0",
+        "CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
+        "CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING": "1"
+      },
+      "cleanupPeriodDays": 3650,
+      "autoCompactEnabled": false
     }
     ```
     
