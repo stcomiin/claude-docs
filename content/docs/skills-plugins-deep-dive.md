@@ -580,6 +580,7 @@ This is useful when a phase has several separable parts. It is less useful when 
 
 ### Two layers of verification
 
+
 During `/gsd-execute-phase`, a verifier checks the completed phase against its goals and writes `VERIFICATION.md`. If it finds gaps, run `/gsd-plan-phase N --gaps`, followed by `/gsd-execute-phase N --gaps-only`, to close them.
 
 `/gsd-verify-work N` then walks through user acceptance testing and writes the phase's UAT file. If you report issues, it creates fix plans.

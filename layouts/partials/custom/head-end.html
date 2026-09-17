@@ -55,6 +55,19 @@
   .lightbox.is-open .lightbox-img {
     transform: scale(1);
   }
+  /* SVG diagrams are vectors, so scale them up to fill the viewport instead of
+     pinning to their small intrinsic size (max-width/max-height only ever shrink).
+     object-fit keeps the aspect ratio. Gated to .svg via the is-vector class so
+     raster screenshots are never upscaled past their pixels and blurred. */
+  .lightbox-img.is-vector {
+    width: 95vw;
+    height: 92vh;
+    max-width: none;
+    max-height: none;
+    object-fit: contain;
+    border-radius: 0;
+    box-shadow: none;
+  }
   .lightbox-close {
     position: absolute;
     top: 1rem;
@@ -182,6 +195,8 @@ document.addEventListener("DOMContentLoaded", function () {
   function openLightbox(src, alt) {
     lbImg.src = src;
     lbImg.alt = alt || "";
+    // Vectors (SVG) scale up cleanly, so let them fill the viewport; raster stays capped.
+    lbImg.classList.toggle("is-vector", /\.svg(?:[?#]|$)/i.test(src));
     overlay.classList.add("is-open");
     document.body.style.overflow = "hidden";
   }

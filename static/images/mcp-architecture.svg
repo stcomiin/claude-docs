@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="500" viewBox="0 0 980 500" role="img" aria-labelledby="title description">
+  <title id="title">MCP connects an AI application to local and remote servers</title>
+  <desc id="description">Claude Code is the host. A separate client connects to each server: stdio for a local process, or Streamable HTTP for a remote service. Servers expose tools, resources, and prompts.</desc>
+  <!-- Adapted from https://modelcontextprotocol.io/docs/learn/architecture -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#b45937"/>
+    </marker>
+  </defs>
+  <rect width="980" height="500" rx="12" fill="#faf9f5"/>
+  <g font-family="system-ui, -apple-system, Segoe UI, sans-serif" fill="#211f1a">
+    <text x="40" y="52" font-size="28" font-weight="700">MCP: one host, a client for each server</text>
+    <text x="40" y="84" font-size="17" fill="#635f55">The host manages the connections. Servers provide external capabilities.</text>
+
+    <rect x="28" y="122" width="370" height="302" rx="12" fill="#f2efe6" stroke="#b9b5a7" stroke-width="2"/>
+    <text x="55" y="158" font-size="21" font-weight="600">Claude Code</text>
+    <text x="55" y="183" font-size="16" fill="#635f55">MCP host (AI application)</text>
+
+    <rect x="58" y="208" width="290" height="58" rx="8" fill="#fffdfa" stroke="#c15f3c" stroke-width="2"/>
+    <text x="203" y="244" text-anchor="middle" font-size="19" font-weight="600">MCP client A</text>
+    <rect x="58" y="325" width="290" height="58" rx="8" fill="#fffdfa" stroke="#c15f3c" stroke-width="2"/>
+    <text x="203" y="361" text-anchor="middle" font-size="19" font-weight="600">MCP client B</text>
+
+    <path d="M 358 237 H 570" fill="none" stroke="#b45937" stroke-width="2.5" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+    <rect x="422" y="196" width="85" height="26" rx="4" fill="#faf9f5"/>
+    <text x="464" y="215" text-anchor="middle" font-size="16" fill="#635f55">stdio</text>
+    <path d="M 358 354 H 570" fill="none" stroke="#b45937" stroke-width="2.5" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+    <rect x="402" y="313" width="169" height="26" rx="4" fill="#faf9f5"/>
+    <text x="486" y="332" text-anchor="middle" font-size="16" fill="#635f55">Streamable HTTP</text>
+
+    <rect x="580" y="195" width="360" height="84" rx="10" fill="#fffdfa" stroke="#b9b5a7" stroke-width="2"/>
+    <text x="602" y="229" font-size="21" font-weight="600">Local MCP server</text>
+    <text x="602" y="255" font-size="16" fill="#635f55">Example: filesystem process</text>
+    <rect x="580" y="312" width="360" height="84" rx="10" fill="#fffdfa" stroke="#b9b5a7" stroke-width="2"/>
+    <text x="602" y="346" font-size="21" font-weight="600">Remote MCP server</text>
+    <text x="602" y="372" font-size="16" fill="#635f55">Example: hosted service</text>
+
+    <text x="40" y="467" font-size="17" fill="#635f55">Servers expose tools, resources, and prompts through the same protocol.</text>
+  </g>
+</svg>

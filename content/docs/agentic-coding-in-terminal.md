@@ -77,6 +77,8 @@ Before we go deeper, here are some commands / CLI flags that are useful.
 
 ## Stop/Resume/Continue Claude Code conversations
 
+{{< figure src="/images/claude-session-continuity.svg" width="560" height="280" loading="lazy" alt="Resuming appends messages to the same session; forking branches its history into a new session ID." caption="Resume to continue a conversation; fork to explore a separate direction." attr="Claude Code docs" attrlink="https://code.claude.com/docs/en/how-claude-code-works#resume-or-fork-sessions" >}}
+
 | Action | Command | Remarks |
 | --- | --- | --- |
 | Stop a conversation | Ctrl + C twice in the session until the session is exited | All session history is stored as .jsonl files in .claude folder in User Directory. `~/.claude/projects/<folder name>` |
@@ -84,53 +86,77 @@ Before we go deeper, here are some commands / CLI flags that are useful.
 
 ### Useful Claude Code Customisation
 
-1. ccstatusline
+#### 1. ccstatusline
     
-    Use ccstatusline to keep the session metrics you care about in the status bar.
-    GitHub *repo:* https://github.com/sirmalloc/ccstatusline
-    
-    ```bash
-    npx -y ccstatusline@latest
-    ```
-    
-    Install ccstatusline via npx
-    
-    Sample Config:
-    
-    Line 1:  Model | Context Length | Context % (usable) | Git Branch | Skills | Thinking Effort 
-    
-    ![ccstatusline sample](/images/statusline-sample.png)
-    
-    - Installation step by step:
-        1. Run `npx -y ccstatusline@latest` and select `Edit Lines` option (via pressing enter)
+Use ccstatusline to keep the session metrics you care about in the status bar.
+GitHub *repo:* https://github.com/sirmalloc/ccstatusline
+
+```bash
+npx -y ccstatusline@latest
+```
+
+Install ccstatusline via npx
+
+Sample Config:
+
+Line 1:  Model | Context Length | Context % (usable) | Git Branch | Skills | Thinking Effort 
+
+![ccstatusline sample](/images/statusline-sample.png)
+
+- Installation step by step:
+    1. Run `npx -y ccstatusline@latest` and select `Edit Lines` option (via pressing enter)
+        
+        ![Step 1](/images/statusline-step1.png)
+        
+    2. Select which line to add 
+        
+        ![Step 2](/images/statusline-step2.png)
+        
+    3. Decide where to put (tip: use Separator to cleanly separate widgets)
+        
+        ![Step 3](/images/statusline-step3.png)
+        
+    4. Press (a) to add via picker and start typing to search (e.g thinking)
+        
+        ![Step 4](/images/statusline-step4.png)
+        
+    5. Press `Esc` to return to Main Menu and select enter on `Install to Claude Code` or `Save & Exit` option
+        
+        ![Step 5](/images/statusline-step5.png)
             
-            ![Step 1](/images/statusline-step1.png)
-            
-        2. Select which line to add 
-            
-            ![Step 2](/images/statusline-step2.png)
-            
-        3. Decide where to put (tip: use Separator to cleanly separate widgets)
-            
-            ![Step 3](/images/statusline-step3.png)
-            
-        4. Press (a) to add via picker and start typing to search (e.g thinking)
-            
-            ![Step 4](/images/statusline-step4.png)
-            
-        5. Press `Esc` to return to Main Menu and select enter on `Install to Claude Code` or `Save & Exit` option
-            
-            ![Step 5](/images/statusline-step5.png)
-            
-2. Windows Toast Notification 
+#### 2. Changing Output Style
     
-    Native Windows toast notifications for Claude Code hook events. Shows which project triggered the notification so you can find the right VS Code window when running multiple sessions.
+The default prose style of Claude models is overly convoluted and full of AI-slop. You can tweak how the model replies by setting custom output styles. There are 5 in-built styles available, but you can also add custom styles: create a markdown file, and place it in `~/.claude/output-styles`.
+
+One such custom style that can be used is pstack's [unslop skill](https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md). Add an extra front-matter field in the file `keep-coding-instructions: true` to preserve software engineering parts of the system prompt.
+
+Then reload the Claude Code session and enter the command below to activate the style:
+
+```
+/output-style unslop
+```
+
+Or set it as default output style in `settings.json`:
+
+```
+{ 
+  "env": {
+    xxx
+  },
+  "outputStyle": "unslop"
+}
+```
+
+
+#### 3. Windows Toast Notification 
     
-    See guide: https://github.com/stcomiin/claude-helpers
-    
-    Sample: 
-    
-    ![Toast notification sample](/images/statusline-toast.png)
+Native Windows toast notifications for Claude Code hook events. Shows which project triggered the notification so you can find the right VS Code window when running multiple sessions.
+
+See guide: https://github.com/stcomiin/claude-helpers
+
+Sample: 
+
+![Toast notification sample](/images/statusline-toast.png)
     
 
 ## But first, let's just make something (Hands-on: 15 minutes)
@@ -161,6 +187,8 @@ Please open Claude Code, and ask it to give you a CRUD app of some kind.
 
 Agentic coding tools like Claude Code maintain context across a session, but understanding **where** memory lives, and how to shape it, is key to getting consistent, high-quality results.
 
+{{< figure src="/images/context-engineering.png" width="2292" height="1290" loading="lazy" alt="A single prompt produces a response; an agent repeatedly selects instructions, documents, tools, memory, and history, then feeds tool results into the next turn." caption="Context engineering means selecting what the model sees at each turn." attr="Anthropic" attrlink="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" >}}
+
 ### CLAUDE.md and AGENTS.md
 
 - **`CLAUDE.md`** is a special file Claude Code reads automatically when it starts in a project. Use it to encode persistent instructions: coding conventions, architecture decisions, preferred libraries, things Claude should never do, and so on. The contents of this is injected at the start of the conversation, in one of the many system prompts.
@@ -168,8 +196,6 @@ Agentic coding tools like Claude Code maintain context across a session, but und
 - **Claude Code reads `CLAUDE.md`, not `AGENTS.md`, directly.** If another tool already uses `AGENTS.md`, import it from `CLAUDE.md` with `@AGENTS.md` or link the two files with `ln -s AGENTS.md CLAUDE.md`. `/init` reads existing Cursor and Copilot rule files by default; with `CLAUDE_CODE_NEW_INIT=1`, it also incorporates `AGENTS.md` and `.windsurfrules`.
 - Think of these files as your **onboarding doc for the AI**, the same way you'd brief a new contractor on how your codebase works, but not quite. Normally briefs would be done using actual documentation. CLAUDE.md is more for project specific stuff.
 - Good things to put in `CLAUDE.md`:
-    - Tech stack and versions
-    - Folder structure conventions
     - Test framework and how to run tests
     - Linting / formatting rules
     - Anything the agent keeps getting wrong
@@ -177,7 +203,7 @@ Agentic coding tools like Claude Code maintain context across a session, but und
 - **Do not use /init to initialize the CLAUDE.md**. Automatically generated files are overly verbose and may harm model performance. Only add things specific to your codebase that the agent should be aware of. If something is general knowledge, assume the model knows it. Reinforce in CLAUDE.md only if the model does not remember or repeatedly does something wrong.
     - If you write one by hand, keep it tight: specific build commands, test runners, and hard constraints only. Skip codebase overviews (agents discover structure on their own just as well, or ask it to use codebase graph DB MCPs covered below)
     - **Paper that discusses auto-generated context files - Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?** [https://arxiv.org/abs/2602.11988](https://arxiv.org/abs/2602.11988)
-- Example of actual CLAUDE.md
+- Example of actual CLAUDE.md from Opus 4.6 days
 
 ```markdown
 ## TOP RULES
@@ -219,16 +245,14 @@ Claude Code has some built-in skills to manage CLAUDE.md
 
 Now that you understand how context and memory work, let's put it into practice. Open the CRUD app you built earlier and create a `CLAUDE.md` file in the project root.
 
-Your `CLAUDE.md` should include:
-
-- **Folder structure**: Where routes, components, models, etc. live
-- **Top rules**: At least 3 rules specific to your code that the agent must always follow (e.g. "always add Function Docstring to functions", "never use `any` types", "run tests before committing")
 
 Test it out! Prompt Claude Code to add a feature. Check whether it follows the rules that you set. If it doesn't, tweak the file. 
 
 > 😜 Example md file: "Always reply in Singlish!" 
 
 ### Compaction & Context Window Management
+
+![Prompt caching across turns: each turn resends the full context, the unchanged prefix reads from cache, and changing the system prompt reprocesses everything after it](/images/prompt-caching-prefix.svg)
 
 - LLMs have a finite context window. In long sessions, older conversation turns get summarised ("compacted") to free up context, which is not desirable.
 - What goes into the context? Visualize it - [https://code.claude.com/docs/en/context-window](https://code.claude.com/docs/en/context-window)
@@ -241,7 +265,12 @@ Test it out! Prompt Claude Code to add a feature. Check whether it follows the r
     - Use `/clear` to reset context without restarting (when hitting ~300k context)
     - Keep `CLAUDE.md` tight and relevant: it's loaded at the start of every session, so bloating it costs precious tokens
     - Use the `/handoff` skill from Matt Pocock to generate a handoff document when exceeding the smart zone context limit https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md
-    - Or, Just ask it to create a handoff document. `Create a detailed handoff file with the remaining tasks and context that is needed for another coding agent session to continue from where you have left off. Be as detailed as possible with the explicit requirements and verification required`
+    - Or, Just ask it to create a handoff document. 
+    ```
+    Create a detailed handoff file with the remaining tasks and context that is needed for another coding 
+    agent session to continue from where you have left off. 
+    Be as detailed as possible with the explicit requirements and verification required
+    ```
     - Use /context to check what's in your current context
 - If the agent starts "forgetting" earlier decisions or stops following rules in `CLAUDE.md`, it's often a sign the model is way past its smart zone, create a handoff document and continue in a new session
 
@@ -249,9 +278,9 @@ Test it out! Prompt Claude Code to add a feature. Check whether it follows the r
 
 | Command | What it does |
 | --- | --- |
-| `/context` | Visual grid showing how your context window is allocated |
-| `/compact [focus]` | Compress conversation into a summary. Pass focus instructions to steer what's preserved. Do not use in Claude Code. |
 | `/clear` | Wipe conversation entirely. CLAUDE.md stays loaded. Use when switching to an unrelated task |
+| `/context` | Visual grid showing how your context window is allocated |
+| `/compact [focus]` | Compress conversation into a summary. Pass focus instructions to steer what's preserved. **Do not use in Claude Code**. |
 
 
 
@@ -270,16 +299,18 @@ The quality of your prompt is the biggest lever you have on output quality. Thes
 ### Prompt Style
 
 - Do not use emotion when responding to the model for coding tasks, like "Why are you so stupid, just do this xxxxx" or "You're so dumb, do it properly now". From our experience this tends to disrupt the output quality of the model for code.
-- Narrate all requirements and details thoroughly in the prompt if already known
+- Narrate all requirements and details thoroughly in the prompt if already known, voice mode helps
+- [Provide specific context](https://code.claude.com/docs/en/best-practices#provide-specific-context-in-your-prompts). Including an explicit success condition (passing tests, a specific output, a diff that meets a criterion) lets the agent self-verify and reduces back-and-forth.
+
 
 ### Modes
 
-#### Plan Mode
+#### Planning
 
 
 - Before Claude starts writing or changing code, ask it to **plan first**: `"Think through the approach before making any changes."`
 - In Claude Code, you can explicitly enter **plan mode** to get a structured breakdown of what it intends to do. Review it, push back, then approve execution.
-- Use plan mode when a task spans several files or could make changes that are hard to undo.
+- Besides the in-built plan mode, there are other planning skills or workflows that could be used, like [`/grill-with-docs`](https://github.com/mattpocock/skills/tree/main/skills/engineering/grill-with-docs) from Matt Pocock's skills repo.
 - A good plan includes: what files will be changed, what the success condition looks like, and any risks or unknowns.
 - Press `Shift+Tab` to cycle through `default`, `acceptEdits`, and `plan`. If auto mode is available for your account, it appears as a fourth option.
 
@@ -322,10 +353,7 @@ Only user settings can select auto mode as the default; project and local settin
 
 **Availability:**
 
-- It is available on all plans. On Team and Enterprise, an Owner must enable it in the admin settings first.
-- Only works with models newer than Opus 4.7
-- It also works with Amazon Bedrock, Google Cloud's Agent Platform, and Microsoft Foundry when you use Sonnet 5, Opus 4.7 or later, or Fable 5. Foundry still defaults to Sonnet 4.5, so switch models there first.
-- Admins can disable it across the organization through managed settings (`disableAutoMode: "disable"`).
+- It is available on all plans. On Team and Enterprise, an Owner must enable it in the admin settings first. Only works with models newer than Opus 4.7. It also works with Amazon Bedrock, Google Cloud's Agent Platform, and Microsoft Foundry when you use Sonnet 5, Opus 4.7 or later, or Fable 5. Foundry still defaults to Sonnet 4.5, so switch models there first. Admins can disable it across the organization through managed settings (`disableAutoMode: "disable"`).
 
 
 
@@ -387,27 +415,13 @@ Double-tap `Esc` on an empty input to open the rewind menu. Scroll back with `�
 | `@file` | Inline file/directory reference |
 | `Alt + P` | Switch Model |
 
-### Prompt Crafting with Constraints
 
-Good agentic prompts answer three questions:
-
-1. **What do I want?** The task, clearly stated
-2. **What are the constraints?** What must be true (language, style, must not break X)
-3. **How does the agent know it succeeded?** A concrete definition of done, verifiable
-
-**Example, vague:**
-
-> "Refactor the auth module"
-
-**Example, better:**
-
-> "Refactor `src/auth/session.ts` to use the new `UserSession` type from `@src/types/user.ts`. Do not change the public API. All existing tests in `auth.test.ts` must still pass. Add JSDoc comments to exported functions."
-
-Including an explicit success condition (passing tests, a specific output, a diff that meets a criterion) lets the agent self-verify and reduces back-and-forth.
 
 ## Tools: What Claude Code Can Actually Do
 
 When Claude Code acts on your codebase, it calls **tools**. Tools that only read don't need permission; tools that modify things do (unless pre-approved or in auto mode).
+
+{{< figure src="/images/claude-agentic-loop.svg" width="720" height="280" loading="lazy" alt="A user prompt starts a loop of gathering context, taking action, and checking results, with opportunities for the user to steer." caption="Tool results inform the next step: inspect, act, check, and repeat." attr="Claude Code docs" attrlink="https://code.claude.com/docs/en/how-claude-code-works#the-agentic-loop" >}}
 
 ### Selected Built-in Tools
 
@@ -440,6 +454,8 @@ These are the tools used most often in the workshop. See the [tools reference](h
 - **MCP tools** (Chrome DevTools, Playwright, Context7, etc.) show up alongside built-in tools. Check with `/mcp`.
 
 ### Permission Rules
+
+![Permission decision flow: a tool request passes through hooks, deny rules, ask rules, permission mode, allow rules, then canUseTool before it executes or is blocked](/images/permissions-flow.svg)
 
 Pre-approve tools via `/permissions` or `settings.json` to reduce prompts:
 
@@ -514,20 +530,6 @@ use codex to code review the entire codebase/git diffs, with focus areas on:
 
 Other review commands installed in this workshop setup include `/everything-claude-code:code-review`, `/codex:adversarial-review`, and `/bmad-code-review`.
 
-The code review workflow above has been incorporated into a skill for use. Install the skill from [https://github.com/stcomiin/claude-helpers](https://github.com/stcomiin/claude-helpers), `/team-code-review` 
-
-```text
-Main Thread: Scope → Dispatch 4 parallel stages → Consolidate → Devil's Advocate → Final Output
-                          │
-                          ├── Stage 1: Agent Team Debate (simplify)
-                          ├── Stage 2: Codex Review (GPT-6-Astra)
-                          ├── Stage 3: CC-Native Review (code-reviewer)
-                          └── Stage 4: BMAD Adversarial Review (bmad-code-review)
-                                            ↓
-                          Stage 5: Consolidation (main thread)
-                                            ↓
-                          Stage 6: Devil's Advocate Challenge (devils-advocate)
-```
 
 ### Working with Other Agents (Sub-agents & Agent Teams)
 
@@ -589,6 +591,8 @@ Availability: all paid plans, the API, Amazon Bedrock, Google Cloud's Agent Plat
 Read more: [code.claude.com/docs/en/workflows](https://code.claude.com/docs/en/workflows)
 
 ### Hooks
+
+![Hook resolution: a Bash tool call fires PreToolUse, then your matcher and if-condition decide whether the hook command runs and denies the tool or lets it proceed](/images/hook-resolution.svg)
 
 - Hooks receive JSON at Claude Code lifecycle events, run your handler, and can return event-specific output. A `PreToolUse` hook can allow, deny, or ask before a tool runs. Unlike instructions in CLAUDE.md, hook checks are enforced by the runtime.
 - Hooks block the current event by default, so keep them quick. A command hook that does not need to affect the current action can set `"async": true`.
@@ -700,6 +704,8 @@ You should see the hook deny the request with a reason like `🛡️ [env-file] 
 
 ## MCP
 
+{{< figure src="/images/mcp-architecture.svg" width="980" height="500" loading="lazy" alt="Claude Code hosts one MCP client per server connection: stdio connects to a local process, while Streamable HTTP connects to a remote server." caption="The same host can connect to both local and remote MCP servers." attr="Adapted from the MCP architecture overview" attrlink="https://modelcontextprotocol.io/docs/learn/architecture" >}}
+
 - **Model Context Protocol (MCP)** is a standard way for an AI agent to talk to external tools and data sources via "servers" (think: APIs for agents)
 - It turns a chat model into something that can *do work* (read files, query systems, take actions), with clearer boundaries and permissions than ad-hoc scripts.
 - Caveat: if both MCP and CLI version of the same tool exists, choose the CLI always (for eg, GitHub MCP and CLI both exist). Models are better trained for CLI-style tool use interaction, like running `--help` to get more information about how to use other CLIs
@@ -761,6 +767,38 @@ use the chrome devtools mcp, open duckduckgo and search for the best claude code
 ## Skills
 
 Agent Skills are folders of instructions, scripts, and resources that agents can discover and use to do things more accurately and efficiently.
+
+Diagrams from Anthropic's [Agent Skills article](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills). Click to enlarge.
+
+### Anatomy of a skill
+
+Metadata describes when to use a skill; the Markdown body provides instructions.
+
+{{< figure src="/images/agent-skills-anatomy.jpg" width="1650" height="929" loading="lazy" alt="A SKILL.md file with YAML frontmatter and Markdown instructions." >}}
+
+Link supporting files from `SKILL.md` so they can be read separately.
+
+{{< figure src="/images/agent-skills-supporting-files.jpg" width="1650" height="1069" loading="lazy" alt="SKILL.md links to reference.md and forms.md." >}}
+
+### Progressive disclosure
+
+Load descriptions first, instructions when selected, and supporting files as needed.
+
+{{< figure src="/images/agent-skills-progressive-disclosure.jpg" width="2292" height="673" loading="lazy" alt="Three levels: metadata, instructions, and supporting files." caption="Illustrative token counts. Files remain on disk until needed; loaded content still consumes context." >}}
+
+### Skills in the context window
+
+A PDF request triggers `SKILL.md`, then the form-filling reference.
+
+{{< figure src="/images/agent-skills-context-window.jpg" width="1650" height="929" loading="lazy" alt="The PDF request, skill instructions, and form reference enter context in sequence." >}}
+
+### Skills and code execution
+
+Instructions can invoke bundled scripts for repeatable operations.
+
+{{< figure src="/images/agent-skills-code-execution.jpg" width="1650" height="929" loading="lazy" alt="Form instructions point to a Python helper for extracting PDF fields." >}}
+
+For a worked authoring example, see [Creating your own skills](/docs/skills-plugins-deep-dive/#creating-your-own-skills).
 
 See the following Github repo for living doc: https://github.com/luongnv89/claude-howto/blob/6d1e0ae4afbb95305e10d414ae90fcf3d74b9c4e/03-skills/README.md
 
