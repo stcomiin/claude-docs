@@ -10,7 +10,7 @@ Workshop materials for building with Claude Code, Codex, GSD, and BMAD from the 
 
 | Page | Use it for |
 | --- | --- |
-| [Pre-Workshop Setup Guide](/docs/setup-guide/) | API keys, local tools, Claude Code, Codex, and GSD setup. |
+| [Pre-Workshop Setup Guide](/docs/setup-guide/) | API keys, local tools, Claude Code, Codex, and Matt Pocock's skills. |
 | [Agentic Coding in Terminal](/docs/agentic-coding-in-terminal/) | Main workshop curriculum and terminal agent concepts. |
 | [Skills & Plugins Reference](/docs/skills-plugins-deep-dive/) | When and how to use skills, plugins, BMAD, GSD, and Superpowers. |
 | [Cheat Sheet for Claude Code](/docs/cheat-sheet/) | Quick command, shortcut, and CI reference. |

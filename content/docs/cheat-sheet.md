@@ -19,11 +19,11 @@ A compact reference for the commands and shortcuts that come up most often durin
 
 | Command | Description |
 | --- | --- |
-| `/usage` | Show account usage and limits |
+| `/usage` | Show account usage and limits, with a per-loop token breakdown (v2.1.243+) |
 | `/cost`, `/stats` | Aliases for `/usage` |
-| `/insights` | Generate a report on the projects you worked on, how you used Claude Code, and where sessions got stuck |
-| `/model [name]` | Switch models: opus, sonnet, fable, or haiku |
-| `/effort [level]` | Set effort to low, medium, high (default), xhigh, max, or `ultracode` |
+| `/insights` | Generate a report on the projects you worked on, how you used Claude Code, and where sessions got stuck; works through LLM gateways since v2.1.269 |
+| `/model [name]` | Switch models: opus, sonnet, fable, or haiku. Switching no longer re-sends tool definitions, so the prompt cache survives (v2.1.267+) |
+| `/effort [level]` | Set effort to low, medium, high (default), xhigh, max, or `ultracode`. Saved per model (v2.1.251+); press `s` to change it for this session only (v2.1.257+). The `maxEffortLevel` setting caps it (v2.1.267+) |
 | `/fast [on\|off]` | Toggle fast mode for Opus 5 and Opus 4.8: up to 2.5× faster, billed at $10 input and $50 output per MTok |
 
 ## Memory & project setup
@@ -34,6 +34,7 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `/memory` | Open the CLAUDE.md files in scope |
 | `/permissions` | Review or edit permission rules |
 | `/config` | Open Claude Code settings |
+| `/output-style [name]` | List output styles or switch to one (v2.1.269+; use `/config` on older versions) |
 | `/doctor` | Diagnose setup issues and optionally fix them (alias `/checkup`) |
 | `/fewer-permission-prompts` | Scan recent transcripts and propose a read-only allowlist to cut permission prompts |
 
@@ -42,7 +43,6 @@ A compact reference for the commands and shortcuts that come up most often durin
 | Command | Description |
 | --- | --- |
 | `/plan` or `Shift+Tab` | Enter plan mode to inspect the project and propose changes |
-| `/ultraplan <prompt>` | Plan in a browser session, then execute remotely |
 | `@file` | Add a file or directory to the prompt |
 | `Alt+T` | Toggle extended thinking for the rest of the session |
 
@@ -50,12 +50,12 @@ A compact reference for the commands and shortcuts that come up most often durin
 
 | Command | Description |
 | --- | --- |
-| `/btw` | Ask a side question without adding it to the main conversation context |
+| `/btw` | Ask a side question without adding it to the main conversation context; `Shift+Left` and `Shift+Right` browse earlier side questions (v2.1.257+) |
 | `/copy [N]` | Copy the latest response, or response N, to the clipboard |
 | `Ctrl+S` | Stash current draft; press `Ctrl+S` again on an empty prompt to restore |
 | `Esc` | Stop generation |
 | `Esc Esc` or `/rewind` | Open the rewind menu for code, conversation, both, a summary point, or a fork (`f`) |
-| `/branch` / `/fork` | `/branch` switches to a new conversation timeline; `/fork` copies the conversation into a background session |
+| `/branch` / `/fork` | `/branch` switches to a new conversation timeline; `/fork` copies the conversation into a background session with its own worktree (v2.1.222+) |
 | `/subtask <prompt>` | Hand a side task to a subagent; its result returns into this conversation |
 | `/background` / `/bg` | Detach the current session to run as a background agent and free the terminal |
 
@@ -63,10 +63,9 @@ A compact reference for the commands and shortcuts that come up most often durin
 
 | Command | Description |
 | --- | --- |
-| `/diff` | Open the interactive diff viewer |
-| `/review <pr>` | Run a fast, single-pass PR review |
+| `/diff` | Open the diff viewer; in fullscreen mode it is a live panel beside the conversation that shows uncommitted changes as Claude edits (v2.1.260+) |
 | `/security-review` | Check the current work for security issues; see [Cybersecurity & Hardening](/docs/security/) |
-| `/code-review` | Find correctness bugs and cleanup opportunities; runs in a background subagent by default |
+| `/code-review [level] [pr]` | Find correctness bugs and cleanup opportunities in the current diff or a PR; runs in a background subagent by default. No level reuses the last one you typed. `/review` is an alias (v2.1.223+) |
 | `/code-review ultra` or `/ultrareview` | Run the cloud review; `/ultrareview` remains a supported alias |
 | `/simplify` | Run four cleanup agents to improve reuse, clarity, and efficiency |
 | `/batch <description>` | Split a migration or other repetitive change across worktree agents |
@@ -82,9 +81,9 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `/workflows` | List, watch, pause, resume, save, stop workflow runs |
 | `/deep-research <question>` | Research a question in parallel and return a cited report |
 | `/dataviz` | Chart and dashboard design guidance when building visualizations |
-| `/loop [interval] [prompt]` | Re-run a prompt while the session stays open (alias `/proactive`); `Esc` stops it. Omit the interval and Claude paces itself; omit the prompt and it runs a maintenance pass or your `.claude/loop.md`. Recurring tasks self-delete 7 days after creation |
-| `/goal [condition\|clear]` | Keep taking turns until an evaluator model confirms your condition is met (needs v2.1.139+); pair with auto mode or turns stall on prompts. `/goal` alone shows status; `/goal clear` stops it |
-| `/schedule` | Create a cloud routine triggered by a schedule, API call, or webhook |
+| `/loop [interval] [prompt]` | Re-run a prompt while the session stays open (alias `/proactive`); `Esc` stops it. Omit the interval and Claude paces itself; omit the prompt and it runs a maintenance pass or your `.claude/loop.md`. Recurring tasks self-delete 7 days after creation. Quiet wake-ups fold into one line (v2.1.243+) |
+| `/goal [condition\|clear]` | Keep taking turns until an evaluator model confirms your condition is met (needs v2.1.139+); pair with auto mode or turns stall on prompts. `/goal` alone shows status; `/goal clear` stops it. Checks in on long background work with backoff and survives `--resume` (v2.1.234+) |
+| `/schedule` | Create a cloud routine triggered by a schedule, API call, or webhook; locally configured MCP servers cannot be attached (v2.1.251) |
 | `/sandbox` | Run with file and network isolation |
 
 ## Extending Claude Code
@@ -93,7 +92,8 @@ A compact reference for the commands and shortcuts that come up most often durin
 | --- | --- |
 | `/agents` | Reminder to create or edit subagents by asking Claude or editing `.claude/agents/`; no longer an interactive manager (as of v2.1.198) |
 | `/skills` | List and manage skills |
-| `/plugin` | Browse plugin marketplaces |
+| `/skill-doctor` | Show which loaded skills went unused and what they cost in context (v2.1.261+) |
+| `/plugin` | Browse plugin marketplaces; changes apply when the menu closes, no `/reload-plugins` needed (v2.1.268+) |
 | `/mcp` | Manage MCP servers such as GitHub or Jira |
 | `/hooks` | Configure lifecycle hooks such as PreToolUse, PostToolUse, Stop, and Notification |
 | `/install-github-app` | Install Claude GitHub App for PR workflows |
@@ -105,6 +105,8 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `/resume` | Open the session picker |
 | `claude -c` | Continue the most recent session from the shell |
 | `claude --resume <id>` | Continue a session by ID |
+| `claude --resume <id> --bg` | Continue that session as a background session under the same ID (v2.1.257+) |
+| `claude attach <id>` | Reattach to a running background session; `claude logs`, `stop`, `respawn`, and `rm` manage them (listed in `claude --help` since v2.1.251) |
 | `claude -r "name"` | Continue a session by name |
 | `/rename my-feature` | Rename current session |
 | `claude -c --fork-session` | Continue the most recent session under a new session ID |
@@ -134,9 +136,15 @@ claude -p "refactor" --disallowedTools "Bash(rm:*),Bash(sudo:*)"
 
 # Pipe-based review
 git diff main | claude -p "security review" --model haiku --max-budget-usd 1.00
+
+# Untrusted input: no command-running tools or WebFetch, file tools stay inside the working directory (v2.1.248+)
+claude -p "summarize this repo" --restricted
+
+# Unattended: deny anything that would still prompt instead of hanging (v2.1.259+)
+claude -p "fix the bug" --permission-mode auto --permission-prompts none
 ```
 
-**CI tip:** combine `--max-budget-usd`, `--max-turns`, and an explicit `--model` so failed or underspecified jobs have clear limits.
+**CI tip:** combine `--max-budget-usd`, `--max-turns`, and an explicit `--model` so failed or underspecified jobs have clear limits. `-p` runs continue a response cut off mid-stream on their own (v2.1.246+), and `--max-budget-usd` includes the 1.1× premium for US-only-inference workspaces (v2.1.239+).
 
 ## Keyboard shortcuts
 
@@ -146,9 +154,11 @@ git diff main | claude -p "security review" --model haiku --max-budget-usd 1.00
 | `Esc Esc` | Rewind menu |
 | `Shift+Tab` | Cycle through manual, auto-accept, plan, and auto mode when available |
 | `Ctrl+S` | Stash the current draft; press again on an empty prompt to restore it |
-| `Ctrl+B` | Send the current shell command to the background |
+| `Ctrl+B` | Background the current turn: running shell commands and subagents keep going while you get the prompt back |
 | `Ctrl+R` | Interactive history search |
-| `Ctrl+T` | Toggle task list visibility |
+| `Ctrl+W` / `Alt+F` / `Alt+D` | Delete back to whitespace, jump to word end, delete to word end, as in Bash (v2.1.261+) |
+| `Ctrl+L` | In fullscreen mode, clear the transcript view like `clear`; scroll up for earlier messages (v2.1.260+) |
+| `Ctrl+T` | Toggle task list visibility. Empty on Opus 4.8, Sonnet 5, and Fable unless `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` is set |
 | `Ctrl+O` | Open the transcript viewer |
 | `Ctrl+V`; `Cmd+V` in iTerm2; `Alt+V` on Windows/WSL | Paste an image |
 | `!command` | Run a shell command without Claude interpreting it |

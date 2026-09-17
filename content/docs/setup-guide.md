@@ -5,17 +5,17 @@ weight: 1
 
 **Agentic Coding in Terminal**: Apex Builders Collective × Info PC
 
-Please finish these steps **before** the workshop. Allow about 15–20 minutes.
+Please finish these steps **before** the workshop. Allow about 15–20 minutes. **We are mainly working with Claude Code in this workshop**, so most info are Claude Code specific, but most things extrapolate to other harnesses. You can choose to use any agentic coding harness of your preference for the workshop.
 
 ---
 
 ## Setup checklist
 
-- [ ] Node.js v22+ installed (for npm/npx tooling like GSD)
+- [ ] Node.js v22+ installed
 - [ ] Git installed
 - [ ] A terminal you're comfortable with
 - [ ] Claude Code installed and working
-- [ ] Codex installed and working
+- [ ] (Optional) Codex installed and working
 - [ ] (Optional) A code editor you like
 
 ---
@@ -26,7 +26,7 @@ Install these first.
 
 ### Node.js (v22 or higher)
 
-Download the current LTS release from [nodejs.org](https://nodejs.org/). It includes npm and meets the Node.js 22+ requirement for Claude Code and the GSD installer below.
+Download the current LTS release from [nodejs.org](https://nodejs.org/). It includes npm and meets the Node.js 22+ requirement for Claude Code. The `npx skills` installer in step 3 needs Node.js too.
 
 Verify after install:
 
@@ -91,11 +91,11 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
     - Node.js 22 or later
     - npm (comes with Node.js)
     
-    npm is the default install method here because it also works in air-gapped environments: point npm at your internal registry mirror and install the same way.
+    npm is our recommended default install method here because it also works in air-gapped environments: point npm at your internal registry mirror and install the same way.
     
     ```bash
     # Install globally
-    npm install -g @anthropic-ai/claude-code@2.1.220 # verified 2026-07-27
+    npm install -g @anthropic-ai/claude-code@2.1.273 # verified 2026-09-16
     
     # Verify
     claude --version
@@ -104,9 +104,9 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
     npm install -g @anthropic-ai/claude-code@latest
     ```
     
-2. **Configure the gateway**
+2. **Configure the gateway in `settings.json`**
     
-    Edit `~/.claude/settings.json` and replace the example URL and key. In PowerShell, the same file is `$HOME\.claude\settings.json`. Claude Code sends requests to `ANTHROPIC_BASE_URL` and authenticates them with `ANTHROPIC_AUTH_TOKEN`.
+    Edit `~/.claude/settings.json`(Linux/MacOS), `%USERPROFILE%/.claude/settings.json`(Windows) and replace the example URL and key. In PowerShell, the same file is `$HOME\.claude\settings.json`. Claude Code sends requests to `ANTHROPIC_BASE_URL` and authenticates them with `ANTHROPIC_AUTH_TOKEN`.
     
     **LiteLLM proxy:**
     
@@ -115,14 +115,20 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
       "env": {
         "ANTHROPIC_BASE_URL": "https://your-litellm-proxy.example.com",
         "ANTHROPIC_AUTH_TOKEN": "sk-your-api-key",
-        "ANTHROPIC_MODEL": "claude-opus-5",
-        "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5",
-        "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-opus-5",
-        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-opus-5",
-        "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-5",
+        "ANTHROPIC_MODEL": "claude-opus-4-8[1m]",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-8[1m]",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-opus-4-8[1m]",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-opus-4-8[1m]",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-4-8[1m]",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-        "CLAUDE_CODE_EFFORT_LEVEL": "max"
-      }
+        "CLAUDE_CODE_EFFORT_LEVEL": "max",
+        "CLAUDE_CODE_FORK_SUBAGENT": "0",
+        "CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
+        "CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING": "1",
+        "CLAUDE_CODE_SUBAGENT_MODEL_FORCE": "1"
+      },
+      "cleanupPeriodDays": 3650,
+      "autoCompactEnabled": false
     }
     ```
     
@@ -133,22 +139,30 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
       "env": {
         "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
         "ANTHROPIC_AUTH_TOKEN": "sk-or-your-openrouter-key",
-        "ANTHROPIC_MODEL": "anthropic/claude-opus-5",
-        "ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic/claude-opus-5",
-        "ANTHROPIC_DEFAULT_SONNET_MODEL": "anthropic/claude-opus-5",
-        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-opus-5",
-        "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-opus-5",
+        "ANTHROPIC_MODEL": "anthropic/claude-opus-4-8[1m]",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic/claude-opus-4-8[1m]",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "anthropic/claude-opus-4-8[1m]",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-opus-4-8[1m]",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-opus-4-8[1m]",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-        "CLAUDE_CODE_EFFORT_LEVEL": "max"
-      }
+        "CLAUDE_CODE_EFFORT_LEVEL": "max",
+        "CLAUDE_CODE_FORK_SUBAGENT": "0",
+        "CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
+        "CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING": "1",
+        "CLAUDE_CODE_SUBAGENT_MODEL_FORCE": "1"
+      },
+      "cleanupPeriodDays": 3650,
+      "autoCompactEnabled": false
     }
     ```
     
-    Leave `ENABLE_TOOL_SEARCH` out unless your gateway forwards `tool_reference` blocks. If it does, add `"ENABLE_TOOL_SEARCH": "true"` to the `env` object. On Windows, add `"CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe"` only if Claude Code cannot find Git Bash.
+  On Windows, add `"CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe"` only if Claude Code cannot find Git Bash.
 
-3. Run `claude`, then use `/model` to change models. As of 2026-07-27, the Claude Code lineup is Fable 5, Opus 5, Sonnet 5, and Haiku 4.5. These gateway examples use Opus 5. Use `/effort` when you need to change the reasoning depth.
+ - `CLAUDE_CODE_SUBAGENT_MODEL` is a default rather than an override since v2.1.251: an agent file's own `model:` wins. `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` (v2.1.257+) force applies it to every subagent.
+ - `CLAUDE_CODE_FORK_SUBAGENT=0` turns off subagent forking, which has been on by default since v2.1.232. A forked subagent inherits the whole conversation which is context bloat. With forking off, subagents start from only the brief they are given.
 
-### Codex CLI
+
+### Codex CLI (Optional)
 
 1. **Install with npm**
 
@@ -231,23 +245,39 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
 
 ---
 
-## 3. Install GSD Core
+## 3. Install Skills by Matt Pocock
 
-The hands-on exercise uses [GSD Core](https://github.com/open-gsd/gsd-core). Install version 1.8.0 in the workshop project.
+The hands-on exercise uses some of the agent skills by [Matt Pocock](https://github.com/mattpocock/skills). Set it up in a project folder for this workshop. Follow the install instructions for the harness you are choosing to use.
+
+<details>
+<summary><strong>Claude Code</strong></summary>
 
 ```bash
-# Create a workshop project
-mkdir workshop-project
-cd workshop-project
-git init
-
-# Install GSD Core, verified 2026-07-27
-npx @opengsd/gsd-core@1.8.0
+claude plugin install mattpocock-skills
 ```
 
-Verify by opening Claude Code in that folder and typing `/gsd-help`.
+Or, from inside a session:
 
-The older `get-shit-done-cc` and `@opengsd/get-shit-done-redux` package names are deprecated.
+```
+/plugin install mattpocock-skills
+```
+
+It's in Claude Code's official marketplace, so there's nothing to add first, and updates arrive automatically.
+</details>
+
+
+<details>
+<summary><strong>Codex, and other agents</strong></summary>
+
+```bash
+npx skills@latest add mattpocock/skills
+```
+
+Pick the skills you want, and which coding agents to install them on. **The installer lets you choose which skills to take, so make sure `setup-matt-pocock-skills` is one of them.**
+
+A native Codex plugin is on the roadmap (see [`.agents/adr/0002-ship-as-a-claude-code-plugin.md`](https://github.com/mattpocock/skills/blob/main/.agents/adr/0002-ship-as-a-claude-code-plugin.md)).
+
+</details>
 
 ---
 
@@ -266,23 +296,6 @@ gh auth login
 
 **A few terminal basics**: If you rarely use a terminal, practice changing folders, listing files, creating a directory, and reading a text file before the workshop.
 
----
-
-## 5. Bring a small project idea
-
-During the workshop, you'll build a small app from scratch. It does not need to be original or useful; a basic CRUD app is enough.
-
-For example:
-
-- A job application tracker (roles, companies, stages, interview notes)
-- A stock tracker (symbols, prices, and daily movement)
-- A personal book tracker (title, author, status, notes)
-- An expense tracker (transactions, categories, budgets)
-- A recipe manager (recipes, ingredients, tags)
-- A workout logger (exercises, sets, reps, progress)
-- Something completely useless that makes you smile
-
-Pick something you can describe in one sentence. The exercise is about the workflow, not a finished product.
 
 ---
 
@@ -291,8 +304,8 @@ Pick something you can describe in one sentence. The exercise is about the workf
 If you get stuck on any step:
 
 1. Copy the error message
-2. Paste it into Claude or ChatGPT and ask for help
-3. If you're still stuck, ask in the workshop group chat. Someone may already have seen the same error.
+2. Paste it into Claude or ChatGPT and ask for help.
+3. Check `claude --version`. Versions 2.1.265 through 2.1.267 fail every turn with HTTP 400 through third-party Anthropic-compatible endpoints such as LiteLLM and OpenRouter (fixed in 2.1.268). The pinned version above is past that range.
 
 ---
 

@@ -256,6 +256,8 @@ Use optional frontmatter only when it changes behavior:
 | `disable-model-invocation` | Make the skill manual-only, useful for deploy or commit workflows. |
 | `user-invocable: false` | Hide the skill from the slash-command menu while still allowing automatic use. |
 | `context: fork` | Run the skill in a forked subagent context. |
+| `model` | Run the skill on a named model, for example a cheaper one for mechanical work. Auto mode keeps the session model if it cannot support the named one (v2.1.259+). |
+| `effort` | Set the reasoning effort for the skill's turn. |
 
 Spend the most care on `description`. Write it as a trigger, not as a vague summary.
 
@@ -279,6 +281,8 @@ description: Use when reviewing pull requests or code diffs. Pay special attenti
 - Include gotchas the model has missed before.
 - Focus on instructions that change behavior.
 - Remove obvious guidance that Claude would already follow.
+- Run `claude plugin validate` on the skill folder before sharing it; it reports `SKILL.md` frontmatter that fails to parse (v2.1.233+), and `--json` gives a machine-readable report (v2.1.259+).
+- Run `/skill-doctor` now and then to see which loaded skills go unused and what they cost in context (v2.1.261+).
 
 ### Where skills live
 
@@ -580,6 +584,7 @@ This is useful when a phase has several separable parts. It is less useful when 
 
 ### Two layers of verification
 
+
 During `/gsd-execute-phase`, a verifier checks the completed phase against its goals and writes `VERIFICATION.md`. If it finds gaps, run `/gsd-plan-phase N --gaps`, followed by `/gsd-execute-phase N --gaps-only`, to close them.
 
 `/gsd-verify-work N` then walks through user acceptance testing and writes the phase's UAT file. If you report issues, it creates fix plans.
@@ -622,11 +627,10 @@ The Codex plugin lets Claude Code call Codex for review or delegated work. A sec
 ```bash
 /plugin marketplace add openai/codex-plugin-cc
 /plugin install codex@openai-codex
-/reload-plugins
 /codex:setup
 ```
 
-`/codex:setup` checks whether Codex CLI is installed and authenticated.
+`/codex:setup` checks whether Codex CLI is installed and authenticated. On Claude Code before v2.1.268, run `/reload-plugins` after the install; newer versions apply plugin changes when the `/plugin` menu closes.
 
 ### Useful commands
 
