@@ -292,23 +292,6 @@ gh auth login
 
 **A few terminal basics**: If you rarely use a terminal, practice changing folders, listing files, creating a directory, and reading a text file before the workshop.
 
----
-
-## 5. Bring a small project idea
-
-During the workshop, you'll build a small app from scratch. It does not need to be original or useful; a basic CRUD app is enough.
-
-For example:
-
-- A job application tracker (roles, companies, stages, interview notes)
-- A stock tracker (symbols, prices, and daily movement)
-- A personal book tracker (title, author, status, notes)
-- An expense tracker (transactions, categories, budgets)
-- A recipe manager (recipes, ingredients, tags)
-- A workout logger (exercises, sets, reps, progress)
-- Something completely useless that makes you smile
-
-Pick something you can describe in one sentence. The exercise is about the workflow, so don't rack your brain thinking of an idea.
 
 ---
 

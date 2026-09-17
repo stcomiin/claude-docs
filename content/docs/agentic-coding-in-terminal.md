@@ -63,7 +63,6 @@ Before we go deeper, here are some commands / CLI flags that are useful.
 | `/help` | Lists every command available in your setup: built-in, custom, plugin, and MCP-provided |
 | `/init` | Scans the repo and generates a starter `CLAUDE.md`. DO NOT USE THIS. |
 | `/clear` | Wipes conversation history (CLAUDE.md stays loaded). Use when switching tasks or when you find that the context is filling up. This should be your most used command. Always start fresh whenever possible. |
-| `/compact [focus]` | Summarizes history instead of wiping it. Pass instructions: `/compact keep the auth decisions`. DO NOT USE THIS. |
 | `/model [name]` | Switch model mid-session: `opus`, `sonnet`, `fable`, `haiku`, or a full ID like `claude-fable-5` |
 | `/usage` | Shows usage and limits. `/cost` and `/stats` remain available as aliases. |
 | `/resume` | Pick up a previous session. `claude -c` from the shell resumes the most recent. e.g `claude --resume <some-session-id>` |
@@ -72,17 +71,16 @@ Before we go deeper, here are some commands / CLI flags that are useful.
 | `Ctrl+S` | Prompt stashing - best for when you're mid-prompt and need to ask something else first. Press `Ctrl+S` again on an empty prompt to bring the stash back. |
 | `Esc Esc` (Empty prompt) | Open the rewind menu (selective: code only, conversation only, or both). You can also use `/rewind` |
 | `@filepath` | Reference a file or directory inline: `@src/auth/login.ts fix the JWT check` |
+| `!<command>` | Run a terminal command and passes the results of the command to the session |
 
 **One-liner to remember:** type `/` on an empty prompt to see everything available in your setup, including custom and MCP commands. You'll rarely need to memorize a full list.
 
 ## Stop/Resume/Continue Claude Code conversations
 
-{{< figure src="/images/claude-session-continuity.svg" width="560" height="280" loading="lazy" alt="Resuming appends messages to the same session; forking branches its history into a new session ID." caption="Resume to continue a conversation; fork to explore a separate direction." attr="Claude Code docs" attrlink="https://code.claude.com/docs/en/how-claude-code-works#resume-or-fork-sessions" >}}
-
 | Action | Command | Remarks |
 | --- | --- | --- |
-| Stop a conversation | Ctrl + C twice in the session until the session is exited | All session history is stored as .jsonl files in .claude folder in User Directory. `~/.claude/projects/<folder name>` |
 | Resume a previous conversation | `claude --resume`  which will show a list of previous conversations to resume from in this current folder, OR `claude --continue` which will auto continue from the last stopped conversation in this current folder | you can also append additional flags to these resume and continue commands for eg. `claude --continue --dangerously-skip-permissions --effort max --model claude-sonnet-5` |
+| Exit a conversation | Ctrl + C until session exits | All session history is stored as transcript files in .claude folder in User Directory. `~/.claude/projects/<folder name>` |
 
 ### Useful Claude Code Customisation
 
@@ -158,29 +156,6 @@ Sample:
 
 ![Toast notification sample](/images/statusline-toast.png)
     
-
-## But first, let's just make something (Hands-on: 15 minutes)
-
-Please open Claude Code, and ask it to give you a CRUD app of some kind. 
-
-- CRUD: Create, Read, Update, Delete. Your quintessential database app.
-- Examples of CRUD apps you can build:
-    - **Job applications tracker**: roles, companies, stages, and interview notes.
-    - **Personal library tracker**: manage books, authors, reading status, and notes.
-    - **Inventory manager**: products, stock counts, suppliers, and reorder levels.
-    - **Student roster + attendance**: students, classes, attendance records, and remarks.
-    - **Workshop registration system**: events, participants, tickets, and check-ins.
-    - **Issue / bug tracker**: tickets, assignees, status, priority, and comments.
-    - **Simple CRM**: leads, companies, contacts, and follow-up tasks.
-    - **Recipe manager**: recipes, ingredients, tags, and meal plans.
-    - **Expense tracker**: transactions, categories, budgets, and attachments.
-    - **Appointment booking**: providers, timeslots, bookings, and cancellations.
-    - **Asset checkout**: equipment, borrowers, due dates, and returns.
-    - **Content calendar**: posts, channels, publish dates, and approvals.
-    - **Donations + donors**: donors, campaigns, donation records, and receipts.
-    - **Classroom resources**: worksheets, links, topics, and usage history.
-    - **Support ticket inbox**: customers, conversations, labels, and resolutions.
-
 ---
 
 ## Context & Memory
