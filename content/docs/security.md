@@ -68,6 +68,8 @@ Dynamic context is what takes that decision away from the model. When the resear
 
 What makes this dangerous is how little it takes to land in a session you trust. Nothing has to be installed from a marketplace. Cloning a repo is enough, since skills in `.claude/skills/`, in nested folders, or under any `--add-dir` path all get loaded. The hard fix is to set `"disableSkillShellExecution": true` in managed settings. Beyond that, review the whole repo instead of just your own `~/.claude/skills/`, and put `.claude/` changes through code review like anything else. A skill is part of your supply chain, and the model's own judgment shouldn't be the only thing guarding your credentials.
 
+Recent releases narrowed some of these paths. Skills synced from a claude.ai account cannot run `!` commands or expand `@` files on your machine, and they no longer shadow local commands (v2.1.228+). Marketplace names containing control or invisible characters are rejected (v2.1.247+), and `"owner/*"` entries in `strictKnownMarketplaces` and `blockedMarketplaces` allow or block every repository under an organisation (v2.1.223+). A catalog entry's `headersHelper` command is shown and confirmed before it runs (v2.1.238+). For pinned, reviewable installs, the `archive` plugin source takes a zip over HTTPS with a SHA-256 pin (v2.1.224+), and `claude plugin install --accept-command <sha256>` accepts exactly the command a `--json` dry run displayed (v2.1.271+).
+
 ### Claude Code & MCP CVEs (2025–2026)
 
 | Vulnerability | What broke | Read |
@@ -87,12 +89,13 @@ What makes this dangerous is how little it takes to land in a session you trust.
 | **CVE-2026-54316** - WebFetch could exfiltrate through an allowed domain | A request to a pre-approved Hugging Face domain could carry data out of the session. Fixed in v2.1.163 (June 2026). Allowlisting a domain does not make it a safe destination for sensitive data. | [GHSA-fg94-h982-f3mm](https://github.com/advisories/GHSA-fg94-h982-f3mm) |
 | **CVE-2026-55607** - Worktree path confusion bypassed the sandbox | Claude Code could resolve a Git worktree against the wrong sandbox path, letting commands write and run code outside the sandbox. Versions from v2.1.38 up to, but not including, v2.1.163 were affected; v2.1.163 fixed the issue. | [GHSA-7835-87q9-rgvv](https://github.com/advisories/GHSA-7835-87q9-rgvv) |
 
-> GitHub published 14 Claude Code advisories between February and July 2026. This table highlights the cases most relevant to the workshop. See the [complete package-filtered list](https://github.com/advisories?query=ecosystem%3Anpm+affects%3A%40anthropic-ai%2Fclaude-code), and keep Claude Code current. Native installations update automatically. For npm installations, run `npm install -g @anthropic-ai/claude-code@latest`.
+> GitHub published 14 Claude Code advisories between February and July 2026, and none between then and 2026-09-17. This table highlights the cases most relevant to the workshop. See the [complete package-filtered list](https://github.com/advisories?query=ecosystem%3Anpm+affects%3A%40anthropic-ai%2Fclaude-code), and keep Claude Code current. Native installations update automatically. For npm installations, run `npm install -g @anthropic-ai/claude-code@latest`.
 
 ### Sandbox, permissions, and Anthropic's own guidance
 
 - `/sandbox` enables OS-level **filesystem and network isolation** (seatbelt on macOS, bubblewrap on Linux/WSL2). Anthropic's docs are explicit that **both layers are required together** - without network isolation a compromised agent exfils your SSH keys; without filesystem isolation it backdoors the binary that opens the network for it next time. Configure granularity with `sandbox.filesystem.{allowRead, denyRead, allowWrite, denyWrite}` in `settings.json`. Use `/sandbox` whenever you'd otherwise reach for `--dangerously-skip-permissions`.
-- `--permission-mode` accepts `default`, `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions`. Pin a project to `plan` or `default` for first contact with unfamiliar code; `acceptEdits` only inside scoped worktrees; `bypassPermissions` only inside a sandbox.
+- Sandbox changes since July 2026: credential files can be masked so commands read a sentinel while the proxy substitutes the real value on egress (`mode: "mask"`, Linux and WSL, v2.1.221+), with JWT-aware and AWS SigV4 masking options (v2.1.224+). Commands typed at the `!` prompt run outside the sandbox even in strict mode (v2.1.260+). The sandboxed Bash prompt no longer lists allowed hosts, so Claude asks per host instead of assuming an unlisted host is blocked (v2.1.243+). In auto mode each command can carry its own `allowed_domains`, opened for that command alone (v2.1.271+).
+- `--permission-mode` accepts `default`, `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions`. Pin a project to `plan` or `default` for first contact with unfamiliar code; `acceptEdits` only inside scoped worktrees; `bypassPermissions` only inside a sandbox. Since v2.1.257 a `defaultMode` of `bypassPermissions` in a project or local settings file is ignored, like `auto`; set it in user settings or pass the flag. For untrusted input, `--restricted` removes the command-running tools and `WebFetch`, keeps file tools inside the working directory, refuses bypass, and ignores settings files (v2.1.248+); `--permission-prompts none` makes an unattended run deny anything that would prompt (v2.1.259+).
 - Claude Code's own [security guide](https://code.claude.com/docs/en/security) lists the platform's built-in safeguards: permission system, command blocklist, network-request approval, isolated context windows, fail-closed pattern matching, encrypted credential storage. Read it once.
 - Anthropic's [Responsible Scaling Policy](https://www.anthropic.com/responsible-scaling-policy) (v3.x) and [Usage Policy](https://www.anthropic.com/legal/aup) sit above per-product controls - relevant for regulated deployments.
 
@@ -603,6 +606,19 @@ Create GitHub issues when it finds something."
 ```
 
 > 💡 **Why this matters:** In a [documented case](https://spaceraccoon.dev/discovering-negative-days-llm-workflows/), a command-injection fix in `@next/codemod` was visible in the patch commit **2 hours before** the CVE was published - and threat feeds operate on hourly cadences, meaning attackers had early warning. Monitoring your deps' commits with Claude closes this gap.
+
+The same applies to Claude Code itself. Between 2.1.221 and 2.1.274 (August to September 2026) the changelog recorded these fixes with no advisory or CVE:
+
+- Telemetry and metrics requests to Anthropic carried the API key configured for a third-party gateway (`ANTHROPIC_BASE_URL`); a credential now goes only to its own host (v2.1.246). This is the workshop's setup.
+- A PowerShell permission bypass through `$PSDefaultParameterValues`, and a Linux sandbox protected-path bypass (v2.1.232).
+- Windows NT-namespace paths (`\??\`) bypassed UNC path validation, an NTLM credential-leak route (v2.1.233 and v2.1.234).
+- Worktree-isolated sessions and their subagents could run destructive git commands against the main checkout (v2.1.222).
+- `/ultrareview` uploaded uncommitted `prod.env`, `*.tfvars`, and editor swap copies of credential files to the cloud session (v2.1.248).
+- A `permissions.ask` rule was skipped in auto mode when the command sat inside a compound command or subshell (v2.1.257).
+- Plugin commands declared in a marketplace entry could point outside the plugin directory (v2.1.251).
+- MCP secrets resolved from `${VAR}` placeholders, and tokens embedded in git source URLs, appeared in error output (v2.1.268 and v2.1.274).
+
+Keep Claude Code current: compare `claude --version` with the [changelog](https://code.claude.com/docs/en/changelog) and install the vetted version with npm as shown in the [setup guide](/docs/setup-guide/#claude-code).
 
 ---
 

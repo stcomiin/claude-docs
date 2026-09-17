@@ -125,6 +125,8 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
         "CLAUDE_CODE_FORK_SUBAGENT": "0",
         "CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
         "CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING": "1"
+        "CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING": "1",
+        "CLAUDE_CODE_SUBAGENT_MODEL_FORCE": "1"
       },
       "cleanupPeriodDays": 3650,
       "autoCompactEnabled": false
@@ -147,7 +149,8 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
         "CLAUDE_CODE_EFFORT_LEVEL": "max",
         "CLAUDE_CODE_FORK_SUBAGENT": "0",
         "CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
-        "CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING": "1"
+        "CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING": "1",
+        "CLAUDE_CODE_SUBAGENT_MODEL_FORCE": "1"
       },
       "cleanupPeriodDays": 3650,
       "autoCompactEnabled": false
@@ -156,7 +159,9 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
     
     Leave `ENABLE_TOOL_SEARCH` out unless your gateway forwards `tool_reference` blocks. If it does, add `"ENABLE_TOOL_SEARCH": "true"` to the `env` object. On Windows, add `"CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe"` only if Claude Code cannot find Git Bash.
 
-3. Run `claude` in a terminal, then use `/model` to change models. As of 2026-09-16, the Claude model lineup is Fable 5.1, Opus 5, Sonnet 5, and Haiku 4.5. These gateway examples use Opus 4.8 with the 1M context window. Use `/effort` when you need to change the reasoning depth.
+    - `CLAUDE_CODE_SUBAGENT_MODEL` is a default rather than an override since v2.1.251: an agent file's own `model:` wins. `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` (v2.1.257+) applies it to every subagent, so nothing asks the proxy for a model it does not serve.
+    - `CLAUDE_CODE_FORK_SUBAGENT=0` turns off subagent forking, which has been on by default since v2.1.232. A forked subagent inherits the whole conversation; with forking off, subagents start from only the brief they are given.
+
 
 ### Codex CLI (Optional)
 
