@@ -79,6 +79,8 @@ If you want to bring your own key, follow the setup steps below.
 ### Claude Code
 
 {{< callout type="warning" >}}
+**For Info PC participants only.** If you are joining from one of the other PCs, bring your own Claude subscription or API key instead of the workshop key.
+
 **The workshop OpenRouter key gives you Haiku only.** The only Claude model available with the key we email you is **Claude Haiku 4.5**. Any other model shown below — Opus 5, Sonnet 5, or Fable 5 — will **not** work with the provided key. Set the model to Haiku in your config, and switch with `/model haiku` inside Claude Code.
 {{< /callout >}}
 
