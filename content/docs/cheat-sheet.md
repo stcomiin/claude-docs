@@ -42,7 +42,6 @@ A compact reference for the commands and shortcuts that come up most often durin
 | Command | Description |
 | --- | --- |
 | `/plan` or `Shift+Tab` | Enter plan mode to inspect the project and propose changes |
-| `/ultraplan <prompt>` | Plan in a browser session, then execute remotely |
 | `@file` | Add a file or directory to the prompt |
 | `Alt+T` | Toggle extended thinking for the rest of the session |
 
@@ -55,7 +54,7 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `Ctrl+S` | Stash current draft; press `Ctrl+S` again on an empty prompt to restore |
 | `Esc` | Stop generation |
 | `Esc Esc` or `/rewind` | Open the rewind menu for code, conversation, both, a summary point, or a fork (`f`) |
-| `/branch` / `/fork` | `/branch` switches to a new conversation timeline; `/fork` copies the conversation into a background session |
+| `/branch` / `/fork` | `/branch` switches to a new conversation timeline; `/fork` copies the conversation into a background session with its own worktree (v2.1.222+) |
 | `/subtask <prompt>` | Hand a side task to a subagent; its result returns into this conversation |
 | `/background` / `/bg` | Detach the current session to run as a background agent and free the terminal |
 
@@ -64,9 +63,8 @@ A compact reference for the commands and shortcuts that come up most often durin
 | Command | Description |
 | --- | --- |
 | `/diff` | Open the interactive diff viewer |
-| `/review <pr>` | Run a fast, single-pass PR review |
 | `/security-review` | Check the current work for security issues; see [Cybersecurity & Hardening](/docs/security/) |
-| `/code-review` | Find correctness bugs and cleanup opportunities; runs in a background subagent by default |
+| `/code-review [level] [pr]` | Find correctness bugs and cleanup opportunities in the current diff or a PR; runs in a background subagent by default. No level reuses the last one you typed. `/review` is an alias (v2.1.223+) |
 | `/code-review ultra` or `/ultrareview` | Run the cloud review; `/ultrareview` remains a supported alias |
 | `/simplify` | Run four cleanup agents to improve reuse, clarity, and efficiency |
 | `/batch <description>` | Split a migration or other repetitive change across worktree agents |
@@ -148,7 +146,7 @@ git diff main | claude -p "security review" --model haiku --max-budget-usd 1.00
 | `Ctrl+S` | Stash the current draft; press again on an empty prompt to restore it |
 | `Ctrl+B` | Send the current shell command to the background |
 | `Ctrl+R` | Interactive history search |
-| `Ctrl+T` | Toggle task list visibility |
+| `Ctrl+T` | Toggle task list visibility. Empty on Opus 4.8, Sonnet 5, and Fable unless `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` is set |
 | `Ctrl+O` | Open the transcript viewer |
 | `Ctrl+V`; `Cmd+V` in iTerm2; `Alt+V` on Windows/WSL | Paste an image |
 | `!command` | Run a shell command without Claude interpreting it |

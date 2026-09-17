@@ -63,7 +63,7 @@ Before we go deeper, here are some commands / CLI flags that are useful.
 | `/help` | Lists every command available in your setup: built-in, custom, plugin, and MCP-provided |
 | `/init` | Scans the repo and generates a starter `CLAUDE.md`. DO NOT USE THIS. |
 | `/clear` | Wipes conversation history (CLAUDE.md stays loaded). Use when switching tasks or when you find that the context is filling up. This should be your most used command. Always start fresh whenever possible. |
-| `/model [name]` | Switch model mid-session: `opus`, `sonnet`, `fable`, `haiku`, or a full ID like `claude-fable-5` |
+| `/model [name]` | Switch model mid-session: `opus`, `sonnet`, `fable`, `haiku`, or a full ID like `claude-fable-5-1` |
 | `/usage` | Shows usage and limits. `/cost` and `/stats` remain available as aliases. |
 | `/resume` | Pick up a previous session. `claude -c` from the shell resumes the most recent. e.g `claude --resume <some-session-id>` |
 | `Esc` | Stop Claude mid-action. |
@@ -124,23 +124,20 @@ Line 1:  Model | Context Length | Context % (usable) | Git Branch | Skills | Thi
             
 #### 2. Changing Output Style
     
-The default prose style of Claude models is overly convoluted and full of AI-slop. You can tweak how the model replies by setting custom output styles. There are 5 in-built styles available, but you can also add custom styles: create a markdown file, and place it in `~/.claude/output-styles`.
+The default prose style of Claude models is overly convoluted and full of AI-slop. You can tweak how the model replies by setting an output style. Five styles are built in: Default, Proactive, Concise, Explanatory, and Learning. Proactive makes Claude act on routine decisions instead of pausing to ask, which goes further than the guidance auto mode adds, while your permission mode still decides what runs without approval. Concise leads with the result and skips the narration (v2.1.237+). You can also add custom styles: create a markdown file and place it in `~/.claude/output-styles`, or in `.claude/output-styles` inside a project.
 
 One such custom style that can be used is pstack's [unslop skill](https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md). Add an extra front-matter field in the file `keep-coding-instructions: true` to preserve software engineering parts of the system prompt.
 
-Then reload the Claude Code session and enter the command below to activate the style:
+Then reload the Claude Code session and enter the command below to activate the style. The standalone command was removed in v2.1.91 and came back in v2.1.269; on older versions, pick the style under **Output style** in `/config`:
 
 ```
 /output-style unslop
 ```
 
-Or set it as default output style in `settings.json`:
+A style switch applies from your next message (v2.1.251+). To make a style the default, set it in `settings.json`:
 
 ```
-{ 
-  "env": {
-    xxx
-  },
+{
   "outputStyle": "unslop"
 }
 ```
@@ -383,7 +380,7 @@ Double-tap `Esc` on an empty input to open the rewind menu. Scroll back with `â†
 | `claude --permission-mode auto` | Start the session directly in auto mode |
 | `claude --dangerously-skip-permissions` | Skip all permission prompts (dangerous) |
 | `/btw` | Ask a side question without polluting conversation context. |
-| `/branch` / `/fork` | `/branch` switches to a new conversation timeline from this point. `/fork` copies the conversation into a background session. |
+| `/branch` / `/fork` | `/branch` switches to a new conversation timeline from this point. `/fork` copies the conversation into a background session that gets its own worktree (v2.1.222+) and keeps the prompt cache. |
 | `/copy [N]` | Copy last response to clipboard |
 | **`Esc + Esc` / `/rewind`** | Rewind menu: code only, convo only, both, summarize from |
 | `Alt + v` | Paste Screenshots / images |
@@ -420,7 +417,7 @@ These are the tools used most often in the workshop. See the [tools reference](h
 | | `EnterPlanMode` | Switch to read-only planning mode | No |
 | | `EnterWorktree` | Create or enter an isolated git worktree | Yes |
 | | `Skill` | Execute a skill / slash command | Yes |
-| | `TaskCreate/Update/List` | Structured task management | No |
+| | `TaskCreate/Update/List` | Structured task management. Not offered on Opus 4.8, Sonnet 5, or Fable models (v2.1.233+); set `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` to bring them back | No |
 | | `CronCreate/Delete/List` | Schedule recurring prompts in-session | No |
 | | `Workflow` | Run reusable JavaScript multi-agent orchestration (see Dynamic Multi-Agent Workflows below) | Yes |
 | | `SendMessage` | Message or resume named subagents, including members of an agent team | No |
@@ -489,8 +486,7 @@ Pick the lightest review that fits the change:
 
 | Command | What it does |
 | --- | --- |
-| `/review <pr>` | Fast, single-pass review of a pull request |
-| `/code-review` | Looks for correctness bugs and cleanup opportunities in a background subagent by default |
+| `/code-review [level] [pr]` | Looks for correctness bugs and cleanup opportunities in the current diff or a pull request, in a background subagent by default. With no level it reuses the last level you typed. `/review` is an alias (v2.1.223+) |
 | `/code-review ultra` | Runs the cloud review; `/ultrareview` is also a supported alias. Only 3 runs are included in the subscription plans, and they do not refresh |
 | `/simplify` | Runs four cleanup agents that check reuse, code quality, and efficiency |
 
@@ -538,7 +534,7 @@ claude --worktree bugfix-123
 
 Dynamic workflows let you define fan-out, loops, barriers, and structured outputs in JavaScript. The workflow runs in the background, so you can keep using the main session while it works.
 
-A workflow can run up to 16 agents at once and 1,000 agents in one run. Workflow sizing defaults to `medium`, which aims to use fewer than 15 agents. Calls made through a workflow's `agent()` function do not consume the normal `Agent` tool quota. Regular `Agent` calls are limited separately to 20 concurrent subagents and 200 per session.
+A workflow can run up to 16 agents at once by default and 1,000 agents in one run; `CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS` raises the concurrent limit to as many as 256 (v2.1.269+). Workflow sizing defaults to `small` on Pro and `medium` on other plans, and `medium` aims to use no more than 10 agents (v2.1.271+). A workflow that hits your usage limit pauses and continues when the limit resets. Calls made through a workflow's `agent()` function do not consume the normal `Agent` tool quota. Regular `Agent` calls are limited separately to 20 concurrent subagents; the 200-per-session cap was removed in v2.1.224.
 
 Two ways to trigger it:
 

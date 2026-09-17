@@ -269,7 +269,7 @@ Constraints:
 | Quick scoped scan | `/security-review` | Before every PR. Built-in, scoped to recent diff. |
 | Deep cloud review | `/code-review ultra` | Before merging to `main`. Runs a multi-agent review in a cloud sandbox. `/ultrareview` remains a supported alias. |
 | Four-agent cleanup pass | `/simplify` | After a refactor. Four agents look for duplicated work, unnecessary complexity, inefficient code, and misplaced abstractions, then apply cleanup fixes. `/simplify` does not check for correctness bugs. |
-| Pull-request review | `/review <pr>` | Fast, read-only, single-pass review of a GitHub pull request. |
+| Pull-request review | `/code-review [level] <pr>` | Reviews a pull request for correctness bugs in a background subagent; add `--comment` to post findings on the PR. `/review` is an alias since v2.1.223. |
 | Adversarial pass | Devil's Advocate skill | After `/security-review` looks clean. Forces "what did we miss?" |
 | Headless budget-capped scan | `git diff main \| claude -p "OWASP Top 10:2025 + OWASP LLM Top 10:2025 review of this diff. List findings by severity." --model haiku --max-budget-usd 1.00` | Cheap pre-PR check from CI or a Git hook. |
 
