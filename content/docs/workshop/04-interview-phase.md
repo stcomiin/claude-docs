@@ -5,11 +5,11 @@ weight: 4
 
 ## Overview
 
-You've explored the app and set up project instructions. Now you'll decide how a monthly-budget feature should work before asking the agent to build it.
+You've explored the app and set up project instructions. Now let us work toward building a new feature: a monthly-budget feature. Before diving straight into asking the agent to implement it, we should discuss with the agent how this feature should work.
 
-Your agent will interview you until you reach a shared understanding of what the feature should and shouldn't do. It will then turn the conversation into a specification for you to review. Once you're satisfied, you'll use `/to-tickets` to convert it into tickets and publish them to your chosen issue tracker.
+You will use the `grill-with-docs` skill to trigger your agent to conduct an interview session until you and your agent reach a shared understanding of what the feature should and shouldn't do. We will then use `to-spec` to turn the conversation into a specification for you to review. Once you have reviewed it, we will use `/to-tickets` to convert it into tickets and publish them to your chosen issue tracker.
 
-Use the reviewed specification or tickets as your implementation plan. In Lab 5, you'll create a feature branch before starting implementation.
+For the purposes of this workshop, we will be using [Matt Pocock's Skill For Real Engineers](https://github.com/mattpocock/skills) to drive our spec-driven development. For your own development, other approaches like [GSD](https://github.com/open-gsd/gsd-core), [BMaD Method](https://github.com/bmad-code-org/bmad-method), [OpenSpec](https://github.com/Fission-AI/openspec), [Spec Kit](https://github.com/github/spec-kit) and [Superpowers](https://github.com/obra/superpowers) can also be considered.
 
 ## Step 1: Start the interview
 
@@ -84,4 +84,4 @@ After publication, open the returned links and check the tickets in GitHub.
 
 ## What's next
 
-In **Lab 5: Implementation**, you'll create a feature branch and start implementing the tickets with test-driven development.
+In **Lab 5: Implementation**, you'll create a feature branch and start implementing the tickets using Matt Pocock's `/implement` skill, which uses the test-driven development approach.
