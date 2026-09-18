@@ -1,6 +1,7 @@
 ---
 title: Pre-Workshop Setup Guide
 weight: 1
+next: /docs/workshop/01-get-running
 ---
 
 **Agentic Coding in Terminal**: Apex Builders Collective × Info PC
@@ -13,6 +14,7 @@ Please finish these steps **before** the workshop. Allow about 15–20 minutes. 
 
 - [ ] Node.js v22+ installed
 - [ ] Git installed
+- [ ] GitHub CLI installed and signed into your GitHub account
 - [ ] A terminal you're comfortable with
 - [ ] Claude Code installed and working
 - [ ] (Optional) Codex installed and working
@@ -42,6 +44,17 @@ Download from [git-scm.com](https://git-scm.com/). Most macOS and Linux machines
 ```bash
 git --version
 ```
+
+### GitHub CLI
+
+Install [GitHub CLI](https://cli.github.com/), then sign into the account that will own your workshop fork:
+
+```bash
+gh auth login
+gh auth status
+```
+
+The labs use GitHub CLI to publish issues to your fork.
 
 ### Windows
 
@@ -287,13 +300,6 @@ None of these are required.
 
 **A code editor**: [VS Code](https://code.visualstudio.com/), [Cursor](https://cursor.com/), or whichever editor you already use. It helps when you want to inspect generated files outside the terminal.
 
-**GitHub CLI**: If you want to follow along with the GitHub integration section:
-
-```bash
-# Install: https://cli.github.com/
-gh auth login
-```
-
 **A few terminal basics**: If you rarely use a terminal, practice changing folders, listing files, creating a directory, and reading a text file before the workshop.
 
 
@@ -308,5 +314,7 @@ If you get stuck on any step:
 3. Check `claude --version`. Versions 2.1.265 through 2.1.267 fail every turn with HTTP 400 through third-party Anthropic-compatible endpoints such as LiteLLM and OpenRouter (fixed in 2.1.268). The pinned version above is past that range.
 
 ---
+
+Continue with [Lab 1: Get running](/docs/workshop/01-get-running/).
 
 [← Back to the contents](/docs/)

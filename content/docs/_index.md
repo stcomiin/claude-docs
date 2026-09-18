@@ -6,6 +6,10 @@ sidebar:
 
 Workshop materials for building with Claude Code, Codex, GSD, and BMAD from the terminal.
 
+## Workshop labs
+
+Follow the [Workshop labs](/docs/workshop/) in order to prepare the Expense Tracker, explore its code, set project instructions and plan a monthly-budget feature.
+
 ## Core Pages
 
 | Page | Use it for |

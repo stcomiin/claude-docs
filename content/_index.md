@@ -10,6 +10,9 @@ contents:
   - title: Setup Guide
     note: arrive ready — accounts, installs, checks
     url: /docs/setup-guide/
+  - title: Workshop labs
+    note: Follow the Expense Tracker exercises in order.
+    url: /docs/workshop/
   - title: Foundations
     note: agentic coding, installation, CLAUDE.md, context
     url: /docs/agentic-coding-in-terminal/
