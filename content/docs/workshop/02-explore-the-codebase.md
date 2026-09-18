@@ -9,7 +9,7 @@ Your app is running. In this lab, you'll use subagents to explore the codebase a
 
 You'll see how they use tools to find and read code. You'll check key details against the source and ask follow-up questions if anything is unclear.
 
-We'll save the overview in `codebase-overview.md` for later labs. In everyday coding, it can stay in chat unless you want to reuse or share it.
+For this workshop, we will save the codebase exploration locally in `codebase-overview.md`. In everyday coding, the exploration can stay in your chat session as context unless you want to reuse or share it.
 
 ## Before you begin
 
@@ -61,29 +61,29 @@ If a command requests approval, check that it fits the read-only investigation.
 
 ## Step 3: Review the overview
 
-> **Required concept:** Read [Prompt style](/docs/agentic-coding-in-terminal/#prompt-style).
+Once the subagents finish, read the codebase overview to get a better understanding of the codebase.
 
-Once the subagents finish, read the overview. Ask follow-up questions if anything is unclear.
+If anything is unclear, ask follow-up questions.
 
-For example:
+> **Example**
+>
+> ```text
+> Show me the code behind the totals and filters.
+> Why do the totals stay the same when I filter the list?
+> ```
+>
+> Then check the explanation against the code:
+>
+> 1. Open `src/App.jsx` in your editor.
+> 2. Find `totalIncomeCents`, `totalExpensesCents` and `filteredTransactions`.
+> 3. Check which transaction data each calculation uses.
+>
+> The totals use all transactions; the table displays the filtered transactions.
+
+Save the codebase overview locally as a workshop reference:
 
 ```text
-Show me the code behind the totals and filters.
-Why do the totals stay the same when I filter the list?
-```
-
-Then check the explanation against the code:
-
-1. Open `src/App.jsx` in your editor.
-2. Find `totalIncomeCents`, `totalExpensesCents` and `filteredTransactions`.
-3. Check which transaction data each calculation uses.
-
-The totals use all transactions; the table displays the filtered transactions.
-
-Save the overview for later labs:
-
-```text
-Save the overview we discussed, including our clarifications,
+Save the codebase overview we discussed, including our clarifications,
 in codebase-overview.md. Don't change other files.
 ```
 

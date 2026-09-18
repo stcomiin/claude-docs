@@ -9,8 +9,6 @@ You've explored the app. Now you'll inspect the context your agent is using and 
 
 You'll check context usage, customize the status line and create a short `CLAUDE.md` with project-specific guidance.
 
-`codebase-overview.md` describes how the app works. `CLAUDE.md` tells the agent how to work on it.
-
 ## Step 1: Inspect your context
 
 > **Required concept:** Read [Context commands](/docs/agentic-coding-in-terminal/#commands-for-keeping-context-healthy).
@@ -40,13 +38,12 @@ npx -y ccstatusline@2.2.29
 ```
 
 1. Select **Edit Lines**, then the first line.
-2. Add or keep **Model**, **Context %** and **Git Branch**. Arrange them as you prefer.
-3. Return to the main menu and select **Install to Claude Code**, then **Pinned global install**, then **npm**. Review the install command and user-settings path before confirming.
-4. Choose **Save & Exit**.
+2. Add or keep **Model**, **Thinking Effort**, **Context Length**, **Context %**, **Session Cost**, **Current Working Dir** and **Git Branch**. You can split these widgets across multiple lines and arrange them as you prefer.
+3. Return to the main menu and select **Install to Claude Code**.
+4. Choose **Pinned global install**, then **npm**. This installs `ccstatusline@2.2.29` for use across projects and adds the status-line command to your Claude Code user settings. The version stays fixed until you update it. Review the install command and settings path before confirming.
+5. Choose **Save & Exit**.
 
-If you already use `ccstatusline`, edit and save your existing layout instead of reinstalling it.
-
-Return to Claude Code and check that the status line shows your model, context usage and current branch. You can close the temporary terminal.
+Return to Claude Code and check that your chosen widgets appear in the status line. You can close the temporary terminal.
 
 ## Step 3: Write project instructions
 
@@ -64,12 +61,12 @@ Here are some sample rules you can add:
 
 Avoid repeating codebase details in your instructions. The agent can find that information in the code and existing documentation.
 
-Keep only instructions the agent wouldn't otherwise know, such as custom project conventions. Also record corrections for things it forgets or repeatedly gets wrong, to help prevent the same mistakes in future sessions.
+Keep only instructions the agent wouldn't otherwise know, such as custom project conventions. Also include instructions for things the agent keeps forgetting and repeatedly gets wrong, to help prevent the same mistakes in future sessions.
 
 ## Checkpoint
 
 - [ ] I've inspected context usage with `/context`.
-- [ ] My status line shows the model, context usage and current Git branch.
+- [ ] My status line shows the model, thinking effort, context usage, session cost, working directory and Git branch.
 - [ ] I've reviewed the instructions in my project's `CLAUDE.md` or `AGENTS.md`.
 
 ## What's next
