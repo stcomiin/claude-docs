@@ -297,16 +297,11 @@ description: Use when reviewing pull requests or code diffs. Pay special attenti
 
 ## Document skills - docx, pdf, pptx, xlsx
 
+The document-skills plugin helps Claude create and edit Word documents, PDFs, slide decks, and spreadsheets. Its skills cover tasks such as document formatting, PDF extraction, presentation layout, and spreadsheet formulas and charts. Use it when a stakeholder needs an office file or a formatted deliverable, and inspect the generated file before sharing it.
+
 **Project:** [anthropics/skills](https://github.com/anthropics/skills)
 
-The document skills help Claude create and edit real office files:
-
-- `docx` for Word documents
-- `pdf` for PDF extraction, editing, and final output
-- `pptx` for slide decks
-- `xlsx` for spreadsheets
-
-Use these when the stakeholder expects a Word doc, slide deck, or styled PDF. For internal docs (design notes, ADRs, runbooks, status reports), markdown is better: it reviews in PRs, diffs cleanly, and lives next to the code.
+For internal docs (design notes, ADRs, runbooks, status reports), markdown is better: it reviews in PRs, diffs cleanly, and lives next to the code.
 
 ### Install
 
@@ -346,9 +341,11 @@ The important check is simple: open the generated file and inspect it. Document 
 
 ## Superpowers
 
+Superpowers adds skills for brainstorming, planning, debugging, test-driven development, and verification that activate based on the task. It fits everyday coding sessions where you want the agent to follow a repeatable process without remembering a command for every step. Its automatic skill activation adds structure, but can make sessions harder to predict if you prefer to direct each step yourself.
+
 **Project:** [obra/superpowers](https://github.com/obra/superpowers) · by Jesse Vincent (MIT)
 
-Unlike BMAD and GSD, Superpowers is less command-driven. Its skills fire based on what you're doing (brainstorming, planning, debugging, TDD, or verification) without you having to remember which command to type. A session-start bootstrap (the `using-superpowers` skill) teaches Claude to check for a relevant skill before each task.
+A session-start bootstrap (the `using-superpowers` skill) teaches Claude to check for a relevant skill before each task.
 
 ### Install
 
@@ -388,13 +385,11 @@ Skip it if you want to keep your agent environment minimal or if automatic skill
 
 ## BMAD - Breakthrough Method for Agile AI-Driven Development
 
+BMAD gives Claude an agile-style workflow with separate roles for product, architecture, development, QA, and UX. Those roles turn an idea into requirements, design decisions, stories, implementation, and review artifacts that later agents can read. It is useful for larger product work that needs explicit decisions and handoffs, but usually adds too much process for isolated fixes.
+
 **Project:** [bmad-code-org/BMAD-METHOD](https://github.com/bmad-code-org/BMAD-METHOD)
 
 **Docs:** [docs.bmad-method.org](https://docs.bmad-method.org/)
-
-BMAD gives Claude an agile-style workflow. Instead of one agent doing every job, it separates product, architecture, development, QA, UX, and other roles.
-
-That structure is useful when the work needs requirements, design decisions, task breakdowns, and review artifacts. It is usually too much for isolated fixes.
 
 ### Install
 
@@ -498,9 +493,9 @@ BMAD is a poor fit when the overhead is larger than the change. If the task is "
 
 ## GSD Core
 
-**Project:** [open-gsd/gsd-core](https://github.com/open-gsd/gsd-core)
+GSD organizes a project into requirements and roadmap phases, then takes each phase through discussion, planning, execution, and verification. It saves plans, decisions, and progress in `.planning/` so later sessions can continue from written project state. Use it for features or projects that benefit from small, reviewable phases; its quick commands cover smaller tasks that do not need the full workflow.
 
-GSD divides a project into requirements, roadmap phases, discussion, planning, execution, and verification. Each phase is small enough to review on its own, and the working state lives on disk instead of depending on one long conversation.
+**Project:** [open-gsd/gsd-core](https://github.com/open-gsd/gsd-core)
 
 ### Install
 
@@ -618,9 +613,11 @@ Two practical consequences:
 
 ## Codex for Claude Code
 
+The Codex plugin lets Claude Code call Codex for code review, investigation, or delegated work. Its commands support focused reviews and background jobs, making it useful for getting another model's perspective on a change or a difficult bug. The plugin's model support is outdated, so ask your agent to use the Codex CLI directly for this workflow.
+
 **Project:** [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 
-The Codex plugin lets Claude Code call Codex for review or delegated work. A second model isn't automatically right, but it tends to notice risks the first one missed.
+> **Warning: Use the Codex CLI directly.** The `openai/codex-plugin-cc` repository has not been updated to support the latest Codex models and new reasoning effort levels. Ask your agent to use the Codex CLI directly instead of this plugin.
 
 ### Install
 
