@@ -98,14 +98,14 @@ Before we go deeper, here are some commands / CLI flags that are useful.
 
 **One-liner to remember:** type `/` on an empty prompt to see everything available in your setup, including custom and MCP commands. You'll rarely need to memorize a full list.
 
-## Stop/Resume/Continue Claude Code conversations
+#### Stop/Resume/Continue Claude Code conversations
 
 | Action | Command | Remarks |
 | --- | --- | --- |
 | Resume a previous conversation | `claude --resume`  which will show a list of previous conversations to resume from in this current folder, OR `claude --continue` which will auto continue from the last stopped conversation in this current folder | you can also append additional flags to these resume and continue commands for eg. `claude --continue --dangerously-skip-permissions --effort max --model claude-sonnet-5` |
 | Exit a conversation | Ctrl + C until session exits | All session history is stored as transcript files in .claude folder in User Directory. `~/.claude/projects/<folder name>` |
 
-### Useful Claude Code Customisation
+### Useful Claude Code Customisation & Quality of Life {#useful-claude-code-customisation}
 
 #### 1. ccstatusline
     
@@ -176,9 +176,17 @@ Sample:
 
 ![Toast notification sample](/images/statusline-toast.png)
 
-#### 4. Fullscreen renderer
+#### 4. Managing Multiple Agent Sessions with Herdr {#managing-multiple-agent-sessions-with-herdr}
 
-New installs start in the fullscreen renderer, including Bedrock, Vertex, Foundry, and other setups that were excluded before (v2.1.239+). In an older session, `/tui fullscreen` switches to it. Fullscreen adds a live `/diff` panel beside the conversation that updates as Claude edits (v2.1.260+), mouse support in `/config` (v2.1.271+), and `Ctrl+L` to clear the view like a terminal `clear` (v2.1.260+). `/focus` hides tool activity behind a one-line summary per turn.
+We recommend [Herdr](https://herdr.dev/docs/quick-start/) when juggling multiple coding agent sessions. It organizes terminals into workspaces, tabs, and panes, shows which agents are working or waiting for input, and keeps sessions running when you detach or close the terminal. Run `herdr` again to reattach.
+
+After [installing Herdr](https://herdr.dev/docs/install/), run `herdr` from your project directory, then start `claude`, `codex`, or another supported agent inside a pane. The [quick start](https://herdr.dev/docs/quick-start/) covers creating panes, switching workspaces, and detaching.
+
+For independent changes in the same repository, use [separate Git worktrees](/docs/agentic-coding-in-terminal/#worktrees--working-in-parallel), then run each agent in a Herdr pane. Worktrees isolate file edits; Herdr helps you monitor and switch between the sessions.
+
+#### 5. Claude Code History Viewer
+
+[Claude Code History Viewer](https://github.com/jhlee0409/claude-code-history-viewer) lets you browse past sessions and project statistics. Install the MSI from the [latest release](https://github.com/jhlee0409/claude-code-history-viewer/releases). Despite the name, it also reads sessions from tools such as Codex and reports token usage.
     
 ---
 
@@ -223,15 +231,15 @@ Agentic coding tools like Claude Code maintain context across a session, but und
 
 #### CLAUDE.md tiers: User, Project, Local
 
-CLAUDE.md has three possible locations
+CLAUDE.md can be organized into these scopes:
 
 | Scope | What it covers | Where it lives |
 | --- | --- | --- |
 | **User** | Preferences across all your projects (e.g. tone, formatting habits) | Global config (~/.claude/claude.md) |
-| **Project** | Instructions specific to this repo (e.g. stack, conventions) | `CLAUDE.md` in repo root |
+| **Project** | Instructions specific to this repo or folder (e.g. stack, conventions) | `CLAUDE.md` in the repo root or subfolders |
 | **Local** | Overrides just for your machine (e.g. local paths, secrets) | `CLAUDE.local.md` |
 
-Use **project memory** for anything the whole team should share. Project specific settings must be committed to the repo's CLAUDE.md
+Use **project memory** for anything the whole team should share, and commit these files to the repo. Keep shared instructions in the root `CLAUDE.md`; different folders can have their own files, such as `frontend/CLAUDE.md` and `backend/CLAUDE.md`, for folder-specific conventions. When you start Claude Code at the repo root, nested files load only when Claude reads files in those folders, adding to the root instructions. See [how CLAUDE.md files load](https://code.claude.com/docs/en/memory#how-claudemd-files-load).
 
 Use **local memory** for anything personal or environment-specific that shouldn't be committed.
 
@@ -255,12 +263,11 @@ Test it out! Prompt Claude Code to add a feature. Check whether it follows the r
 
 - LLMs have a finite context window. In long sessions, older conversation turns get summarised ("compacted") to free up context, which is not desirable.
 - What goes into the context? Visualize it - [https://code.claude.com/docs/en/context-window](https://code.claude.com/docs/en/context-window)
-- [Claude Code History Viewer](https://github.com/jhlee0409/claude-code-history-viewer) lets you browse past sessions and project statistics. Install the MSI from the [latest release](https://github.com/jhlee0409/claude-code-history-viewer/releases). Despite the name, it also reads sessions from tools such as Codex and reports token usage.
 - Do not let conversations get to the point where your conversation needs to be compacted. Always `/clear` around 300k context if possible. Claude models have 1M context now by default but performance still degrades in longer context, no matter how good they say it is.
 - **Do not use the compaction feature in Claude Code**. Compaction is simply passing the chat history to a model and asking it to summarize the history. The session then continues from that summarized conversation, which is lossy and important details gleaned over the session may be stripped out.
-- Codex running on OpenAI frontier model handles compaction and long term attention well, unknown if it's due to the harness or the model. Using compaction is fine in Codex from our experience
-- Claude Code handles the context window automatically (that's the whole point of CC: context engineering for agentic tasks), but you can influence it in some ways:
-    - Always start a **new session** for any task that is not related to your current session.
+- Codex running on OpenAI frontier model handles compaction and long term attention well, unknown if it's due to the harness or the model. Using compaction is fine in Codex from our experience.
+- Optimal Context tips:
+    - Always start a **new session** for any new task that is not related to your current session.
     - Use `/clear` to reset context without restarting (when hitting ~300k context)
     - Keep `CLAUDE.md` tight and relevant: it's loaded at the start of every session, so bloating it costs precious tokens
     - Use the `/handoff` skill from Matt Pocock to generate a handoff document when exceeding the smart zone context limit https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md
