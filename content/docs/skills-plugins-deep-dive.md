@@ -15,136 +15,23 @@ The examples below are intentionally selective. Star counts, launch claims, and 
 
 ---
 
-## Why *Good* skills and plugins matter
+## Why do skills and plugins matter to the harness?
 
-Plain prompting works for small, clear tasks. It gets weaker when the task needs planning, repeated checks, project memory, or a specific output format.
+- **Progressive disclosure.** The agent sees a skill's name and description before loading its full instructions. When the skill is invoked, it reads the `SKILL.md` body and follows references to supporting files as needed. For example, a release skill can keep database migration instructions in a separate file that is read only when the release changes the database. This [progressive disclosure](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) keeps unrelated procedures out of context, following Anthropic's [context engineering guidance](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents).
 
-Skills and plugins help by *"spec-ing"* the job. They can tell Claude what to inspect, what to ask, which checks to run, and what output format to produce.
+- **Shared setup.** Plugins bundle skills, scripts, agents, and hooks into one installable package. A team can share its review or release workflow without each person copying instructions and configuring the supporting components separately. Keeping that setup in one repository gives the team a common place to review and improve it. When the workflow changes, the team can update the shared package and distribute the revision.
 
-They don't make the model reliable on their own, but they give it clearer rules and more chances to catch mistakes before you treat the output as finished.
+---
 
-When using such agentic coding tools on both brownfield work (with existing codebases) and production-grade greenfield work (not just a POC), some common failures keep showing up:
+## Why do *Good* skills and plugins matter?
 
-- **Attempts to refactor legacy code** that the agent was not tasked to refactor or touch in the current session.
-- **AI sloppy code**, including but not limited to:
-  - over-abstraction (e.g. wrapping a single function call in a factory plus interface):
+A skill records a workflow you want the agent to repeat. It tells the agent what to read, which steps to follow, when to ask for input, and how to check the result. You can reuse those instructions across sessions and share them with your team without repeating the same detailed prompt.
 
-    ```python
-    from abc import ABC, abstractmethod
+For example, a PR review skill can instruct Claude to read the diff and intended behavior, check project conventions, examine correctness and security, review test coverage, and report findings with file references and evidence. The process should adapt to the change. An authentication change needs permission checks, while a documentation edit needs different checks. The skill should explain when each step applies.
 
-    class GreeterInterface(ABC):
-        @abstractmethod
-        def greet(self, name: str) -> str: ...
+A good skill is specific enough that you can tell whether the agent followed it. "Check that every new endpoint enforces the caller's permissions" gives the agent a concrete task and the reviewer something to verify. Writing the process down also makes it easier to improve. When a review misses something, update the skill so future sessions can use the correction.
 
-    class DefaultGreeter(GreeterInterface):
-        def greet(self, name: str) -> str:
-            return f"Hello, {name}"
-
-    class GreeterFactory:
-        @staticmethod
-        def create() -> GreeterInterface:
-            return DefaultGreeter()
-
-    greeting = GreeterFactory.create().greet("Alice")
-    # When `def greet(name): return f"Hello, {name}"` was all that was needed.
-    ```
-
-  - lasagna code (e.g. several thin pass-through layers between the handler and the real logic):
-
-    ```python
-    def handle_request(req):
-        return _process_request(req)
-
-    def _process_request(req):
-        return _execute_request(req)
-
-    def _execute_request(req):
-        return _run_request(req)
-
-    def _run_request(req):
-        return {"user_id": req["user_id"]}
-    # Four layers of pass-through to return one field.
-    ```
-
-  - defensive coding theater (e.g. null checks on values the type system already guarantees are non-null, try/catch around code that cannot throw):
-
-    ```python
-    def total(items: list[int]) -> int:
-        if items is None:           # type signature already guarantees list[int]
-            return 0
-        try:
-            return sum(items)       # sum() over list[int] cannot throw
-        except Exception:
-            return 0
-    ```
-
-  - boilerplate bloat (e.g. docstrings and getters/setters on trivial fields):
-
-    ```python
-    class User:
-        def __init__(self, name: str):
-            self._name = name
-
-        @property
-        def name(self) -> str:
-            """Return the user's name."""
-            return self._name
-
-        @name.setter
-        def name(self, value: str) -> None:
-            """Set the user's name."""
-            self._name = value
-    # A @dataclass or plain attribute would do the same work.
-    ```
-
-- **Vacuous or tautological tests** (e.g. mocking every internal call so the test only verifies that the mocks were called):
-
-    ```python
-    def test_double():
-        calc = Mock()
-        calc.double.return_value = 10
-        assert calc.double(5) == 10
-    ```
-
-- **Scope failure** where the agent refuses an obvious boy-scout fix because it didn't cause the issue this session.
-
-    ```python
-    # Task: "Return None for missing users instead of letting db.find_user throw exception."
-
-    # Before
-    def get_user(user_id):
-        cached = cache.get(f"user:{user_id}")
-        if cached is not None:
-            return cached
-
-        user = db.find_user(user_id)                       # raises UserNotFound if missing, to be fixed
-        cache.set(f"users:{user_id}", user, ttl=3600)
-        return user
-
-    # After
-    def get_user(user_id):
-        cached = cache.get(f"user:{user_id}")
-        if cached is not None:
-            return cached
-
-        try:
-            user = db.find_user(user_id)
-        except UserNotFound:
-            return None                                    # changed by agent
-        cache.set(f"users:{user_id}", user, ttl=3600)      # typo, pre-existing: "users:" vs "user:"
-        return user
-
-    # Agent: "The cache.set key looks off but it's pre-existing — out of scope."
-    # Result: the function appears to work perfectly. It just has a 0% cache hit rate,
-    # hammering the database on every call.
-
-    ```
-
-This is not a "model is not smart enough" problem. We need to build our "harness" or setup around the model with intentional guardrails that guide it toward what we want.
-
-We call this *bounded autonomy*: enough room to do the work, with guardrails that catch the specific ways it drifts.
-
-Plain prompting is unbounded. A skill tightens it, and frameworks like BMAD or GSD tighten it more.
+Plugins package related skills with tools, commands, and hooks so others can install the workflow together. Skills still depend on the agent following instructions. They make a process easier to repeat, but cannot guarantee compliance. Use scripts for repeatable checks and hooks or CI to enforce checks that must pass.
 
 ---
 
@@ -167,6 +54,166 @@ The difference matters for how much enforcement each one can carry. Think of it 
 - A **skill** is mostly instructions. It tells Claude what to do when it loads. The agent can still ignore parts of it or treat it as a hint.
 - A **plugin** can add hooks, subagents, and commands that run regardless of what the agent decides. Hooks in particular are enforcement: they fire whether or not the agent wanted them to.
 - A **framework** like BMAD or GSD goes further. It writes project state to disk (PRDs, plans, phases, verification reports), so each step leaves artifacts the next agent reads, and the workflow becomes hard to skip past.
+
+---
+
+## Skills
+
+Agent Skills are folders of instructions, scripts, and resources that agents can discover and use to do things more accurately and efficiently.
+
+Diagrams from Anthropic's [Agent Skills article](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills). Click to enlarge.
+
+### Anatomy of a skill
+
+Metadata describes when to use a skill; the Markdown body provides instructions.
+
+{{< figure src="/images/agent-skills-anatomy.jpg" width="1650" height="929" loading="lazy" alt="A SKILL.md file with YAML frontmatter and Markdown instructions." >}}
+
+Link supporting files from `SKILL.md` so they can be read separately.
+
+{{< figure src="/images/agent-skills-supporting-files.jpg" width="1650" height="1069" loading="lazy" alt="SKILL.md links to reference.md and forms.md." >}}
+
+### Progressive disclosure
+
+Load descriptions first, instructions when selected, and supporting files as needed.
+
+{{< figure src="/images/agent-skills-progressive-disclosure.jpg" width="2292" height="673" loading="lazy" alt="Three levels: metadata, instructions, and supporting files." caption="Illustrative token counts. Files remain on disk until needed; loaded content still consumes context." >}}
+
+### Skills in the context window
+
+A PDF request triggers `SKILL.md`, then the form-filling reference.
+
+{{< figure src="/images/agent-skills-context-window.jpg" width="1650" height="929" loading="lazy" alt="The PDF request, skill instructions, and form reference enter context in sequence." >}}
+
+### Skills and code execution
+
+Instructions can invoke bundled scripts for repeatable operations.
+
+{{< figure src="/images/agent-skills-code-execution.jpg" width="1650" height="929" loading="lazy" alt="Form instructions point to a Python helper for extracting PDF fields." >}}
+
+For a worked authoring example, see [Creating your own skills](/docs/skills-plugins-deep-dive/#creating-your-own-skills).
+
+See the following Github repo for living doc: https://github.com/luongnv89/claude-howto/blob/6d1e0ae4afbb95305e10d414ae90fcf3d74b9c4e/03-skills/README.md
+
+Three recent changes affect how skills behave. `/skill-doctor` lists the loaded skills that went unused and what each costs in context, so you can prune them (v2.1.261+). A skill marked `disable-model-invocation` now makes Claude ask you to run it instead of copying its steps (v2.1.222+).
+
+### Notable Skills for Reference
+
+> ⚠️ **Security warning:** Skills can execute arbitrary code in your environment. Before installing a community skill, **review SKILL.md and every bundled script yourself**. A malicious skill can access your shell, exfiltrate data, or modify files from a few lines of Markdown. Install only from sources you trust. The same risk applies to skills used by OpenClaw and other coding CLIs.
+
+This is a growing list of community and official skills worth knowing about. Not all of these are endorsed. They're here as references for what's possible.
+
+| Category | Skill | Repo | Purpose |
+| --- | --- | --- | --- |
+| Documents | docx, pptx, pdf, xlsx | [anthropics/skills](https://github.com/anthropics/skills/tree/main/skills) | Create and edit common office document formats, same skills that power Claude's document capabilities on web and desktop. [Blog post](https://claude.com/blog/create-files). Might require pip and npm to install some dependencies |
+| Writing | Unslop | [cursor/plugins · pstack](https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md) | Edits prose to remove common AI writing patterns, including filler, vague claims, forced contrasts, and excessive formatting. Preserves the intended meaning and tone while using plain language. |
+| Tooling | Skill Creator | [anthropics/skills](https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md) | Meta-skill for creating, evaluating, improving, and benchmarking other skills. Built into Claude.ai (paid plans). Already installed by default |
+| DevOps | KubeShark Kubernetes Skill | [LukasNiessen/kubernetes-skill](https://github.com/LukasNiessen/kubernetes-skill) | Failure-mode-first Kubernetes manifest generation, review, and hardening for Claude Code and Codex. Reduces deprecated APIs, unsafe defaults, weak RBAC, and rollout or networking issues |
+| Frontend | React Best Practices | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills/tree/main/skills/react-best-practices) | Vercel's official React conventions: component patterns, hooks usage, performance best practices |
+| Frontend | React View Transitions | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills/tree/main/skills/react-view-transitions) | Implements view transitions in React apps using the View Transitions API |
+| Frontend | Impeccable | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) | Frontend-design toolkit that expands Anthropic's frontend-design skill: reusable product/design context (`PRODUCT.md`, `DESIGN.md`), 23 design commands, browser-assisted variant iteration, and 59 deterministic detector rules for recurring AI frontend anti-patterns. Covers design critique, accessibility/performance audits, typography, layout, responsive behavior, i18n/edge-case hardening, and final polish. Install: `npx impeccable install`, then `/impeccable init` (plugin marketplace also supported) |
+| Security | OWASP Security | [agamm/claude-code-owasp](https://github.com/agamm/claude-code-owasp) | OWASP security best practices (2025–2026): Top 10:2025, ASVS 5.0, Agentic AI security, 20+ language-specific security quirks |
+| Security | SecLists & Agents | [awesome-claude-skills-security](https://github.com/Eyadkelleh/awesome-claude-skills-security) | More security skills: curated SecLists wordlists, injection payloads, and expert agents for authorized pentesting, CTFs, and bug bounties |
+| Data & Research | DSPY | [OmidZamani/dspy-skills](https://github.com/OmidZamani/dspy-skills) | Automatic prompt optimization using the DSPY framework |
+| Data & Research | Web Scraper | [yfe404/web-scraper](https://github.com/yfe404/web-scraper) | Intelligent web scraping with automatic strategy selection and TypeScript-first Apify Actor development |
+| Data & Research | OSINT | [smixs/osint-skill](https://github.com/smixs/osint-skill) | Open-source intelligence: from a name to a scored dossier with psychoprofile, career map, and confidence grades. 55+ Apify actors, 7 search APIs. Early beta. |
+| Data & Research | Hyperresearch | [jordan-gibbs/hyperresearch](https://github.com/jordan-gibbs/hyperresearch) | Deep research harness for Claude Code with tier-adaptive pipelines, adversarial review, source provenance, and a persistent searchable vault. |
+| Data & Research | last30days | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill) | Researches what people have discussed and engaged with recently across Reddit, Hacker News, GitHub, YouTube, X, arXiv, and more. Synthesizes cross-source findings into a cited brief. Covers topic/person/company research, tool comparisons, trend discovery, meeting prep, watchlists, and recurring briefings. Several sources work without configuration; optional sources require their own credentials or browser sessions. Install: `/plugin marketplace add mvanhorn/last30days-skill`, then `/plugin install last30days` |
+| Notebook-LM | Knowledge Management | [Notebook-LM skill](https://github.com/PleasePrompto/notebooklm-skill) | LLM to manage your NotebookLM, start research, generate infographics |
+| Code Review | Devil's Advocate | [Devil's Advocate](https://github.com/notmanas/claude-code-skills/tree/main/skills/devils-advocate) | Challenge and poke holes from previous reviews with defined frameworks |
+
+> **Using Hyperresearch:** Treat Hyperresearch more like a research harness than a single prompt helper. Install it in a project with `pip install hyperresearch && hyperresearch install`, then run `/hyperresearch <research question>` inside Claude Code. It can run a lighter mode for bounded factual questions, or a full multi-step pipeline for deep argumentative research with fetchers, critics, patching, and a persistent `research/` vault that future sessions can search and reuse.
+
+---
+
+### Curated Lists & Articles
+
+These aren't individual skills; they're roundups and deep dives that reference multiple skills worth exploring.
+
+| Article | Source | What It Covers |
+| --- | --- | --- |
+| [Top Claude Skills for UI/UX Engineers](https://snyk.io/articles/top-claude-skills-ui-ux-engineers/) | Snyk | Curated list including UX Designer skill, component libraries, design system skills |
+| [Top Claude Skills for Cybersecurity](https://snyk.io/articles/top-claude-skills-cybersecurity-hacking-vulnerability-scanning/) | Snyk | Curated list including OWASP, vulnerability scanning, penetration testing skills |
+| [awesome-agent-skills](https://github.com/VoltAgent/awesome-agent-skills) | VoltAgent | Community-maintained master list of 500+ agent skills across all platforms |
+| [Awesome Claude Skills](https://github.com/ComposioHQ/awesome-claude-skills) | ComposioHQ | Awesome curated list of Claude Skills for all domains |
+| [agent-skills](https://github.com/addyosmani/agent-skills) | Addy Osmani | Software engineering specific skills |
+
+---
+
+### On Skill Security
+
+The convenience of skills comes with real risk.
+
+- Snyk's research on the [ClawHavoc campaign](https://snyk.io/articles/skill-md-shell-access/) demonstrated how a malicious SKILL.md file can escalate from Markdown instructions to full shell access in three lines.
+- Hidden instructions in a PDF file included with the skill alters the default skill instructions [https://blog.sondera.ai/p/claude-skill-hijack-invisible-sentence](https://blog.sondera.ai/p/claude-skill-hijack-invisible-sentence)
+- **Skills can include executable scripts**: a `scripts/` directory can contain anything that runs on your machine
+- **Prompt injection via SKILL.md**: malicious instructions can tell the agent to exfiltrate environment variables, API keys, or source code
+- **Supply chain attacks**: a skill you installed from GitHub can be updated by the author at any time after you've added it
+- **No sandbox by default**: unlike MCP servers, skills run with the same permissions as your Claude Code session
+
+**Practices to be followed before installing any community skill:**
+
+1. **Read the SKILL.md**: the full file, not just the front-matter description
+2. **Check the scripts/ directory**: if it has executable code, read every file
+3. **Review the repo**: check commit history, contributors, and whether the repo is actively maintained
+4. **Pin versions**: clone or fork rather than referencing a live repo that can change under you, or pin to commit SHAs
+5. **Use `--dangerously-skip-permissions` with caution**: this flag + a malicious skill = full access to your machine
+
+> 🔗 For securing the **apps Claude builds** (OWASP web/API/LLM/Agentic Top 10s, MCP & Claude Code CVEs, ready-to-paste pre-commit and CI guards, the LMDeploy 12h-to-exploit advisory), see [Cybersecurity & Production Hardening](/docs/security/).
+
+## Plugins
+
+Plugins extend Claude Code with additional capabilities: language intelligence, platform integrations, workflow automation, and more.
+
+Changes made from `/plugin` (install, enable, disable) take effect when you close the menu; `/reload-plugins` is no longer needed (v2.1.268+). Before publishing your own plugin, `claude plugin validate --json` gives a machine-readable report (v2.1.259+) and `claude plugin eval` runs its eval suite and scores the results (v2.1.269+). On install, `--accept-command <sha256>` accepts exactly the command a `--json` dry run displayed, instead of a blanket `-y` (v2.1.271+).
+
+> 🗒️ Some plugins install the MCP servers they depend on. Official plugins are available through the `claude-plugins-official` marketplace.
+
+### Notable Plugins
+
+| Plugin | What it does | Link |
+| --- | --- | --- |
+| **Superpowers** | A collection of power-user enhancements for Claude Code | [https://github.com/obra/superpowers](https://github.com/obra/superpowers) |
+| **Skills for Real Engineers** | Matt Pocock's composable collection of engineering-discipline skills: requirements grilling, domain modeling, specs and ticket decomposition, TDD, debugging, code review, and codebase architecture | [GitHub](https://github.com/mattpocock/skills/tree/main/skills)<br><code>/plugin install mattpocock-skills</code> (or <code>npx skills@latest add mattpocock/skills</code> for editable project-local copies. Pick one method to avoid duplicate skills) |
+| **Security Guidance** | Official plugin that automatically reviews code changes for vulnerabilities on edits, commits, or pushes | [Docs](https://code.claude.com/docs/en/security-guidance#on-each-commit-or-push-claude-makes)<br><code>/plugin install security-guidance@claude-plugins-official</code> |
+| **Codex Security** | OpenAI Codex plugin for authorized repository, deep, and diff-focused security scans, plus minimal fixes for validated findings | [Docs](https://developers.openai.com/codex/security/plugin)<br><code>$codex-security:security-scan</code> / <code>$codex-security:security-diff-scan</code> |
+| **GSD Core** | Phase-based spec, implementation, and verification workflow | [https://github.com/open-gsd/gsd-core](https://github.com/open-gsd/gsd-core) |
+| **BMAD** | Agile-style planning and development framework (SDD) | [docs](https://docs.bmad-method.org/) / [GitHub](https://github.com/bmad-code-org/BMAD-METHOD) |
+| **Spec Kit** | SDD Framework | [https://github.com/github/spec-kit](https://github.com/github/spec-kit) |
+| **OpenSpec** | SDD Framework | [https://github.com/Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec) |
+| **GitLab** | GitLab-native version of the GitHub integration | via claude-plugins-official marketplace |
+| **Codex for CC** | Call Codex CLI for a second review or delegated task | [GitHub](https://github.com/openai/codex-plugin-cc)<br><code>/plugin marketplace add openai/codex-plugin-cc</code><br><code>/plugin install codex@openai-codex</code> |
+| **Playwright** | Browser automation and end-to-end testing MCP server | via claude-plugins-official marketplace |
+| **Language Servers (LSP)** | Gives Claude real-time access to your language server: hover info, go-to-definition, diagnostics | via claude-plugins-official marketplace |
+
+### Plugin Marketplace
+
+| Marketplace option | Offline? |
+| --- | --- |
+| **Official Claude Code marketplace** | 🔴 Requires internet to browse and install |
+| **LiteLLM self-hosted marketplace** | 🟢 Fully offline once LiteLLM proxy is running locally |
+| **Archive source** (v2.1.224+) | Works from any internal HTTPS host: a plugin zip with an optional SHA-256 pin, no git or npm needed |
+
+**Offline / self-hosted option via LiteLLM:**
+
+Full guide: [https://docs.litellm.ai/docs/tutorials/claude_code_plugin_marketplace](https://docs.litellm.ai/docs/tutorials/claude_code_plugin_marketplace)
+
+**Prerequisites for the LiteLLM marketplace:**
+
+- LiteLLM Proxy running with a database connected
+- Access to the LiteLLM UI
+- Plugins hosted on GitHub, GitLab, or any git-accessible URL (can be a local git server)
+
+To browse and install plugins from the official marketplace, open Claude Code and navigate to **Extensions → Marketplace**, or visit the marketplace via the Claude Code documentation.
+
+### Plugin Marketplace Offline setup steps
+
+For offline environments, you can host curated plugins through a self-hosted LiteLLM instance, mirroring their online counterparts.
+To add a self-hosted LiteLLM as a plugin marketplace in Claude Code:
+
+`claude plugin marketplace add http://your-litellm-proxy.example.com/claude-code/marketplace.json`
+
+If the catalog needs a token, a marketplace `headersHelper` runs a command of yours that mints the request headers (v2.1.238+). Marketplaces hosted on a self-managed GitLab work with bare repository URLs, including nested subgroups (v2.1.232+).
 
 ---
 
