@@ -7,6 +7,27 @@ weight: 2
 
 [Pre-Workshop Setup Guide](/docs/setup-guide/)
 
+## Workshop Overview
+
+Claude Code brings a Claude model, an agentic loop, and a set of tools together. Around that core, we can add project context, reusable workflows, external integrations, and controls over how the agent works.
+
+{{< figure src="/images/claude-code-overview.svg" width="1200" height="880" alt="Claude Code sits at the center, connected to context and memory, built-in tools, MCP servers, skills, plugins, subagents, hooks, and permissions. Its agentic loop gathers context, acts, and checks results." caption="The parts we’ll explore. Connections show how each part relates to Claude Code, not an execution order." >}}
+
+| Part | What it adds | Where we’ll explore it |
+| --- | --- | --- |
+| **Context & memory** | Project instructions, conversation history, and persistent memory that inform the agent’s work. | [Context & Memory](/docs/agentic-coding-in-terminal/#context--memory) |
+| **Built-in tools** | Actions such as reading files, editing code, running shell commands, and searching the web. | [Tools](/docs/agentic-coding-in-terminal/#tools-what-claude-code-can-actually-do) |
+| **MCP servers** | External tools and data connected through the Model Context Protocol, such as Context7 or Chrome DevTools. | [MCP](/docs/agentic-coding-in-terminal/#mcp) |
+| **Skills** | Reusable instructions in `SKILL.md`, with optional scripts and references, that guide a workflow. | [Skills](/docs/agentic-coding-in-terminal/#skills) |
+| **Plugins** | Installable packages that can bundle skills, agents, hooks, and MCP servers. | [Plugins](/docs/agentic-coding-in-terminal/#plugins) |
+| **Subagents** | Focused tasks delegated to agents with their own context windows; tasks can run in parallel. | [Sub-agents](/docs/agentic-coding-in-terminal/#working-with-other-agents-sub-agents--agent-teams) |
+| **Hooks** | Handlers that run at lifecycle events, such as before or after a tool call, for checks and automation. | [Hooks](/docs/agentic-coding-in-terminal/#hooks) |
+| **Permissions** | Rules and approval modes that control which actions the agent can take. | [Permission Rules](/docs/agentic-coding-in-terminal/#permission-rules) |
+
+**How the pieces fit:** skills guide the workflow; tools perform actions; MCP servers expose external capabilities; plugins package extensions. Hooks and permissions control execution, while context and memory inform decisions. Subagents help split the work.
+
+We’ll start with [setup](/docs/setup-guide/) and the foundations on this page, then explore [structured workflows with GSD and BMAD](/docs/skills-plugins-deep-dive/) and [Matt Pocock’s skills](/docs/setup-guide/#3-install-skills-by-matt-pocock), [security and hardening](/docs/security/), and [applying these workflows to existing codebases](/docs/existing-codebase-workflows/). Keep the [cheat sheet](/docs/cheat-sheet/) beside you as a reference.
+
 
 ## Installation & Configuration
 

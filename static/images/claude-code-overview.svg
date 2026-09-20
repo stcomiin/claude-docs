@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="880" viewBox="0 0 1200 880" role="img" aria-labelledby="overview-title overview-description">
+  <title id="overview-title">Claude Code: the workshop at a glance</title>
+  <desc id="overview-description">Claude Code is in the center: a Claude model and an agentic loop that gathers context, acts, and checks results. Eight connected parts surround it: context and memory, built-in tools, MCP servers, skills, plugins, subagents, hooks, and permissions. Skills guide workflows; tools perform actions; MCP servers connect external capabilities; plugins can bundle skills, agents, hooks, and MCP servers. The workshop moves from setup and foundations to extensions, structured workflows, security, and existing codebases.</desc>
+  <!--
+  THESIS: Make the workshop's moving parts legible around a single Claude Code hub.
+  OWN-WORLD: Inherit the manual's ivory paper, clay accent, warm stone rules, and system type.
+  STORY: Identify each part, distinguish its role, then follow the linked guide below the image.
+  FIRST VIEWPORT: Eight labeled branches surround the model and agentic loop; the study path closes the plate.
+  FORM: A centered component map, directly specified by the user; local extension, no concept seed.
+  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+  -->
+  <style>
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; fill: #211f1a; }
+    .heading { font-size: 30px; font-weight: 650; letter-spacing: -.6px; }
+    .label { font-size: 25px; font-weight: 600; letter-spacing: -.3px; }
+    .detail { font-size: 19px; fill: #635f55; }
+    .example { font-size: 17px; fill: #635f55; }
+    .node { fill: #fffdfa; stroke: #d1ccc0; stroke-width: 1; }
+    .connection { fill: none; stroke: #a39f93; stroke-width: 1; }
+    .port { fill: #c15f3c; }
+  </style>
+  <rect width="1200" height="880" rx="12" fill="#faf9f5"/>
+  <text x="40" y="54" class="heading">Claude Code, at a glance</text>
+  <text x="40" y="85" class="detail">The building blocks we’ll explore throughout the workshop.</text>
+
+  <!-- Lines represent relationships, not an execution sequence. -->
+  <g class="connection">
+    <path d="M360 218 C414 218 406 368 444 368"/>
+    <path d="M600 250 V326"/>
+    <path d="M840 218 C786 218 794 368 756 368"/>
+    <path d="M360 414 H420"/>
+    <path d="M780 414 H840"/>
+    <path d="M360 610 C414 610 406 460 444 460"/>
+    <path d="M600 502 V578"/>
+    <path d="M840 610 C786 610 794 460 756 460"/>
+  </g>
+
+  <g>
+    <rect class="node" x="40" y="154" width="320" height="128" rx="8"/>
+    <text class="label" x="62" y="193">Built-in tools</text>
+    <text class="detail" x="62" y="224">Read, edit, search &amp; execute</text>
+    <text class="example" x="62" y="256">Read · Edit · Bash · WebSearch</text>
+    <circle class="port" cx="360" cy="218" r="3"/>
+  </g>
+  <g>
+    <rect class="node" x="440" y="122" width="320" height="128" rx="8"/>
+    <text class="label" x="462" y="161">Context &amp; memory</text>
+    <text class="detail" x="462" y="192">Supply project knowledge</text>
+    <text class="example" x="462" y="224">CLAUDE.md · history · memory</text>
+    <circle class="port" cx="600" cy="250" r="3"/>
+  </g>
+  <g>
+    <rect class="node" x="840" y="154" width="320" height="128" rx="8"/>
+    <text class="label" x="862" y="193">Skills</text>
+    <text class="detail" x="862" y="224">Teach repeatable workflows</text>
+    <text class="example" x="862" y="256">SKILL.md + scripts &amp; references</text>
+    <circle class="port" cx="840" cy="218" r="3"/>
+  </g>
+  <g>
+    <rect class="node" x="40" y="350" width="320" height="128" rx="8"/>
+    <text class="label" x="62" y="389">MCP servers</text>
+    <text class="detail" x="62" y="420">Connect external tools &amp; data</text>
+    <text class="example" x="62" y="452">Context7 · Chrome DevTools</text>
+    <circle class="port" cx="360" cy="414" r="3"/>
+  </g>
+
+  <!-- The central hub is the only accent-filled surface. -->
+  <rect x="420" y="326" width="360" height="176" rx="12" fill="#f2e4db" stroke="#c15f3c" stroke-width="1"/>
+  <text x="600" y="382" text-anchor="middle" font-size="38" font-weight="700" letter-spacing="-1">Claude Code</text>
+  <text x="600" y="417" text-anchor="middle" font-size="20" fill="#635f55">Claude model + agentic loop</text>
+  <path d="M454 438 H746" stroke="#c15f3c" stroke-opacity=".35" stroke-width="1"/>
+  <text x="600" y="472" text-anchor="middle" font-size="19">Gather context → Act → Check ↺</text>
+
+  <g>
+    <rect class="node" x="840" y="350" width="320" height="128" rx="8"/>
+    <text class="label" x="862" y="389">Plugins</text>
+    <text class="detail" x="862" y="420">Install extensions as a package</text>
+    <text class="example" x="862" y="452">Skills · agents · hooks · MCP</text>
+    <circle class="port" cx="840" cy="414" r="3"/>
+  </g>
+  <g>
+    <rect class="node" x="40" y="546" width="320" height="128" rx="8"/>
+    <text class="label" x="62" y="585">Hooks</text>
+    <text class="detail" x="62" y="616">Run checks at lifecycle events</text>
+    <text class="example" x="62" y="648">PreToolUse · PostToolUse · Stop</text>
+    <circle class="port" cx="360" cy="610" r="3"/>
+  </g>
+  <g>
+    <rect class="node" x="440" y="578" width="320" height="128" rx="8"/>
+    <text class="label" x="462" y="617">Permissions</text>
+    <text class="detail" x="462" y="648">Control which actions can run</text>
+    <text class="example" x="462" y="680">Allow · ask · deny / settings.json</text>
+    <circle class="port" cx="600" cy="578" r="3"/>
+  </g>
+  <g>
+    <rect class="node" x="840" y="546" width="320" height="128" rx="8"/>
+    <text class="label" x="862" y="585">Subagents</text>
+    <text class="detail" x="862" y="616">Delegate focused tasks</text>
+    <text class="example" x="862" y="648">Separate context · parallel work</text>
+    <circle class="port" cx="840" cy="610" r="3"/>
+  </g>
+
+  <path d="M40 746 H1160" stroke="#d1ccc0" stroke-width="1"/>
+  <text x="40" y="781" font-size="19" font-weight="600">Our path through the workshop</text>
+  <text x="40" y="817" font-size="19" fill="#635f55">Setup → Foundations → Skills &amp; MCP → GSD / BMAD / Matt Pocock’s skills</text>
+  <text x="40" y="849" font-size="19" fill="#635f55">→ Security &amp; hardening → Existing codebases</text>
+</svg>

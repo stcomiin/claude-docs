@@ -20,6 +20,7 @@ The files below come directly from the article's CDN assets, bypassing its resiz
 
 | Local file | Format / native size | Documentation placement | Source / original asset |
 | --- | --- | --- | --- |
+| `claude-code-overview.svg` | SVG, 1200 × 880 viewBox | Workshop Overview | Original component map based on the current workshop docs. Claude Code is the central hub; the eight branches describe related capabilities, not an execution sequence. |
 | `claude-agentic-loop.svg` | SVG, 720 × 280 viewBox | Tools | [How Claude Code works](https://code.claude.com/docs/en/how-claude-code-works#the-agentic-loop) · [SVG](https://mintcdn.com/claude-code/ikqp3_70mqIahteV/images/agentic-loop.svg) |
 | `claude-session-continuity.svg` | SVG, 560 × 280 viewBox | Stop/Resume/Continue | [How Claude Code works](https://code.claude.com/docs/en/how-claude-code-works#resume-or-fork-sessions) · [SVG](https://mintcdn.com/claude-code/ikqp3_70mqIahteV/images/session-continuity.svg) |
 | `context-engineering.png` | PNG, 2292 × 1290 | Context & Memory | [Effective context engineering](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) · [PNG](https://www-cdn.anthropic.com/images/4zrzovbb/website/faa261102e46c7f090a2402a49000ffae18c5dd6-2292x1290.png) |
