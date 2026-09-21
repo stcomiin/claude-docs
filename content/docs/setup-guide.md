@@ -70,32 +70,32 @@ C:\Program Files\Git\bin\bash.exe
 
 ## 2. Install and configure
 
-### Get an API key
+### Getting Your API Key
 
-You need a key from the provider used for the workshop.
+You'll need an API key from your chosen provider.
 
-#### Option A: LiteLLM proxy
+> ℹ️ **For workshop participants:** We will provide your API key. Watch for a follow-up email from us.
 
-If your organization provides a LiteLLM proxy, or you run one yourself:
+If you want to bring your own key, follow the setup steps below.
 
-1. Open the LiteLLM admin page at `https://your-litellm-proxy.example.com/ui`.
-2. Select **Virtual Keys**, then **Create new key**.
-3. Choose your team, give the key a name, and leave the other fields at their defaults.
-4. Create the key and save it somewhere secure. You can regenerate it later from the same page.
-5. Use **Logs** for request details such as token counts and time to first token. Use **Usage** for totals.
+#### OpenRouter setup steps
 
-#### Option B: OpenRouter
+[OpenRouter](https://openrouter.ai/) provides unified access to Claude, GPT, Gemini, and many other models through a single API key.
 
-[OpenRouter](https://openrouter.ai/) routes requests to Claude, GPT, Gemini, and other model providers through one API key.
-
-1. Sign up at [openrouter.ai](https://openrouter.ai/).
-2. Open [Keys](https://openrouter.ai/keys) and create an API key.
-3. Add credits under [Credits](https://openrouter.ai/credits).
-4. Save the key; it starts with `sk-or-`.
-
-Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses `https://openrouter.ai/api/v1`.
+1. Skip to [Claude Code installation section](#claude-code) if you already have an OpenRouter key (`sk-or-xxxxxx`).
+2. Sign up at [openrouter.ai](https://openrouter.ai/)
+3. Go to [Keys](https://openrouter.ai/keys) and create an API key
+4. Add credits under [Credits](https://openrouter.ai/credits)
+5. Your base URL will be `https://openrouter.ai/api`
+6. Note your API key — it starts with `sk-or-`
 
 ### Claude Code
+
+{{< callout type="warning" >}}
+**For Info PC participants only.** If you are joining from one of the other PCs, bring your own Claude subscription or API key instead of the workshop key.
+
+**The workshop OpenRouter key gives you Haiku only.** The only Claude model available with the key we email you is **Claude Haiku 4.5**. Any other model shown below — Opus 5, Sonnet 5, or Fable 5 — will **not** work with the provided key. Set the model to Haiku in your config, and switch with `/model haiku` inside Claude Code.
+{{< /callout >}}
 
 1. **Install with npm**
     
@@ -121,7 +121,7 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
     
     Edit `~/.claude/settings.json`(Linux/MacOS), `%USERPROFILE%/.claude/settings.json`(Windows) and replace the example URL and key. In PowerShell, the same file is `$HOME\.claude\settings.json`. Claude Code sends requests to `ANTHROPIC_BASE_URL` and authenticates them with `ANTHROPIC_AUTH_TOKEN`.
     
-    **LiteLLM proxy:**
+    **LiteLLM proxy (Use Openrouter section below for the workshop):**
     
     ```json
     {
@@ -145,18 +145,18 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
     }
     ```
     
-    **OpenRouter:**
+    **OpenRouter (use this for the workshop):**
     
     ```json
     {
       "env": {
         "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
         "ANTHROPIC_AUTH_TOKEN": "sk-or-your-openrouter-key",
-        "ANTHROPIC_MODEL": "anthropic/claude-opus-4-8[1m]",
-        "ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic/claude-opus-4-8[1m]",
-        "ANTHROPIC_DEFAULT_SONNET_MODEL": "anthropic/claude-opus-4-8[1m]",
-        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-opus-4-8[1m]",
-        "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-opus-4-8[1m]",
+        "ANTHROPIC_MODEL": "anthropic/claude-haiku-4.5",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic/claude-haiku-4.5",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "anthropic/claude-haiku-4.5",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-haiku-4.5",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-haiku-4.5",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
         "CLAUDE_CODE_EFFORT_LEVEL": "max",
         "CLAUDE_CODE_FORK_SUBAGENT": "0",
@@ -174,8 +174,7 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
  - `CLAUDE_CODE_SUBAGENT_MODEL` is a default rather than an override since v2.1.251: an agent file's own `model:` wins. `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` (v2.1.257+) force applies it to every subagent.
  - `CLAUDE_CODE_FORK_SUBAGENT=0` turns off subagent forking, which has been on by default since v2.1.232. A forked subagent inherits the whole conversation which is context bloat. With forking off, subagents start from only the brief they are given.
 
-
-### Codex CLI (Optional)
+### (Optional, not needed for this workshop) Codex CLI
 
 1. **Install with npm**
 
