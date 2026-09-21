@@ -15,4 +15,4 @@ Work through these labs in order using the Expense Tracker starter. Complete the
 | [4. Interview phase](/docs/workshop/04-interview-phase/) | Agree on a monthly-budget feature, review its specification and publish tickets to your fork. |
 | [5. Implementation](/docs/workshop/05-implementation/) | Create a feature branch, configure a formatting hook and implement the tickets with checks. |
 | [6. Verify the feature](/docs/workshop/06-verify-the-feature/) | Check completed work in the browser, then create and reuse `visual-code-review`. |
-| [7. Review and hand off](/docs/workshop/07-review-and-hand-off/) | Review the completed work, address findings and open a draft pull request in your fork. |
+| [7. Hand off the work](/docs/workshop/07-review-and-hand-off/) | Commit remaining files, open the first draft PR and continue dependent tickets with stacked PRs. |

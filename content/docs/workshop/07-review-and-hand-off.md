@@ -1,173 +1,149 @@
 ---
-title: "Lab 7: Review and hand off"
+title: "Lab 7: Hand off the work"
 weight: 7
 ---
 
-<!-- Working review copy. The user requested this draft for annotations. The wording and revised procedure are proposed, not approved or rehearsed. -->
-<!-- REVIEW: This draft reuses Lab 5's commits for a final branch review. Additional commits are needed only for reviewed work that is still uncommitted or for approved corrections. -->
+<!-- Working review copy. Revised from the user's annotations to focus on commits, PR handoff and stacked PRs. The new wording and stacked-PR walkthrough await review and participant rehearsal. -->
 
 ## Overview
 
-In Lab 5, `/implement` reviewed and committed your first ticket. In Lab 6, you checked the running app and created `visual-code-review`. Now you'll review the branch you intend to share, address findings and open a draft pull request in your own fork.
+In Labs 5 and 6, you implemented, reviewed and tested your first ticket. Now you'll commit any remaining files that belong with that work, push the feature branch and open a draft pull request in your own fork.
 
-Review only the tickets you've completed. The pull request should describe that work and identify the tickets still to do. You don't need to finish the whole monthly-budget feature to hand off the first ticket.
+The pull request description is your handoff. It should explain what you completed, how you checked it and what remains to do. You'll then use stacked pull requests to continue the dependent tickets without waiting for the first PR to merge.
 
-## Step 1: Check what the review will include
+## Step 1: Prepare the files for handoff
 
 Keep working in your expense-tracker project on the feature branch from Lab 5. Open a temporary terminal at the project root:
 
 ```sh
 git branch --show-current
 git status --short
-git log --oneline main..HEAD
-git diff main...HEAD
-```
-
-These commands use `main` as the base branch. If you started the feature from a different branch, replace `main` throughout this lab with that branch.
-
-Check that you're on your feature branch and that the commits and diff contain the completed ticket's changes. If you're on `main`, or the diff is empty, check the branch and commit history before continuing. An empty diff doesn't establish that the work passed review.
-
-Matt's `code-review` skill reviews committed changes. It won't include uncommitted edits or new, untracked files. Check for work left over from Lab 6, including `.claude/skills/visual-code-review/SKILL.md` and any corrections you approved.
-
-Review and explicitly approve any additional commits before continuing. Include only the intended files. Preserve unrelated work and keep credentials, transcripts and generated test output out of the commits.
-
-{{< details title="Walkthrough: Include uncommitted work" closed="true" >}}
-
-Inspect unstaged and staged changes:
-
-```sh
-git diff
-git diff --cached
-```
-
-Open files marked `??` by `git status --short` in your editor. They are untracked, so the diff commands won't show their contents.
-
-Ask Claude to propose the commit:
-
-```text
-Show the uncommitted work that belongs in this handoff, including
-visual-code-review. Propose the exact files and a commit message.
-Don't stage or commit anything until I approve the selection.
-```
-
-Inspect the proposed files. Rerun the relevant checks if app code or tests changed. After approving the selection, ask Claude to commit only those files without pushing or rewriting existing commits.
-
-Run `git status --short` again. Confirm that any remaining files are work you deliberately left out, rather than a missing part of the ticket or skill.
-
-{{< /details >}}
-
-## Step 2: Run the code review
-
-> **Required concept:** Read [Working with other agents](/docs/agentic-coding-in-terminal/#working-with-other-agents-sub-agents--agent-teams).
-
-Matt's reviewer delegates two checks to separate subagents. The Standards review checks the project's coding rules. The Spec review checks the implementation against the ticket. This is separate from `visual-code-review`, which uses the running app.
-
-Get the commit where your feature branch and base branch last shared history:
-
-```sh
-git merge-base main HEAD
-```
-
-Copy the returned hash. Replace `BASE-SHA` below with that hash and `TICKET-URL` with the completed ticket's URL. Include each URL if you completed more than one ticket. For a local tracker, use the ticket's file path.
-
-In Claude Code, enter:
-
-```text
-/mattpocock-skills:code-review Review the committed changes since
-BASE-SHA against TICKET-URL. Include the current HEAD hash in the report.
-Report findings only. Don't change files, commit, push or post to GitHub.
-```
-
-Check that the review uses the intended commit range and completed tickets. It should produce separate Standards and Spec reports. If Claude can't read the ticket or skips the Spec review, resolve that problem before treating the review as complete.
-
-Save the report locally with the Lab 6 browser evidence. Keep the base hash and reviewed `HEAD` hash with it so you know which version it describes.
-
-## Step 3: Decide what to fix and verify it
-
-Read each finding and inspect the cited code. Check whether it describes a defect, a project-rule violation or a suggestion you don't need. Ask for an explanation or a reproducing case when the evidence is unclear.
-
-Decide which findings to fix, reject or leave for follow-up. Record your reasons. Include unresolved failures from Lab 6 in this decision. Leave unfinished tickets out of this review, but count any unmet acceptance criterion in a completed ticket as a failure.
-
-If a correction is needed, tell Claude which finding you accept and enter:
-
-```text
-Fix only the finding we agreed on. For a behaviour defect, add or update
-a regression test without weakening existing checks. Don't commit or push yet.
-```
-
-Inspect the changes, then run these commands from the project root:
-
-```sh
-npm test
-npm run lint
-npm run build
-```
-
-Keep the app running and repeat the browser verification for the affected ticket:
-
-```text
-/visual-code-review TICKET-URL
-```
-
-Review the new report and screenshots. After checking the correction, approve a commit of the selected files and repeat Step 2 using the same `BASE-SHA`. The new report must identify the updated `HEAD`.
-
-If no corrections are needed, keep the existing verification evidence and review report. Don't make a change just to produce a finding or another commit. Record any failed or blocked checks as unresolved; don't describe that work as ready to merge.
-
-## Step 4: Open a draft pull request in your fork
-
-> **Required concept:** Read [Working with GitHub](/docs/agentic-coding-in-terminal/#working-with-github).
-
-The pull request description is your handoff. It should tell another developer what changed, how you checked it and what remains unfinished.
-
-Before asking Claude to publish anything, inspect the remote destinations:
-
-```sh
 git remote -v
 ```
 
-Confirm that `origin`, including its push URL, points to your own fork. The pull request must target `main` in that same fork, not `stcomiin/expense-tracker-workshop-starter`.
+Confirm that you're on the intended feature branch and that `origin`, including its push URL, points to your own fork.
 
-Replace `YOUR-USERNAME` below with the account that owns your fork:
+Reuse the commits from Lab 5. Check whether any intended work is still uncommitted, such as `.claude/skills/visual-code-review/SKILL.md` or corrections made in Lab 6. Commit only the files you approve for the handoff.
 
-```text
-Prepare a draft pull request for the completed work. Target main in
-YOUR-USERNAME/expense-tracker-workshop-starter from my current feature
-branch. Show the title, description, commits and exact push and
-`gh pr create` commands for my review. Include completed ticket links,
-verification results, unresolved findings and the tickets still to do.
-Don't push or create the pull request yet.
-```
+Keep the report and screenshot folders from Lab 6 local. Don't stage them along with the code, or include credentials and transcripts in a commit.
 
-Review the description and proposed commands. Check that:
+{{< details title="If intended files are still uncommitted" closed="true" >}}
 
-- The title and description claim only the work you completed.
-- The verification results match your saved test output and browser observations. Failed or blocked checks remain visible.
-- The proposed commits end at the `HEAD` from your final review. No intended changes remain uncommitted.
-- The push targets only your feature branch on your fork. The `gh pr create` command includes an explicit `--repo` for your fork, `--base main`, `--head` for the reviewed feature branch and `--draft`.
-
-Inspect any reports or screenshots before sharing them. Keep them local unless you choose to attach reviewed copies. A local file path in the description won't give a GitHub reviewer access to that evidence; include the observed results in the description itself.
-
-When you're satisfied, explicitly approve publication:
+Ask Claude:
 
 ```text
-Push only the reviewed feature branch to my fork and create the draft
-pull request using the commands and description I approved.
-Don't merge it or mark it ready for review. Return the pull request URL.
+Show the uncommitted files that belong in this handoff, including
+visual-code-review. Propose the exact files and a commit message.
+Wait for my approval before staging or committing. Don't push yet.
 ```
 
-If the push fails, inspect the reason rather than force-pushing. If Claude reports an existing pull request for the branch, inspect it before approving any update.
+Inspect the proposed changes with `git diff` and `git diff --cached`. Open untracked files in your editor, since those commands won't show their contents.
 
-Open the returned URL. Confirm that it belongs to your fork, shows **Draft**, targets the intended base branch and contains the reviewed commits under **Commits** and **Files changed**. Check the description against your saved evidence.
+After approving the selection, ask Claude to commit only those files without pushing or rewriting existing commits. Run `git status --short` again and confirm that no intended work remains uncommitted.
+
+{{< /details >}}
+
+Use the review and test results from Labs 5 and 6. If app code or tests have changed since those checks, return to the relevant verification steps before claiming they passed. Carry any unresolved findings into the PR description.
+
+## Step 2: Push the branch and open the first PR
+
+> **Required concept:** Read [Working with GitHub](/docs/agentic-coding-in-terminal/#working-with-github).
+
+This first PR covers issue #1 in our example. Replace `TICKET-URL` with your completed ticket's URL and `YOUR-USERNAME` with the account that owns your fork:
+
+```text
+Prepare a draft PR for TICKET-URL in
+YOUR-USERNAME/expense-tracker-workshop-starter. Use my current feature
+branch as --head and main as --base. Pass my fork explicitly with --repo.
+Include what changed, the verification results, unresolved findings
+and the next ticket. Show the description, commits and exact push and
+PR creation commands. Don't push or create the PR until I approve them.
+```
+
+Check that the description matches the completed ticket and your saved evidence. It shouldn't claim that unfinished tickets are complete. Summarize the test results and browser observations in the description. A local report path alone won't give another developer access to that evidence.
+
+Inspect any screenshots before choosing to attach them. Confirm that the proposed push targets only your feature branch on your fork, and that `gh pr create` includes `--draft`, the correct `--repo`, `--base` and `--head`.
+
+After approving the description and commands, enter:
+
+```text
+Push the approved feature branch to my fork and create the draft PR
+using the description and commands I approved. Return its URL.
+Don't merge it or mark it ready for review.
+```
+
+If the branch already has a PR, inspect it before approving an update instead of creating a duplicate. If a push is rejected, inspect the reason rather than force-pushing.
+
+Open the returned URL. Confirm that the PR belongs to your fork, shows **Draft**, targets `main` and contains the intended files under **Files changed**. Keep its URL and branch name for the next step. The PR number may differ from the issue number.
+
+## Step 3: Stack the remaining tickets
+
+> **Required concept:** Read [About stacked pull requests](https://docs.github.com/en/pull-requests/get-started/about-stacked-prs).
+
+Leave the first PR open. A stacked PR targets the branch of the PR it depends on, so its diff shows only the next ticket's changes. You can continue dependent work before the earlier PR merges.
+
+For example, if issue #2 depends on issue #1, and issue #3 depends on issue #2:
+
+| PR for | Head branch | Base branch |
+| --- | --- | --- |
+| Issue #1 | Issue #1's branch | `main` |
+| Issue #2 | Issue #2's branch | Issue #1's branch |
+| Issue #3 | Issue #3's branch | Issue #2's branch |
+
+Use the dependencies from your Lab 4 tickets. Independent work can branch from `main` instead. Keep every branch and PR in your own fork, since GitHub doesn't support cross-fork stacks.
+
+Continue with the remaining tickets now if you have time, or after the workshop. If your plan has only two tickets, stop with a two-PR stack.
+
+### Create the next branch and implement its ticket
+
+Replace `ISSUE-2-URL` with your next ticket's URL and `ISSUE-1-PR-URL` with the PR URL from Step 2:
+
+```text
+Create and switch to a feature/[ID]-short-description branch for
+ISSUE-2-URL, based on the branch in ISSUE-1-PR-URL. Stop if the new branch
+already exists or app or skill changes are uncommitted. Preserve the
+local evidence files. Don't implement or push yet.
+```
+
+Confirm the new branch, then implement its ticket:
+
+```text
+/mattpocock-skills:implement ISSUE-2-URL
+```
+
+Follow the implementation and verification steps in [Lab 5](/docs/workshop/05-implementation/#step-3-implement-the-first-ticket-via-implement) and [Lab 6](/docs/workshop/06-verify-the-feature/). Reuse your existing `visual-code-review` skill for this ticket rather than creating it again. Keep each ticket's tests with its implementation.
+
+### Open the dependent PRs
+
+Repeat Step 2 for issue #2, changing `--base` from `main` to issue #1's branch. Use issue #2's branch as `--head`. Link the first PR in the description as a dependency, alongside this ticket's verification results.
+
+Approve the push and PR creation separately for this branch. In **Files changed**, check that the PR shows issue #2's changes without repeating issue #1's diff. If it includes both, check the base branch before continuing.
+
+Repeat for issue #3, creating its branch from issue #2's branch and targeting that branch in its PR. Use each ticket's actual URL and branch name, and include the preceding PR's URL in the handoff.
+
+### Link the PRs as a GitHub stack
+
+This walkthrough uses GitHub's website to link the existing PRs. You don't need to install the `gh stack` extension.
+
+Follow GitHub's [instructions for turning existing PRs into a stack](https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/creating-stacked-pull-requests#turning-existing-pull-requests-into-a-stack):
+
+1. Open one of your dependent PRs. GitHub shows a recommendation banner when it recognizes the chain of base and head branches.
+2. Select the banner to preview the stack. Check that the first ticket's PR is at the bottom, targeting `main`, with each dependent PR above its prerequisite.
+3. Confirm the stack. Check that GitHub shows a stack map and that you can navigate between the PRs.
+
+GitHub's stack UI is in public preview. If the banner doesn't appear, check the branch relationships against the table and the current GitHub guide. Until GitHub confirms the stack, you have dependent PRs but haven't completed the linking step.
+
+Leave the PRs as drafts for this exercise. Merging a higher PR in a GitHub stack also merges the unmerged PRs below it, so don't use merge as a way to test the stack.
 
 ## Checkpoint
 
-- [ ] I've reviewed the intended commits against the completed tickets and read both the Standards and Spec reports.
-- [ ] I've decided what to do with each finding and recorded any unresolved failures or blocked checks.
-- [ ] I've rerun the relevant checks after corrections, and the final review identifies the commits in my pull request.
-- [ ] I've inspected the draft pull request in my own fork. Its description separates completed work from unfinished tickets.
+- [ ] I've committed the intended code and project skill without adding the local evidence folders.
+- [ ] I've opened and inspected the first draft PR in my own fork.
+- [ ] Its description records the completed ticket, verification results, unresolved findings and next ticket.
+- [ ] If I've continued with dependent tickets, each PR targets the correct branch and GitHub shows the linked stack.
 
 ## After the workshop
 
-Leave the pull request as a draft while you address unresolved findings or finish its scope. Continue the remaining tickets with the same implementation and verification steps, then update the review and handoff to match the new commits.
+Continue any unfinished tickets on their own branches. Keep each PR description current so another developer can see its dependency, verification results and next action without reading your agent conversation.
 
-Before your next coding session, read the ticket, the pull request description and any unresolved findings. Keep `visual-code-review` with the project so you can repeat the browser checks without the workshop conversation.
+If an earlier PR changes, the branches above it need to pick up that change. Follow GitHub's [stack management guide](https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/managing-stacked-pull-requests) before rebasing or updating remote branches. Those operations need separate approval. Merging the PRs is outside this exercise.

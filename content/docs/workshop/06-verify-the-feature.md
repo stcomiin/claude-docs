@@ -29,7 +29,7 @@ In your first terminal, open your expense-tracker project folder and run the sam
 npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
 ```
 
-Wait for the server to start, then open **http://127.0.0.1:5173/** in your browser. Leave this terminal running and return to Claude Code in your second terminal.
+Wait for the server to start, then open **<http://127.0.0.1:5173/>** in your browser. Leave this terminal running and return to Claude Code in your second terminal.
 
 If port 5173 is already in use, check whether your app is running in another terminal before starting another server.
 
@@ -62,28 +62,39 @@ If a completed ticket's acceptance criteria aren't met, report a failure. Leave 
 
 > **Required concept:** Read [Creating your own skills](/docs/skills-plugins-deep-dive/#creating-your-own-skills).
 
-Stay in the same conversation so the agent can use the browser checks it just performed. Ask it to turn those checks into a project skill:
+Use Anthropic's [skill-creator](https://code.claude.com/docs/en/skills#run-evals-with-skill-creator) to turn the browser checks you performed into a project skill. Stay in the same conversation so it can use your browser walkthrough.
+
+Type `/` in Claude Code and check that `/skill-creator:skill-creator` appears in the command menu.
+
+{{< details title="If skill-creator isn't available" closed="true" >}}
+
+The workshop setup doesn't include this plugin. Install it from inside Claude Code:
 
 ```text
-Create a visual-code-review skill from the browser checks we just
-performed. Save it in .claude/skills/visual-code-review/SKILL.md.
-Have it accept a ticket URL or file path and an optional app URL,
-defaulting to http://127.0.0.1:5173/. Repeat the checks through Chrome
-DevTools MCP. On each run, save a report and desktop and narrow
-screenshots in a new folder under the system temp directory, and
-return its full path. Report findings without changing app code or
-tests, or performing Git operations.
+/plugin install skill-creator@claude-plugins-official
 ```
 
-{{< details title="Optional: Evaluate the skill with Anthropic's skill-creator" closed="true" >}}
+If Claude reports that the marketplace is missing, run `/plugin marketplace add anthropics/claude-plugins-official`, then retry the installation.
 
-Anthropic's [skill-creator](https://code.claude.com/docs/en/skills#run-evals-with-skill-creator) helps draft skills, run test cases and revise the instructions based on the results. Consider it after this lab if you want to compare runs with and without your skill.
-
-For this exercise, use the prompt above and the two runs in Step 3. The workshop setup doesn't include `skill-creator`. Follow Anthropic's linked Claude Code installation instructions if you choose to try it; availability in Claude.ai doesn't establish that it's available in your Claude Code session.
+Check the command menu again. If the skill still doesn't appear, exit Claude Code and run `claude --continue` from the project root. This resumes the conversation containing your browser checks.
 
 {{< /details >}}
 
-Open `SKILL.md` in your editor. Check that it uses `name: visual-code-review` and describes when to run it. Then check the instructions:
+Invoke the skill:
+
+```text
+/skill-creator:skill-creator Create a visual-code-review skill from
+our browser checks. Save it in
+.claude/skills/visual-code-review/SKILL.md.
+Have it accept a ticket URL or file path and an optional app URL,
+defaulting to http://127.0.0.1:5173/. Repeat the checks through Chrome
+DevTools MCP. On each run, save a report and desktop and narrow
+screenshots in a new local folder in this repo, and return its full
+path. Report findings without changing app code or tests, or
+performing Git operations.
+```
+
+Answer any questions about the checks, then confirm that Claude saved the file. Open `SKILL.md` in your editor. Check that it uses `name: visual-code-review` and describes when to run it. Then check the instructions:
 
 - The skill repeats your Step 1 checks against the supplied ticket and app URL.
 - Each check includes its test data, browser actions and expected result.
@@ -124,7 +135,7 @@ If the agent skips a step or relies on something from the conversation, update t
 
 {{< /details >}}
 
-Before clearing the conversation, confirm that the report and screenshots exist in the reported temp folder. Make sure the skill and tickets contain the instructions and acceptance criteria needed for another run.
+Before clearing the conversation, confirm that the report and screenshots exist in the reported folder. Make sure the skill and tickets contain the instructions and acceptance criteria needed for another run.
 
 Start a fresh conversation:
 
@@ -148,7 +159,7 @@ Run this from the project root in a temporary terminal:
 npm test
 ```
 
-Save the test output with your browser evidence, but keep the results separate. If both pass, continue to Lab 7. No correction is required.
+Save the test output with your browser evidence, but keep the results separate. If both pass, continue to Lab 7.
 
 {{< details title="If a check fails or is blocked" closed="true" >}}
 
@@ -171,4 +182,4 @@ After an approved app or test correction, rerun the affected browser checks and 
 
 ## What's next
 
-In Lab 7, you'll review the completed work and prepare it for handoff. Keep the reports, screenshots and any unresolved findings available for that review.
+In [Lab 7: Hand off the work](/docs/workshop/07-review-and-hand-off/), you'll push the completed ticket's branch and open a draft PR, then use stacked PRs for dependent tickets. Keep the reports, screenshots and unresolved findings for the PR description.
