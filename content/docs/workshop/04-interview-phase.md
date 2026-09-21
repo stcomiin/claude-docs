@@ -84,4 +84,4 @@ After publication, open the returned links and check the tickets in GitHub.
 
 ## What's next
 
-In **Lab 5: Implementation**, you'll create a feature branch and start implementing the tickets using Matt Pocock's `/implement` skill, which uses the test-driven development approach.
+In [Lab 5: Implementation](/docs/workshop/05-implementation/), you'll create a feature branch and start implementing the tickets using Matt Pocock's `/implement` skill, which uses the test-driven development approach.

@@ -13,3 +13,4 @@ Work through these labs in order using the Expense Tracker starter. Complete the
 | [2. Explore the codebase](/docs/workshop/02-explore-the-codebase/) | Use subagents, check their explanations against the code and save an overview. |
 | [3. Manage context and project instructions](/docs/workshop/03-manage-context-and-project-instructions/) | Inspect context usage, customise the status line and review project instructions. |
 | [4. Interview phase](/docs/workshop/04-interview-phase/) | Agree on a monthly-budget feature, review its specification and publish tickets to your fork. |
+| [5. Implementation](/docs/workshop/05-implementation/) | Create a feature branch, configure a formatting hook and implement the tickets with checks. |
