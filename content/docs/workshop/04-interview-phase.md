@@ -13,7 +13,7 @@ For the purposes of this workshop, we will be using [Matt Pocock's Skill For Rea
 
 ## Step 1: Start the interview
 
-> **Required concept:** Read [Skills](/docs/agentic-coding-in-terminal/#skills).
+> **Required concept:** Read [Skills](/docs/skills-plugins-deep-dive/#skills).
 
 Use Matt Pocock's `grill-with-docs` skill to work through the feature requirements. In Claude Code, enter:
 

@@ -7,6 +7,27 @@ weight: 2
 
 [Pre-Workshop Setup Guide](/docs/setup-guide/)
 
+## Workshop Overview
+
+Claude Code brings a Claude model, an agentic loop, and a set of tools together. Around that core, we can add project context, reusable workflows, external integrations, and controls over how the agent works.
+
+{{< figure src="/images/claude-code-overview.svg" width="1200" height="880" alt="Claude Code sits at the center, connected to context and memory, built-in tools, MCP servers, skills, plugins, subagents, hooks, and permissions. Its agentic loop gathers context, acts, and checks results." caption="The parts we’ll explore. Connections show how each part relates to Claude Code, not an execution order." >}}
+
+| Part | What it adds | Where we’ll explore it |
+| --- | --- | --- |
+| **Context & memory** | Project instructions, conversation history, and persistent memory that inform the agent’s work. | [Context & Memory](/docs/agentic-coding-in-terminal/#context--memory) |
+| **Built-in tools** | Actions such as reading files, editing code, running shell commands, and searching the web. | [Tools](/docs/agentic-coding-in-terminal/#tools-what-claude-code-can-actually-do) |
+| **MCP servers** | External tools and data connected through the Model Context Protocol, such as Context7 or Chrome DevTools. | [MCP](/docs/agentic-coding-in-terminal/#mcp) |
+| **Skills** | Reusable instructions in `SKILL.md`, with optional scripts and references, that guide a workflow. | [Skills](/docs/skills-plugins-deep-dive/#skills) |
+| **Plugins** | Installable packages that can bundle skills, agents, hooks, and MCP servers. | [Plugins](/docs/skills-plugins-deep-dive/#plugins) |
+| **Subagents** | Focused tasks delegated to agents with their own context windows; tasks can run in parallel. | [Sub-agents](/docs/agentic-coding-in-terminal/#working-with-other-agents-sub-agents--agent-teams) |
+| **Hooks** | Handlers that run at lifecycle events, such as before or after a tool call, for checks and automation. | [Hooks](/docs/agentic-coding-in-terminal/#hooks) |
+| **Permissions** | Rules and approval modes that control which actions the agent can take. | [Permission Rules](/docs/agentic-coding-in-terminal/#permission-rules) |
+
+**How the pieces fit:** skills guide the workflow; tools perform actions; MCP servers expose external capabilities; plugins package extensions. Hooks and permissions control execution, while context and memory inform decisions. Subagents help split the work.
+
+We’ll start with [setup](/docs/setup-guide/) and the foundations on this page, then explore [structured workflows with GSD and BMAD](/docs/skills-plugins-deep-dive/) and [Matt Pocock’s skills](/docs/setup-guide/#3-install-skills-by-matt-pocock), [security and hardening](/docs/security/), and [applying these workflows to existing codebases](/docs/existing-codebase-workflows/). Keep the [cheat sheet](/docs/cheat-sheet/) beside you as a reference.
+
 
 ## Installation & Configuration
 
@@ -77,14 +98,14 @@ Before we go deeper, here are some commands / CLI flags that are useful.
 
 **One-liner to remember:** type `/` on an empty prompt to see everything available in your setup, including custom and MCP commands. You'll rarely need to memorize a full list.
 
-## Stop/Resume/Continue Claude Code conversations
+#### Stop/Resume/Continue Claude Code conversations
 
 | Action | Command | Remarks |
 | --- | --- | --- |
 | Resume a previous conversation | `claude --resume`  which will show a list of previous conversations to resume from in this current folder, OR `claude --continue` which will auto continue from the last stopped conversation in this current folder | you can also append additional flags to these resume and continue commands for eg. `claude --continue --dangerously-skip-permissions --effort max --model claude-sonnet-5` |
 | Exit a conversation | Ctrl + C until session exits | All session history is stored as transcript files in .claude folder in User Directory. `~/.claude/projects/<folder name>` |
 
-### Useful Claude Code Customisation
+### Useful Claude Code Customisation & Quality of Life {#useful-claude-code-customisation}
 
 #### 1. ccstatusline
     
@@ -155,9 +176,17 @@ Sample:
 
 ![Toast notification sample](/images/statusline-toast.png)
 
-#### 4. Fullscreen renderer
+#### 4. Managing Multiple Agent Sessions with Herdr {#managing-multiple-agent-sessions-with-herdr}
 
-New installs start in the fullscreen renderer, including Bedrock, Vertex, Foundry, and other setups that were excluded before (v2.1.239+). In an older session, `/tui fullscreen` switches to it. Fullscreen adds a live `/diff` panel beside the conversation that updates as Claude edits (v2.1.260+), mouse support in `/config` (v2.1.271+), and `Ctrl+L` to clear the view like a terminal `clear` (v2.1.260+). `/focus` hides tool activity behind a one-line summary per turn.
+We recommend [Herdr](https://herdr.dev/docs/quick-start/) when juggling multiple coding agent sessions. It organizes terminals into workspaces, tabs, and panes, shows which agents are working or waiting for input, and keeps sessions running when you detach or close the terminal. Run `herdr` again to reattach.
+
+After [installing Herdr](https://herdr.dev/docs/install/), run `herdr` from your project directory, then start `claude`, `codex`, or another supported agent inside a pane. The [quick start](https://herdr.dev/docs/quick-start/) covers creating panes, switching workspaces, and detaching.
+
+For independent changes in the same repository, use [separate Git worktrees](/docs/agentic-coding-in-terminal/#worktrees--working-in-parallel), then run each agent in a Herdr pane. Worktrees isolate file edits; Herdr helps you monitor and switch between the sessions.
+
+#### 5. Claude Code History Viewer
+
+[Claude Code History Viewer](https://github.com/jhlee0409/claude-code-history-viewer) lets you browse past sessions and project statistics. Install the MSI from the [latest release](https://github.com/jhlee0409/claude-code-history-viewer/releases). Despite the name, it also reads sessions from tools such as Codex and reports token usage.
     
 ---
 
@@ -202,15 +231,15 @@ Agentic coding tools like Claude Code maintain context across a session, but und
 
 #### CLAUDE.md tiers: User, Project, Local
 
-CLAUDE.md has three possible locations
+CLAUDE.md can be organized into these scopes:
 
 | Scope | What it covers | Where it lives |
 | --- | --- | --- |
 | **User** | Preferences across all your projects (e.g. tone, formatting habits) | Global config (~/.claude/claude.md) |
-| **Project** | Instructions specific to this repo (e.g. stack, conventions) | `CLAUDE.md` in repo root |
+| **Project** | Instructions specific to this repo or folder (e.g. stack, conventions) | `CLAUDE.md` in the repo root or subfolders |
 | **Local** | Overrides just for your machine (e.g. local paths, secrets) | `CLAUDE.local.md` |
 
-Use **project memory** for anything the whole team should share. Project specific settings must be committed to the repo's CLAUDE.md
+Use **project memory** for anything the whole team should share, and commit these files to the repo. Keep shared instructions in the root `CLAUDE.md`; different folders can have their own files, such as `frontend/CLAUDE.md` and `backend/CLAUDE.md`, for folder-specific conventions. When you start Claude Code at the repo root, nested files load only when Claude reads files in those folders, adding to the root instructions. See [how CLAUDE.md files load](https://code.claude.com/docs/en/memory#how-claudemd-files-load).
 
 Use **local memory** for anything personal or environment-specific that shouldn't be committed.
 
@@ -234,12 +263,11 @@ Test it out! Prompt Claude Code to add a feature. Check whether it follows the r
 
 - LLMs have a finite context window. In long sessions, older conversation turns get summarised ("compacted") to free up context, which is not desirable.
 - What goes into the context? Visualize it - [https://code.claude.com/docs/en/context-window](https://code.claude.com/docs/en/context-window)
-- [Claude Code History Viewer](https://github.com/jhlee0409/claude-code-history-viewer) lets you browse past sessions and project statistics. Install the MSI from the [latest release](https://github.com/jhlee0409/claude-code-history-viewer/releases). Despite the name, it also reads sessions from tools such as Codex and reports token usage.
 - Do not let conversations get to the point where your conversation needs to be compacted. Always `/clear` around 300k context if possible. Claude models have 1M context now by default but performance still degrades in longer context, no matter how good they say it is.
 - **Do not use the compaction feature in Claude Code**. Compaction is simply passing the chat history to a model and asking it to summarize the history. The session then continues from that summarized conversation, which is lossy and important details gleaned over the session may be stripped out.
-- Codex running on OpenAI frontier model handles compaction and long term attention well, unknown if it's due to the harness or the model. Using compaction is fine in Codex from our experience
-- Claude Code handles the context window automatically (that's the whole point of CC: context engineering for agentic tasks), but you can influence it in some ways:
-    - Always start a **new session** for any task that is not related to your current session.
+- Codex running on OpenAI frontier model handles compaction and long term attention well, unknown if it's due to the harness or the model. Using compaction is fine in Codex from our experience.
+- Optimal Context tips:
+    - Always start a **new session** for any new task that is not related to your current session.
     - Use `/clear` to reset context without restarting (when hitting ~300k context)
     - Keep `CLAUDE.md` tight and relevant: it's loaded at the start of every session, so bloating it costs precious tokens
     - Use the `/handoff` skill from Matt Pocock to generate a handoff document when exceeding the smart zone context limit https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md
@@ -776,168 +804,11 @@ Install the Chrome Devtools MCP server, which allows Claude to control browser s
 use the chrome devtools mcp, open duckduckgo and search for the best claude code plugins. come up with a detailed report.
 ```
 
-## Skills
-
-Agent Skills are folders of instructions, scripts, and resources that agents can discover and use to do things more accurately and efficiently.
-
-Diagrams from Anthropic's [Agent Skills article](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills). Click to enlarge.
-
-### Anatomy of a skill
-
-Metadata describes when to use a skill; the Markdown body provides instructions.
-
-{{< figure src="/images/agent-skills-anatomy.jpg" width="1650" height="929" loading="lazy" alt="A SKILL.md file with YAML frontmatter and Markdown instructions." >}}
-
-Link supporting files from `SKILL.md` so they can be read separately.
-
-{{< figure src="/images/agent-skills-supporting-files.jpg" width="1650" height="1069" loading="lazy" alt="SKILL.md links to reference.md and forms.md." >}}
-
-### Progressive disclosure
-
-Load descriptions first, instructions when selected, and supporting files as needed.
-
-{{< figure src="/images/agent-skills-progressive-disclosure.jpg" width="2292" height="673" loading="lazy" alt="Three levels: metadata, instructions, and supporting files." caption="Illustrative token counts. Files remain on disk until needed; loaded content still consumes context." >}}
-
-### Skills in the context window
-
-A PDF request triggers `SKILL.md`, then the form-filling reference.
-
-{{< figure src="/images/agent-skills-context-window.jpg" width="1650" height="929" loading="lazy" alt="The PDF request, skill instructions, and form reference enter context in sequence." >}}
-
-### Skills and code execution
-
-Instructions can invoke bundled scripts for repeatable operations.
-
-{{< figure src="/images/agent-skills-code-execution.jpg" width="1650" height="929" loading="lazy" alt="Form instructions point to a Python helper for extracting PDF fields." >}}
-
-For a worked authoring example, see [Creating your own skills](/docs/skills-plugins-deep-dive/#creating-your-own-skills).
-
-See the following Github repo for living doc: https://github.com/luongnv89/claude-howto/blob/6d1e0ae4afbb95305e10d414ae90fcf3d74b9c4e/03-skills/README.md
-
-Three recent changes affect how skills behave. `/skill-doctor` lists the loaded skills that went unused and what each costs in context, so you can prune them (v2.1.261+). A skill marked `disable-model-invocation` now makes Claude ask you to run it instead of copying its steps (v2.1.222+). Skills synced from your claude.ai account cannot run `!` commands or expand `@` files on your machine, and they no longer shadow local commands (v2.1.228+).
-
-### Notable Skills for Reference
-
-> ⚠️ **Security warning:** Skills can execute arbitrary code in your environment. Before installing a community skill, **review SKILL.md and every bundled script yourself**. A malicious skill can access your shell, exfiltrate data, or modify files from a few lines of Markdown. Install only from sources you trust. The same risk applies to skills used by OpenClaw and other coding CLIs.
-
-This is a growing list of community and official skills worth knowing about. Not all of these are endorsed. They're here as references for what's possible.
-
-| Category | Skill | Repo | Purpose |
-| --- | --- | --- | --- |
-| Documents | docx, pptx, pdf, xlsx | [anthropics/skills](https://github.com/anthropics/skills/tree/main/skills) | Create and edit common office document formats, same skills that power Claude's document capabilities on web and desktop. [Blog post](https://claude.com/blog/create-files). Might require pip and npm to install some dependencies |
-| Tooling | Skill Creator | [anthropics/skills](https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md) | Meta-skill for creating, evaluating, improving, and benchmarking other skills. Built into Claude.ai (paid plans). Already installed by default |
-| DevOps | KubeShark Kubernetes Skill | [LukasNiessen/kubernetes-skill](https://github.com/LukasNiessen/kubernetes-skill) | Failure-mode-first Kubernetes manifest generation, review, and hardening for Claude Code and Codex. Reduces deprecated APIs, unsafe defaults, weak RBAC, and rollout or networking issues |
-| Frontend | React Best Practices | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills/tree/main/skills/react-best-practices) | Vercel's official React conventions: component patterns, hooks usage, performance best practices |
-| Frontend | React View Transitions | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills/tree/main/skills/react-view-transitions) | Implements view transitions in React apps using the View Transitions API |
-| Frontend | Impeccable | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) | Frontend-design toolkit that expands Anthropic's frontend-design skill: reusable product/design context (`PRODUCT.md`, `DESIGN.md`), 23 design commands, browser-assisted variant iteration, and 59 deterministic detector rules for recurring AI frontend anti-patterns. Covers design critique, accessibility/performance audits, typography, layout, responsive behavior, i18n/edge-case hardening, and final polish. Install: `npx impeccable install`, then `/impeccable init` (plugin marketplace also supported) |
-| Security | OWASP Security | [agamm/claude-code-owasp](https://github.com/agamm/claude-code-owasp) | OWASP security best practices (2025–2026): Top 10:2025, ASVS 5.0, Agentic AI security, 20+ language-specific security quirks |
-| Security | SecLists & Agents | [awesome-claude-skills-security](https://github.com/Eyadkelleh/awesome-claude-skills-security) | More security skills: curated SecLists wordlists, injection payloads, and expert agents for authorized pentesting, CTFs, and bug bounties |
-| Data & Research | DSPY | [OmidZamani/dspy-skills](https://github.com/OmidZamani/dspy-skills) | Automatic prompt optimization using the DSPY framework |
-| Data & Research | Web Scraper | [yfe404/web-scraper](https://github.com/yfe404/web-scraper) | Intelligent web scraping with automatic strategy selection and TypeScript-first Apify Actor development |
-| Data & Research | OSINT | [smixs/osint-skill](https://github.com/smixs/osint-skill) | Open-source intelligence: from a name to a scored dossier with psychoprofile, career map, and confidence grades. 55+ Apify actors, 7 search APIs. Early beta. |
-| Data & Research | Hyperresearch | [jordan-gibbs/hyperresearch](https://github.com/jordan-gibbs/hyperresearch) | Deep research harness for Claude Code with tier-adaptive pipelines, adversarial review, source provenance, and a persistent searchable vault. |
-| Data & Research | last30days | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill) | Researches what people have discussed and engaged with recently across Reddit, Hacker News, GitHub, YouTube, X, arXiv, and more. Synthesizes cross-source findings into a cited brief. Covers topic/person/company research, tool comparisons, trend discovery, meeting prep, watchlists, and recurring briefings. Several sources work without configuration; optional sources require their own credentials or browser sessions. Install: `/plugin marketplace add mvanhorn/last30days-skill`, then `/plugin install last30days` |
-| Notebook-LM | Knowledge Management | [Notebook-LM skill](https://github.com/PleasePrompto/notebooklm-skill) | LLM to manage your NotebookLM, start research, generate infographics |
-| Code Review | Devil's Advocate | [Devil's Advocate](https://github.com/notmanas/claude-code-skills/tree/main/skills/devils-advocate) | Challenge and poke holes from previous reviews with defined frameworks |
-
-> **Using Hyperresearch:** Treat Hyperresearch more like a research harness than a single prompt helper. Install it in a project with `pip install hyperresearch && hyperresearch install`, then run `/hyperresearch <research question>` inside Claude Code. It can run a lighter mode for bounded factual questions, or a full multi-step pipeline for deep argumentative research with fetchers, critics, patching, and a persistent `research/` vault that future sessions can search and reuse.
-
----
-
-### Curated Lists & Articles
-
-These aren't individual skills; they're roundups and deep dives that reference multiple skills worth exploring.
-
-| Article | Source | What It Covers |
-| --- | --- | --- |
-| [Top Claude Skills for UI/UX Engineers](https://snyk.io/articles/top-claude-skills-ui-ux-engineers/) | Snyk | Curated list including UX Designer skill, component libraries, design system skills |
-| [Top Claude Skills for Cybersecurity](https://snyk.io/articles/top-claude-skills-cybersecurity-hacking-vulnerability-scanning/) | Snyk | Curated list including OWASP, vulnerability scanning, penetration testing skills |
-| [awesome-agent-skills](https://github.com/VoltAgent/awesome-agent-skills) | VoltAgent | Community-maintained master list of 500+ agent skills across all platforms |
-| [Awesome Claude Skills](https://github.com/ComposioHQ/awesome-claude-skills) | ComposioHQ | Awesome curated list of Claude Skills for all domains |
-| [agent-skills](https://github.com/addyosmani/agent-skills) | Addy Osmani | Software engineering specific skills |
-
----
-
-### On Skill Security
-
-The convenience of skills comes with real risk. 
-
-- Snyk's research on the [ClawHavoc campaign](https://snyk.io/articles/skill-md-shell-access/) demonstrated how a malicious SKILL.md file can escalate from Markdown instructions to full shell access in three lines.
-- Hidden instructions in a PDF file included with the skill alters the default skill instructions [https://blog.sondera.ai/p/claude-skill-hijack-invisible-sentence](https://blog.sondera.ai/p/claude-skill-hijack-invisible-sentence)
-- **Skills can include executable scripts**: a `scripts/` directory can contain anything that runs on your machine
-- **Prompt injection via SKILL.md**: malicious instructions can tell the agent to exfiltrate environment variables, API keys, or source code
-- **Supply chain attacks**: a skill you installed from GitHub can be updated by the author at any time after you've added it
-- **No sandbox by default**: unlike MCP servers, skills run with the same permissions as your Claude Code session
-
-**Practices to be followed before installing any community skill:**
-
-1. **Read the SKILL.md**: the full file, not just the front-matter description
-2. **Check the scripts/ directory**: if it has executable code, read every file
-3. **Review the repo**: check commit history, contributors, and whether the repo is actively maintained
-4. **Pin versions**: clone or fork rather than referencing a live repo that can change under you, or pin to commit SHAs
-5. **Use `--dangerously-skip-permissions` with caution**: this flag + a malicious skill = full access to your machine
-
-> 🔗 For securing the **apps Claude builds** (OWASP web/API/LLM/Agentic Top 10s, MCP & Claude Code CVEs, ready-to-paste pre-commit and CI guards, the LMDeploy 12h-to-exploit advisory), see [Cybersecurity & Production Hardening](/docs/security/).
-
-## Plugins
-
-Plugins extend Claude Code with additional capabilities: language intelligence, platform integrations, workflow automation, and more.
-
-Changes made from `/plugin` (install, enable, disable) take effect when you close the menu; `/reload-plugins` is no longer needed (v2.1.268+). Before publishing your own plugin, `claude plugin validate --json` gives a machine-readable report (v2.1.259+) and `claude plugin eval` runs its eval suite and scores the results (v2.1.269+). On install, `--accept-command <sha256>` accepts exactly the command a `--json` dry run displayed, instead of a blanket `-y` (v2.1.271+).
-
-> 🗒️ Some plugins install the MCP servers they depend on. Official plugins are available through the `claude-plugins-official` marketplace.
-
-### Notable Plugins
-
-| Plugin | What it does | Link |
-| --- | --- | --- |
-| **Superpowers** | A collection of power-user enhancements for Claude Code | [https://github.com/obra/superpowers](https://github.com/obra/superpowers) |
-| **Skills for Real Engineers** | Matt Pocock's composable collection of engineering-discipline skills: requirements grilling, domain modeling, specs and ticket decomposition, TDD, debugging, code review, and codebase architecture | [GitHub](https://github.com/mattpocock/skills/tree/main/skills)<br><code>/plugin install mattpocock-skills</code> (or <code>npx skills@latest add mattpocock/skills</code> for editable project-local copies. Pick one method to avoid duplicate skills) |
-| **Security Guidance** | Official plugin that automatically reviews code changes for vulnerabilities on edits, commits, or pushes | [Docs](https://code.claude.com/docs/en/security-guidance#on-each-commit-or-push-claude-makes)<br><code>/plugin install security-guidance@claude-plugins-official</code> |
-| **Codex Security** | OpenAI Codex plugin for authorized repository, deep, and diff-focused security scans, plus minimal fixes for validated findings | [Docs](https://developers.openai.com/codex/security/plugin)<br><code>$codex-security:security-scan</code> / <code>$codex-security:security-diff-scan</code> |
-| **GSD Core** | Phase-based spec, implementation, and verification workflow | [https://github.com/open-gsd/gsd-core](https://github.com/open-gsd/gsd-core) |
-| **BMAD** | Agile-style planning and development framework (SDD) | [docs](https://docs.bmad-method.org/) / [GitHub](https://github.com/bmad-code-org/BMAD-METHOD) |
-| **Spec Kit** | SDD Framework | [https://github.com/github/spec-kit](https://github.com/github/spec-kit) |
-| **OpenSpec** | SDD Framework | [https://github.com/Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec) |
-| **GitLab** | GitLab-native version of the GitHub integration | via claude-plugins-official marketplace |
-| **Codex for CC** | Call Codex CLI for a second review or delegated task | [GitHub](https://github.com/openai/codex-plugin-cc)<br><code>/plugin marketplace add openai/codex-plugin-cc</code><br><code>/plugin install codex@openai-codex</code> |
-| **Playwright** | Browser automation and end-to-end testing MCP server | via claude-plugins-official marketplace |
-| **Language Servers (LSP)** | Gives Claude real-time access to your language server: hover info, go-to-definition, diagnostics | via claude-plugins-official marketplace |
-
-### Plugin Marketplace
-
-| Marketplace option | Offline? |
-| --- | --- |
-| **Official Claude Code marketplace** | 🔴 Requires internet to browse and install |
-| **LiteLLM self-hosted marketplace** | 🟢 Fully offline once LiteLLM proxy is running locally |
-| **Archive source** (v2.1.224+) | Works from any internal HTTPS host: a plugin zip with an optional SHA-256 pin, no git or npm needed |
-
-**Offline / self-hosted option via LiteLLM:**
-
-Full guide: [https://docs.litellm.ai/docs/tutorials/claude_code_plugin_marketplace](https://docs.litellm.ai/docs/tutorials/claude_code_plugin_marketplace)
-
-**Prerequisites for the LiteLLM marketplace:**
-
-- LiteLLM Proxy running with a database connected
-- Access to the LiteLLM UI
-- Plugins hosted on GitHub, GitLab, or any git-accessible URL (can be a local git server)
-
-To browse and install plugins from the official marketplace, open Claude Code and navigate to **Extensions → Marketplace**, or visit the marketplace via the Claude Code documentation.
-
-### Plugin Marketplace Offline setup steps
-
-For offline environments, you can host curated plugins through a self-hosted LiteLLM instance, mirroring their online counterparts.
-To add a self-hosted LiteLLM as a plugin marketplace in Claude Code:
-
-`claude plugin marketplace add http://your-litellm-proxy.example.com/claude-code/marketplace.json`
-
-If the catalog needs a token, a marketplace `headersHelper` runs a command of yours that mints the request headers (v2.1.238+). Marketplaces hosted on a self-managed GitLab work with bare repository URLs, including nested subgroups (v2.1.232+).
-
 ## Skills and Plugins Reference
 
-The sections above explain how skills and plugins work and how to install them. The companion page looks at specific tools: what they add, where they help, and when their process costs more than it saves.
+The [Skills and Plugins Reference](/docs/skills-plugins-deep-dive/) covers how skills work, plugin installation and marketplaces, security considerations, and individual tools such as document skills, Superpowers, BMAD, GSD, and Codex for Claude Code.
 
-Read the [Skills and Plugins Reference](/docs/skills-plugins-deep-dive/).
+Start with [Skills](/docs/skills-plugins-deep-dive/#skills) and [Plugins](/docs/skills-plugins-deep-dive/#plugins), then explore the individual tools.
 
 ## More resources
 
