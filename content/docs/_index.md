@@ -8,6 +8,10 @@ Workshop materials for building with Claude Code, Codex, GSD, and BMAD from the 
 
 Start with the [Claude Code overview diagram](/docs/agentic-coding-in-terminal/#workshop-overview) to see how tools, skills, MCP servers, plugins, and the other workshop topics fit together.
 
+## Workshop labs
+
+Follow the [Workshop labs](/docs/workshop/) in order to prepare the Expense Tracker, explore its code, set project instructions and plan a monthly-budget feature.
+
 ## Core Pages
 
 | Page | Use it for |
