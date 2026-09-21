@@ -6,6 +6,8 @@ sidebar:
 
 Workshop materials for building with Claude Code, Codex, GSD, and BMAD from the terminal.
 
+Start with the [Claude Code overview diagram](/docs/agentic-coding-in-terminal/#workshop-overview) to see how tools, skills, MCP servers, plugins, and the other workshop topics fit together.
+
 ## Core Pages
 
 | Page | Use it for |

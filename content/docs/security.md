@@ -60,7 +60,7 @@ Claude Code, like every agent runtime, sits between the public internet (web fet
 
 ### Skill / supply-chain attacks
 
-Already covered in detail in [Foundations → On Skill Security](/docs/agentic-coding-in-terminal/#on-skill-security). Required reading: Snyk's [ClawHavoc](https://snyk.io/articles/skill-md-shell-access/) writeup (three-line `SKILL.md` → full shell), Sondera's [hidden-PDF skill hijack](https://blog.sondera.ai/p/claude-skill-hijack-invisible-sentence), and Datadog Security Labs' [Malicious Coding Agent Skills and the Risk of Dynamic Context](https://securitylabs.datadoghq.com/articles/malicious-skills-supply-chain-risks-in-coding-agents-with-dynamic-context/).
+Already covered in detail in [Skills & Plugins → On Skill Security](/docs/skills-plugins-deep-dive/#on-skill-security). Required reading: Snyk's [ClawHavoc](https://snyk.io/articles/skill-md-shell-access/) writeup (three-line `SKILL.md` → full shell), Sondera's [hidden-PDF skill hijack](https://blog.sondera.ai/p/claude-skill-hijack-invisible-sentence), and Datadog Security Labs' [Malicious Coding Agent Skills and the Risk of Dynamic Context](https://securitylabs.datadoghq.com/articles/malicious-skills-supply-chain-risks-in-coding-agents-with-dynamic-context/).
 
 The Datadog write-up covers a failure mode the other two don't. Their example, Clawsights, is a real skill found in the wild that poses as a leaderboard for Claude Code, then reads your GitHub token with `gh auth token` and uses `curl` to send it to a server the attacker controls, disguised as a stats upload. Run as an ordinary skill, Clawsights spells out every step in plain text, and when Datadog tested it, Opus 4.6 on its highest reasoning setting read the instructions, flagged the credential theft, and refused.
 
@@ -142,7 +142,7 @@ Most of the wins here are upstream of code generation. Bake them into `CLAUDE.md
 
 | Skill | Purpose | Repo |
 | --- | --- | --- |
-| **OWASP Security** | OWASP Top 10:2025 + ASVS 5.0 + Agentic AI security + 20 language-specific quirks. Already in the [Skills list](/docs/agentic-coding-in-terminal/#skills). | [agamm/claude-code-owasp](https://github.com/agamm/claude-code-owasp) |
+| **OWASP Security** | OWASP Top 10:2025 + ASVS 5.0 + Agentic AI security + 20 language-specific quirks. Already in the [Skills list](/docs/skills-plugins-deep-dive/#notable-skills-for-reference). | [agamm/claude-code-owasp](https://github.com/agamm/claude-code-owasp) |
 | **SecLists & Agents** | Wordlists, injection payloads, pentest agents for authorised testing. Bundles `/sqli-test`, `/xss-test`, `/webshell-detect`, `/api-keys`, `/wordlist` slash commands plus `security-fuzzing` / `security-payloads` / `security-patterns` / `security-webshells` / `llm-testing` skills. | [awesome-claude-skills-security](https://github.com/Eyadkelleh/awesome-claude-skills-security) |
 | **Devil's Advocate** | Challenges design decisions and review findings - useful as a final pre-merge pass. | [claude-code-skills/devils-advocate](https://github.com/notmanas/claude-code-skills/tree/main/skills/devils-advocate) |
 | **Trail of Bits skills** | Audit-grade skills published by Trail of Bits: `static-analysis` (CodeQL + Semgrep + SARIF), `semgrep-rule-creator`, `insecure-defaults`, `sharp-edges`, `differential-review`, `variant-analysis`, `supply-chain-risk-auditor`, plus crypto-specific `constant-time-analysis` and `zeroize-audit`. | [trailofbits/skills](https://github.com/trailofbits/skills) |

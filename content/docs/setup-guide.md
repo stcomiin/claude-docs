@@ -287,6 +287,8 @@ None of these are required.
 
 **A code editor**: [VS Code](https://code.visualstudio.com/), [Cursor](https://cursor.com/), or whichever editor you already use. It helps when you want to inspect generated files outside the terminal.
 
+**Herdr**: We recommend Herdr for managing multiple coding agent sessions in one terminal workspace. Follow the [official installation guide](https://herdr.dev/docs/install/) for your operating system, then see [Managing Multiple Agent Sessions with Herdr](/docs/agentic-coding-in-terminal/#managing-multiple-agent-sessions-with-herdr) for a quick introduction. This is optional for the workshop.
+
 **GitHub CLI**: If you want to follow along with the GitHub integration section:
 
 ```bash
