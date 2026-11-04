@@ -54,6 +54,28 @@ We’ll start with [setup](/docs/setup-guide/) and the foundations on this page,
     - `/cost` shows the session's prompt-cache hit ratio (v2.1.251+) and, when hits drop, the likely cause, such as a changed system prompt or an idle gap past the cache window (v2.1.260+).
     - Fable's 1M window needs usage credits on Pro and Team plans. Claude Code says so when a long-context request is refused, and credits turned on mid-session apply after a restart (v2.1.268).
 
+### Turn off unused prompt suggestions
+
+Claude Code can suggest your next prompt after a response. Each suggestion uses a short background request to the session's model and counts toward your plan's usage limits or API costs. Anthropic says these requests mostly reuse the prompt cache and generate a few output tokens, so their added cost is small. Turn them off if you do not use them. The savings depend on how often Claude Code would have generated a suggestion.
+
+In `/config`, turn off **Prompt suggestions**. Alternatively, merge this key into your existing `~/.claude/settings.json` to set your preference across projects on this machine. Keep your other settings:
+
+```json
+{
+  "promptSuggestionEnabled": false
+}
+```
+
+For a shell-level override, set the environment variable before launching Claude Code:
+
+```bash
+export CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION=false
+```
+
+The environment variable takes precedence over the JSON setting. Sessions that do not fetch feature flags, including third-party-provider and Claude apps gateway sessions, already leave suggestions off by default and hide the `/config` toggle. Claude Code also skips suggestions when the prompt cache is cold and in some other situations, so disabling them may save no additional usage in those sessions.
+
+Sources: [Anthropic's prompt suggestions guide](https://code.claude.com/docs/en/interactive-mode#prompt-suggestions), [`promptSuggestionEnabled` reference](https://code.claude.com/docs/en/settings-reference#promptsuggestionenabled), and [settings file scopes](https://code.claude.com/docs/en/settings#settings-files-and-who-they-affect).
+
 ### Why Claude Code (CC) vs other agentic harnesses?
 
 When this workshop was first conducted in April 2026, Claude Code was clearly out in front. The lead is smaller now as other harnesses like Codex, OpenCode, KiloCode, Pi, and Antigravity-Cli have all caught up quickly, and a few are very good now. The harness is just like an IDE where you interact with the model, each harness offers various ways to get your customised workflow. 
