@@ -108,7 +108,7 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
     
     ```bash
     # Install globally
-    npm install -g @anthropic-ai/claude-code@2.1.273 # verified 2026-09-16
+    npm install -g @anthropic-ai/claude-code@2.1.290 # minimum version for idleCompaction
     
     # Verify
     claude --version
@@ -121,6 +121,8 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
     
     Edit `~/.claude/settings.json`(Linux/MacOS), `%USERPROFILE%/.claude/settings.json`(Windows) and replace the example URL and key. In PowerShell, the same file is `$HOME\.claude\settings.json`. Claude Code sends requests to `ANTHROPIC_BASE_URL` and authenticates them with `ANTHROPIC_AUTH_TOKEN`.
     
+    Merge the settings below into your existing file. Keep any other settings and existing `env` entries. `idleCompaction` is a top-level Boolean, not an environment variable.
+
     **LiteLLM proxy:**
     
     ```json
@@ -141,7 +143,8 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
         "CLAUDE_CODE_SUBAGENT_MODEL_FORCE": "1"
       },
       "cleanupPeriodDays": 3650,
-      "autoCompactEnabled": false
+      "autoCompactEnabled": false,
+      "idleCompaction": false
     }
     ```
     
@@ -165,7 +168,8 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
         "CLAUDE_CODE_SUBAGENT_MODEL_FORCE": "1"
       },
       "cleanupPeriodDays": 3650,
-      "autoCompactEnabled": false
+      "autoCompactEnabled": false,
+      "idleCompaction": false
     }
     ```
     
@@ -174,6 +178,14 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
  - `CLAUDE_CODE_SUBAGENT_MODEL` is a default rather than an override since v2.1.251: an agent file's own `model:` wins. `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` (v2.1.257+) force applies it to every subagent.
  - `CLAUDE_CODE_FORK_SUBAGENT=0` turns off subagent forking, which has been on by default since v2.1.232. A forked subagent inherits the whole conversation which is context bloat. With forking off, subagents start from only the brief they are given.
 
+
+#### Keep idle compaction disabled
+
+The workshop setup above sets `"idleCompaction": false` for both gateways. This is our recommended configuration. [Claude Code's product default is `true`](https://code.claude.com/docs/en/settings-reference#idlecompaction), so eligible long conversations can be summarized while you are away, before their prompt cache expires. The setting requires v2.1.290 or later; earlier versions ignore it.
+
+Idle compaction is separate from [automatic compaction near the context limit](https://code.claude.com/docs/en/settings-reference#autocompactenabled). The existing `"autoCompactEnabled": false` already disables both. Keeping `"idleCompaction": false` makes the idle preference explicit if you later re-enable normal automatic compaction. Manual `/compact` still works.
+
+In the [user settings file](https://code.claude.com/docs/en/settings#settings-files-and-who-they-affect), this preference applies to all your projects on that machine. Project, local, command-line, or managed settings can override it. To change it interactively on v2.1.302 or later, run `/config` and turn off **Idle compaction**. That row saves to user settings and may be hidden when another settings source overrides it.
 
 ### Codex CLI (Optional)
 
