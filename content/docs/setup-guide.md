@@ -144,9 +144,12 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
       },
       "cleanupPeriodDays": 3650,
       "autoCompactEnabled": false,
-      "idleCompaction": false
+      "idleCompaction": false,
+      "promptSuggestionEnabled": false
     }
     ```
+
+    `promptSuggestionEnabled: false` turns off next-prompt suggestions.
     
     **OpenRouter:**
     
@@ -169,9 +172,12 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
       },
       "cleanupPeriodDays": 3650,
       "autoCompactEnabled": false,
-      "idleCompaction": false
+      "idleCompaction": false,
+      "promptSuggestionEnabled": false
     }
     ```
+
+    `promptSuggestionEnabled: false` turns off next-prompt suggestions.
     
   On Windows, add `"CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe"` only if Claude Code cannot find Git Bash.
 
