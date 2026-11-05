@@ -121,6 +121,8 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
     
     Edit `~/.claude/settings.json`(Linux/MacOS), `%USERPROFILE%/.claude/settings.json`(Windows) and replace the example URL and key. In PowerShell, the same file is `$HOME\.claude\settings.json`. Claude Code sends requests to `ANTHROPIC_BASE_URL` and authenticates them with `ANTHROPIC_AUTH_TOKEN`.
     
+    These examples turn off prompt suggestions with `"promptSuggestionEnabled": false`, our recommended workshop default. Claude Code enables them by default. If you already have a settings file, merge this key without replacing your other settings. See [prompt suggestion settings and overrides](/docs/agentic-coding-in-terminal/#turn-off-unused-prompt-suggestions).
+
     **LiteLLM proxy:**
     
     ```json
@@ -141,7 +143,8 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
         "CLAUDE_CODE_SUBAGENT_MODEL_FORCE": "1"
       },
       "cleanupPeriodDays": 3650,
-      "autoCompactEnabled": false
+      "autoCompactEnabled": false,
+      "promptSuggestionEnabled": false
     }
     ```
     
@@ -165,7 +168,8 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
         "CLAUDE_CODE_SUBAGENT_MODEL_FORCE": "1"
       },
       "cleanupPeriodDays": 3650,
-      "autoCompactEnabled": false
+      "autoCompactEnabled": false,
+      "promptSuggestionEnabled": false
     }
     ```
     
