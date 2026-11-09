@@ -300,6 +300,17 @@ Test it out! Prompt Claude Code to add a feature. Check whether it follows the r
 
 {{< bookmark url="https://www.anthropic.com/engineering/a-postmortem-of-three-recent-issues" title="A postmortem of three recent issues" description="This is a technical report on three bugs that intermittently degraded responses from Claude. Below we explain what happened, why it took time to fix, and what we're doing to prevent similar issues." icon="https://www.anthropic.com/favicon.ico" image="/images/anthropic-postmortem-og.png" >}}
 
+#### Investigating a suspected quality regression
+
+In [this Reddit thread](https://www.reddit.com/r/ClaudeCode/comments/1xr9x5y/the_nerf_is_real_thank_you_uwum1ha1nho/), u/DerAlbi reports changes in tool-call frequency, Bash command length and token usage across sessions grouped by reported experiment IDs. The chart compares the author's own sessions, not repeated runs of the same tasks. It is community evidence of changed behavior, not proof that an ID caused a quality regression or that every user received the same change. A [commenter's log analysis](https://www.reddit.com/r/ClaudeCode/comments/1xr9x5y/comment/19schh9yex6w1/) also reports different IDs and explicitly says the cause is unproven.
+
+If you notice a regression:
+
+- Record the Claude Code version, model, effort setting, date and a reproducible task. Compare fresh sessions on the same repository revision and judge the result with tests, not token counts alone.
+- Preserve relevant local transcripts before they expire. Anthropic documents plaintext transcripts under `~/.claude/projects/`, retained for 30 days by default. The global state file is `~/.claude.json`, not a file inside `~/.claude/`. See [data usage](https://code.claude.com/docs/en/data-usage#data-retention) and [settings](https://code.claude.com/docs/en/settings). Treat the thread's `atis-latch` records and hexadecimal IDs as undocumented observations, not a stable diagnostic API or a reliable label for a "good" or "bad" model.
+- Do not treat the telemetry flags suggested in the comments as a verified fix. Anthropic documents that `DISABLE_TELEMETRY=1` and `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1` disable feature-flag evaluation and can make Remote Control unavailable. That does not establish an opt-out from server-side model changes or a way to restore an earlier model. See [telemetry services](https://code.claude.com/docs/en/data-usage#telemetry-services).
+- Review and redact evidence before sharing it. Local transcripts can contain code and prompts; `~/.claude.json` contains account and project state. Anthropic's [feedback documentation](https://code.claude.com/docs/en/data-usage#feedback-using-the-/feedback-command) says submitted feedback transcripts are retained for five years.
+
 ## Giving Better Inputs
 
 The quality of your prompt is the biggest lever you have on output quality. These features and techniques help you give the agent exactly what it needs to succeed.
