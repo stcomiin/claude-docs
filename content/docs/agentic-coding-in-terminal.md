@@ -840,8 +840,6 @@ The [RTK report](https://blog.jetbrains.com/ai/2026/07/rtk-claude-code-token-sav
 
 RTK's [v0.43.0 README](https://github.com/rtk-ai/rtk/blob/v0.43.0/README.md) documents the native-tool limitation. Later RTK changes and Caveman's newer input-compression and routing components require separate evaluation.
 
-JetBrains sells developer and AI tools and published both reports. Neither report is an independent replication. The authors repeated smaller tests, but the full benchmark runs used one attempt per task per arm and excluded errored pairs. SkillsBench tasks and task-verifier scores do not cover every developer workflow or every aspect of code quality. The figures are the authors' published results. We have not rerun the benchmarks or reanalyzed the trial-level data. The reported costs use the experiments' pricing, which may differ from your account's current rates.
-
 Use Caveman if you prefer its concise narration. Before adopting either tool to reduce spending, run representative tasks repeatedly with the tool on and off. Keep versions and settings fixed. Compare task outcomes, failed runs and retries, turns, latency, token categories, and billed cost. Check both median per-task changes and total spend, including failures.
 
 ## Alternative providers
