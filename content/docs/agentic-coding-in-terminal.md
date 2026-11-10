@@ -816,7 +816,31 @@ Start with [Skills](/docs/skills-plugins-deep-dive/#skills) and [Plugins](/docs/
 
 > 🔗 [https://github.com/luongnv89/claude-howto](https://github.com/luongnv89/claude-howto)
 
-> 🔗 [https://github.com/rtk-ai/rtk](https://github.com/rtk-ai/rtk): Min-max token counts by using a CLI proxy to remove unnecessary outputs from tool calls
+### Token-saving tools and measured cost
+
+[RTK](https://github.com/rtk-ai/rtk) compresses eligible shell-command output before Claude Code receives it. Caveman shortens the agent's prose while preserving code, commands, and tool calls. Measure billed cost for the whole task, including cached context and additional turns.
+
+Denis Shiryaev's July 2026 JetBrains experiments compared these tools with stock Claude Code on SkillsBench. The results apply to the tested configurations. They do not predict savings for current releases or every coding workload.
+
+| Experiment | Configuration | Reported result |
+| --- | --- | --- |
+| Caveman, forced active in every reply | Claude Code 2.1.200, `claude-sonnet-5`, low effort, Harbor 0.17; 82 clean task pairs | Output tokens fell about 8.5%, from roughly 592,000 to 542,000. The advertised reduction was 65%. |
+| RTK v0.43.0, installed with `rtk init -g` | Claude Code 2.1.201, `claude-sonnet-5`, Harbor 0.18; 80 clean low-effort pairs | Median paired task cost increased 7.6%, p = 0.004. Turns increased 13.8%. |
+| Same RTK setup, high effort | 71 clean task pairs | Median paired task cost changed +0.1%, p = 0.99. The experiment detected no cost benefit. |
+
+The [Caveman report](https://blog.jetbrains.com/ai/2026/07/speak-to-ai-agents-like-cavemen-tosave-tokens/) describes roughly 10% per-task cost savings, but the full-run bill increased from USD 36.39 to USD 40.60. One trial crossed the experiment's long-context pricing threshold, turning the overall saving into a cost increase. A previous run had an outlier in the baseline arm, so the authors did not attribute this behavior to Caveman itself.
+
+Caveman's task scores improved on 8 pairs, worsened on 10, and tied on 64, with a sign-test p-value of 0.82. The RTK tests found no statistically detectable quality difference at either effort level. These tests establish neither equivalent quality nor universal safety, and they do not show that either tool consistently produces worse work.
+
+The [RTK report](https://blog.jetbrains.com/ai/2026/07/rtk-claude-code-token-savings/) describes limits on compression and its effect on billed cost:
+
+- Native Read and Grep calls bypass the Bash hook. In a replay of 83 baseline transcripts, eligible Bash calls accounted for just under one-fifth of tool-result characters.
+- Claude Code already truncates large outputs. RTK's counter compares compressed output with the full raw output, including text the baseline agent would never receive.
+- Actual cost includes differently priced token categories, cached context, and additional turns. The investigators found a broken command rewrite and some rereads, but no single cause explained the cost increase.
+
+RTK's [v0.43.0 README](https://github.com/rtk-ai/rtk/blob/v0.43.0/README.md) documents the native-tool limitation. Later RTK changes and Caveman's newer input-compression and routing components require separate evaluation.
+
+Use Caveman if you prefer its concise narration. Before adopting either tool to reduce spending, run representative tasks repeatedly with the tool on and off. Keep versions and settings fixed. Compare task outcomes, failed runs and retries, turns, latency, token categories, and billed cost. Check both median per-task changes and total spend, including failures.
 
 ## Alternative providers
 
