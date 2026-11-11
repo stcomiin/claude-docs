@@ -108,7 +108,7 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
     
     ```bash
     # Install globally
-    npm install -g @anthropic-ai/claude-code@2.1.290 # minimum version for idleCompaction
+    npm install -g @anthropic-ai/claude-code@2.1.321 # verified 2026-11-10
     
     # Verify
     claude --version
@@ -130,11 +130,11 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
       "env": {
         "ANTHROPIC_BASE_URL": "https://your-litellm-proxy.example.com",
         "ANTHROPIC_AUTH_TOKEN": "sk-your-api-key",
-        "ANTHROPIC_MODEL": "claude-opus-4-8[1m]",
-        "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-8[1m]",
-        "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-opus-4-8[1m]",
-        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-opus-4-8[1m]",
-        "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-4-8[1m]",
+        "ANTHROPIC_MODEL": "claude-opus-5-5[1m]",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5-5[1m]",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-opus-5-5[1m]",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-opus-5-5[1m]",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-5-5[1m]",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
         "CLAUDE_CODE_EFFORT_LEVEL": "max",
         "CLAUDE_CODE_FORK_SUBAGENT": "0",
@@ -158,11 +158,11 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
       "env": {
         "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
         "ANTHROPIC_AUTH_TOKEN": "sk-or-your-openrouter-key",
-        "ANTHROPIC_MODEL": "anthropic/claude-opus-4-8[1m]",
-        "ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic/claude-opus-4-8[1m]",
-        "ANTHROPIC_DEFAULT_SONNET_MODEL": "anthropic/claude-opus-4-8[1m]",
-        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-opus-4-8[1m]",
-        "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-opus-4-8[1m]",
+        "ANTHROPIC_MODEL": "anthropic/claude-opus-5-5[1m]",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic/claude-opus-5-5[1m]",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "anthropic/claude-opus-5-5[1m]",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-opus-5-5[1m]",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-opus-5-5[1m]",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
         "CLAUDE_CODE_EFFORT_LEVEL": "max",
         "CLAUDE_CODE_FORK_SUBAGENT": "0",
@@ -183,6 +183,10 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
 
  - `CLAUDE_CODE_SUBAGENT_MODEL` is a default rather than an override since v2.1.251: an agent file's own `model:` wins. `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` (v2.1.257+) force applies it to every subagent.
  - `CLAUDE_CODE_FORK_SUBAGENT=0` turns off subagent forking, which has been on by default since v2.1.232. A forked subagent inherits the whole conversation which is context bloat. With forking off, subagents start from only the brief they are given.
+ - These settings pin every model slot to Claude Opus 5.5, which needs Claude Code v2.1.280 or later. Your gateway has to serve the model under the name you put here. With LiteLLM that's the deployment name on your proxy, and OpenRouter lists the model as `anthropic/claude-opus-5.5` but also resolves the hyphenated spelling used above. Keep the `[1m]` suffix even though Opus 5.5 has a 1M-token context window without it, because Claude Code holds a model name it doesn't recognise to 200K unless the name ends in `[1m]`.
+ - Opus 5.5 runs with safety classifiers that mostly flag cybersecurity and biology content, and security work is the most likely trigger in this workshop. Claude Code re-runs a flagged request on Opus 4.8 (cybersecurity) or Opus 5 (biology) and keeps the session on that model until you run `/model`, so the re-run fails if your gateway doesn't serve those models. To be asked before a switch, open `/config` and set **Switch models when a message is flagged** to **Ask each time**. To turn switching off, set `CLAUDE_CODE_DISABLE_REFUSAL_FALLBACK=1`.
+ - A new interactive session starts in auto mode on every provider unless you set `permissions.defaultMode` (v2.1.283+). [Auto Mode & Automation](/docs/agentic-coding-in-terminal/#auto-mode--automation) covers how auto mode behaves behind a gateway. To approve each action yourself, press `Shift+Tab` once in the session, or add `"permissions": { "defaultMode": "default" }` to this file.
+ - `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1` also turns off feature-flag fetching, so `/skill-doctor`, the advisor tool, and the built-in "You should know" mod don't work with these settings.
 
 
 #### Keep idle compaction disabled
@@ -272,7 +276,7 @@ In the [user settings file](https://code.claude.com/docs/en/settings#settings-fi
 
     Keep API keys out of `http_headers`. Codex reads the variable named by `env_key` and sends it as the provider credential. Do not add context-window or compaction limits unless your gateway needs values that differ from the model metadata.
 
-4. Run `codex` in the same terminal, then use `/model`. With OpenRouter, choose a provider-qualified ID such as `openai/gpt-5.6-sol`, `openai/gpt-5.6-terra`, or `openai/gpt-5.6-luna`. With LiteLLM, use the deployment name configured on your proxy. Sol is for complex, open-ended work, Terra for everyday development, and Luna for clear, repeatable tasks. Max gives one agent more time to reason; Ultra can delegate independent parts to subagents on eligible accounts.
+4. Run `codex` in the same terminal, then use `/model`. With OpenRouter, choose a provider-qualified ID such as `openai/gpt-6.1-sol`, `openai/gpt-6.1-terra`, or `openai/gpt-6-luna`. The older GPT-5.6 IDs such as `openai/gpt-5.6-sol` still resolve. With LiteLLM, use the deployment name configured on your proxy. Sol is for complex, open-ended work, Terra for everyday development, and Luna for clear, repeatable tasks. Max gives one agent more time to reason; Ultra can delegate independent parts to subagents on eligible accounts.
 
 ---
 
@@ -331,7 +335,9 @@ If you get stuck on any step:
 
 1. Copy the error message
 2. Paste it into Claude or ChatGPT and ask for help.
-3. Check `claude --version`. Versions 2.1.265 through 2.1.267 fail every turn with HTTP 400 through third-party Anthropic-compatible endpoints such as LiteLLM and OpenRouter (fixed in 2.1.268). The pinned version above is past that range.
+3. Check `claude --version`. Versions 2.1.265 through 2.1.267 (fixed in 2.1.268) and 2.1.275 (fixed in 2.1.276) fail every turn with HTTP 400 through third-party Anthropic-compatible endpoints such as LiteLLM and OpenRouter. The pinned version above is past both.
+4. If the gateway says the model doesn't exist, it isn't serving Opus 5.5 under the name in your `settings.json`. Check the model list in the LiteLLM UI or on OpenRouter, or ask whoever runs the proxy which name to use.
+5. If Claude asks about most actions or refuses them, your gateway probably isn't passing auto mode's safety review through. To check, run `/status` and read the **Auto mode server** row. Press `Shift+Tab` to switch to manual mode, then see [Auto Mode & Automation](/docs/agentic-coding-in-terminal/#auto-mode--automation).
 
 ---
 
