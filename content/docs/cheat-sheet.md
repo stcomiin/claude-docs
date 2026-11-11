@@ -23,8 +23,8 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `/cost`, `/stats` | Aliases for `/usage` |
 | `/insights` | Generate a report on the projects you worked on, how you used Claude Code, and where sessions got stuck; works through LLM gateways since v2.1.269 |
 | `/model [name]` | Switch models: opus, sonnet, fable, or haiku. Switching no longer re-sends tool definitions, so the prompt cache survives (v2.1.267+) |
-| `/effort [level]` | Set effort to low, medium, high (default), xhigh, max, or `ultracode`. Saved per model (v2.1.251+); press `s` to change it for this session only (v2.1.257+). The `maxEffortLevel` setting caps it (v2.1.267+) |
-| `/fast [on\|off]` | Toggle fast mode for Opus 5 and Opus 4.8: up to 2.5× faster, billed at $10 input and $50 output per MTok |
+| `/effort [level]` | Set effort to low, medium, high, xhigh, or max. The default depends on the model, and Opus 5.5 starts at medium. Saved per model (v2.1.251+); press `s` to change it for this session only (v2.1.257+). The `maxEffortLevel` setting caps it (v2.1.267+). `/effort ultracode [on\|off]` is a separate toggle and doesn't change the level (v2.1.284+). The workshop settings set `CLAUDE_CODE_EFFORT_LEVEL=max`, which takes precedence over `/effort` |
+| `/fast [on\|off]` | Toggle fast mode, up to 2.5× faster at a higher price per MTok: $16 input and $80 output on Fable 5.2, $8 and $40 on Opus 5.5, $10 and $50 on Opus 5 and Opus 4.8. Fast mode on Opus 4.8 goes away on 30 November 2026. `/fast` is unavailable with the workshop settings, because `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` skips its availability check |
 
 ## Memory & project setup
 
@@ -35,14 +35,14 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `/permissions` | Review or edit permission rules |
 | `/config` | Open Claude Code settings |
 | `/output-style [name]` | List output styles or switch to one (v2.1.269+; use `/config` on older versions) |
-| `/doctor` | Diagnose setup issues and optionally fix them (alias `/checkup`) |
+| `/doctor [prompt-audit]` | Diagnose setup issues and optionally fix them (alias `/checkup`). `/doctor prompt-audit` checks your CLAUDE.md, skills, agents, and commands for prompting written for older models (v2.1.283+) |
 | `/fewer-permission-prompts` | Scan recent transcripts and propose a read-only allowlist to cut permission prompts |
 
 ## Writing better prompts
 
 | Command | Description |
 | --- | --- |
-| `/plan` or `Shift+Tab` | Enter plan mode to inspect the project and propose changes |
+| `/plan`, or `Shift+Tab` until the status bar shows plan mode | Enter plan mode to inspect the project and propose changes |
 | `@file` | Add a file or directory to the prompt |
 | `Alt+T` | Toggle extended thinking for the rest of the session |
 
@@ -54,7 +54,7 @@ A compact reference for the commands and shortcuts that come up most often durin
 | `/copy [N]` | Copy the latest response, or response N, to the clipboard |
 | `Ctrl+S` | Stash current draft; press `Ctrl+S` again on an empty prompt to restore |
 | `Esc` | Stop generation |
-| `Esc Esc` or `/rewind` | Open the rewind menu for code, conversation, both, a summary point, or a fork (`f`) |
+| `Esc Esc` or `/rewind` | Open the rewind menu for code, conversation, both, a summary point, or a fork (`f`). Rewind doesn't undo changes made through Bash |
 | `/branch` / `/fork` | `/branch` switches to a new conversation timeline; `/fork` copies the conversation into a background session with its own worktree (v2.1.222+) |
 | `/subtask <prompt>` | Hand a side task to a subagent; its result returns into this conversation |
 | `/background` / `/bg` | Detach the current session to run as a background agent and free the terminal |
@@ -75,9 +75,10 @@ A compact reference for the commands and shortcuts that come up most often durin
 
 | Flag / Command | Description |
 | --- | --- |
-| `--permission-mode auto` | Start in auto mode; works interactively and with `-p` |
+| `--permission-mode auto` | Start in auto mode. Interactive sessions already start there (v2.1.283+). `-p` runs start in `default` (v2.1.302+), so scripts need this flag |
+| `/auto-mode-setup` | Draft `autoMode.environment` entries from your project and recent sessions, then review and save them to user settings |
 | `claude auto-mode reset` | Remove the user-level `autoMode` customization block |
-| `ultracode` (in a prompt) or `/effort ultracode` | Use xhigh effort and dispatch workflow agents when parts of the task can run independently |
+| `ultracode` (in a prompt) or `/effort ultracode` | The keyword runs one task as a workflow. `/effort ultracode` lets Claude plan workflows for every substantive task in the session, and `/effort ultracode off` stops it. Neither changes the effort level (v2.1.284+) |
 | `/workflows` | List, watch, pause, resume, save, stop workflow runs |
 | `/deep-research <question>` | Research a question in parallel and return a cited report |
 | `/dataviz` | Chart and dashboard design guidance when building visualizations |
@@ -92,9 +93,12 @@ A compact reference for the commands and shortcuts that come up most often durin
 | --- | --- |
 | `/agents` | Reminder to create or edit subagents by asking Claude or editing `.claude/agents/`; no longer an interactive manager (as of v2.1.198) |
 | `/skills` | List and manage skills |
-| `/skill-doctor` | Show which loaded skills went unused and what they cost in context (v2.1.261+) |
-| `/plugin` | Browse plugin marketplaces; changes apply when the menu closes, no `/reload-plugins` needed (v2.1.268+) |
-| `/mcp` | Manage MCP servers such as GitHub or Jira |
+| `/skill-doctor` | Show which loaded skills went unused and what they cost in context (v2.1.261+). It needs feature-flag fetching, so it doesn't work with `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` set, as in the workshop settings |
+| `/plugin` | Browse plugin marketplaces; changes apply when the menu closes, no `/reload-plugins` needed (v2.1.268+). `/plugin install <name> --marketplace <owner/repo>` adds the marketplace and installs in one step (v2.1.275+) |
+| `/plugin-authoring` | Load the reference Claude uses to write a mod, then describe the mod you want (v2.1.287+). See [Mods](/docs/skills-plugins-deep-dive/#mods) |
+| `claude plugin validate <dir>` | Check a plugin folder without running it. For a mod it lists the events the mod hooks and the API calls it makes. Read that list before you install a mod |
+| `claude --safe-mode` | Start a session without installed mods and your other customisations, to check whether one of them caused a problem |
+| `/mcp` | Manage MCP servers such as GitHub or Jira; `/mcp reconnect all` retries every server that failed to connect (v2.1.284+) |
 | `/hooks` | Configure lifecycle hooks such as PreToolUse, PostToolUse, Stop, and Notification |
 | `/install-github-app` | Install Claude GitHub App for PR workflows |
 
@@ -152,13 +156,14 @@ claude -p "fix the bug" --permission-mode auto --permission-prompts none
 | --- | --- |
 | `Esc` | Stop generation |
 | `Esc Esc` | Rewind menu |
-| `Shift+Tab` | Cycle through manual, auto-accept, plan, and auto mode when available |
+| `Shift+Tab` | Cycle permission modes. Sessions start in auto (v2.1.283+), and from there the order is manual, auto-accept, plan, then back to auto |
+| `Ctrl+Enter` or `Ctrl+X Ctrl+S` | Send queued messages now, without waiting for the turn to end (v2.1.275+) |
 | `Ctrl+S` | Stash the current draft; press again on an empty prompt to restore it |
 | `Ctrl+B` | Background the current turn: running shell commands and subagents keep going while you get the prompt back |
 | `Ctrl+R` | Interactive history search |
 | `Ctrl+W` / `Alt+F` / `Alt+D` | Delete back to whitespace, jump to word end, delete to word end, as in Bash (v2.1.261+) |
-| `Ctrl+L` | In fullscreen mode, clear the transcript view like `clear`; scroll up for earlier messages (v2.1.260+) |
-| `Ctrl+T` | Toggle task list visibility. Empty on Opus 4.8, Sonnet 5, and Fable unless `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` is set |
+| `Ctrl+L` | Redraw the screen when the display is garbled. Your input and the conversation stay as they were |
+| `Ctrl+T` | Toggle task list visibility. On the workshop's Opus 5.5, as on any model newer than Opus 4.7, Sonnet 4.6, and Haiku 4.5, the list stays empty unless you set `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` |
 | `Ctrl+O` | Open the transcript viewer |
 | `Ctrl+V`; `Cmd+V` in iTerm2; `Alt+V` on Windows/WSL | Paste an image |
 | `!command` | Run a shell command without Claude interpreting it |

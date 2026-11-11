@@ -53,6 +53,7 @@ The difference matters for how much enforcement each one can carry. Think of it 
 
 - A **skill** is mostly instructions. It tells Claude what to do when it loads. The agent can still ignore parts of it or treat it as a hint.
 - A **plugin** can add hooks, subagents, and commands that run regardless of what the agent decides. Hooks in particular are enforcement: they fire whether or not the agent wanted them to.
+- A **mod** is a plugin whose hooks are code that runs inside Claude Code. It can redraw the interface and rewrite or answer tool calls, which is why [Mods](/docs/skills-plugins-deep-dive/#mods) has a vetting routine.
 - A **framework** like BMAD or GSD goes further. It writes project state to disk (PRDs, plans, phases, verification reports), so each step leaves artifacts the next agent reads, and the workflow becomes hard to skip past.
 
 ---
@@ -95,7 +96,7 @@ For a worked authoring example, see [Creating your own skills](/docs/skills-plug
 
 See the following Github repo for living doc: https://github.com/luongnv89/claude-howto/blob/6d1e0ae4afbb95305e10d414ae90fcf3d74b9c4e/03-skills/README.md
 
-Three recent changes affect how skills behave. `/skill-doctor` lists the loaded skills that went unused and what each costs in context, so you can prune them (v2.1.261+). A skill marked `disable-model-invocation` now makes Claude ask you to run it instead of copying its steps (v2.1.222+).
+Two recent changes affect how skills behave. `/skill-doctor` lists the loaded skills that went unused and what each costs in context, so you can prune them (v2.1.261+). It needs feature-flag fetching, which the workshop settings turn off. A skill marked `disable-model-invocation` now makes Claude ask you to run it instead of copying its steps (v2.1.222+).
 
 ### Notable Skills for Reference
 
@@ -165,7 +166,7 @@ The convenience of skills comes with real risk.
 
 Plugins extend Claude Code with additional capabilities: language intelligence, platform integrations, workflow automation, and more.
 
-Changes made from `/plugin` (install, enable, disable) take effect when you close the menu; `/reload-plugins` is no longer needed (v2.1.268+). Before publishing your own plugin, `claude plugin validate --json` gives a machine-readable report (v2.1.259+) and `claude plugin eval` runs its eval suite and scores the results (v2.1.269+). On install, `--accept-command <sha256>` accepts exactly the command a `--json` dry run displayed, instead of a blanket `-y` (v2.1.271+).
+Changes made from `/plugin` (install, enable, disable) take effect when you close the menu; `/reload-plugins` is no longer needed (v2.1.268+). Before publishing your own plugin, `claude plugin validate --json` gives a machine-readable report (v2.1.259+) and `claude plugin eval` runs its eval suite and scores the results (v2.1.269+). On install, `--accept-command <sha256>` accepts exactly the command a `--json` dry run displayed, instead of a blanket `-y` (v2.1.271+). `/plugin install <name> --marketplace <owner/repo>` adds a marketplace and installs from it in one step (v2.1.275+). `claude plugin install` takes the same flag from the shell since v2.1.292.
 
 > 🗒️ Some plugins install the MCP servers they depend on. Official plugins are available through the `claude-plugins-official` marketplace.
 
@@ -177,6 +178,8 @@ Changes made from `/plugin` (install, enable, disable) take effect when you clos
 | **Skills for Real Engineers** | Matt Pocock's composable collection of engineering-discipline skills: requirements grilling, domain modeling, specs and ticket decomposition, TDD, debugging, code review, and codebase architecture | [GitHub](https://github.com/mattpocock/skills/tree/main/skills)<br><code>/plugin install mattpocock-skills</code> (or <code>npx skills@latest add mattpocock/skills</code> for editable project-local copies. Pick one method to avoid duplicate skills) |
 | **Security Guidance** | Official plugin that automatically reviews code changes for vulnerabilities on edits, commits, or pushes | [Docs](https://code.claude.com/docs/en/security-guidance#on-each-commit-or-push-claude-makes)<br><code>/plugin install security-guidance@claude-plugins-official</code> |
 | **Codex Security** | OpenAI Codex plugin for authorized repository, deep, and diff-focused security scans, plus minimal fixes for validated findings | [Docs](https://developers.openai.com/codex/security/plugin)<br><code>$codex-security:security-scan</code> / <code>$codex-security:security-diff-scan</code> |
+| **Code Modernization** | Official plugin for modernising a legacy codebase. It assesses the code, draws an interactive map, extracts the business rules, and writes a plan for you to approve, then upgrades, rewrites, or rebuilds the code and checks that the new code behaves like the old. Some steps start many agents at once, so pilot it on one module | [README](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-modernization)<br><code>/plugin install code-modernization@claude-plugins-official</code> |
+| **Champion Kit** | Official plugin for the person getting a team to adopt Claude Code. It helps you run hackathons and office hours, find patterns worth sharing, and write an AI maturity report, and the official docs have a matching [Champion kit playbook](https://code.claude.com/docs/en/champion-kit) | [README](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/champion-kit)<br><code>/plugin install champion-kit@claude-plugins-official</code> |
 | **GSD Core** | Phase-based spec, implementation, and verification workflow | [https://github.com/open-gsd/gsd-core](https://github.com/open-gsd/gsd-core) |
 | **BMAD** | Agile-style planning and development framework (SDD) | [docs](https://docs.bmad-method.org/) / [GitHub](https://github.com/bmad-code-org/BMAD-METHOD) |
 | **Spec Kit** | SDD Framework | [https://github.com/github/spec-kit](https://github.com/github/spec-kit) |
@@ -191,8 +194,11 @@ Changes made from `/plugin` (install, enable, disable) take effect when you clos
 | Marketplace option | Offline? |
 | --- | --- |
 | **Official Claude Code marketplace** | 🔴 Requires internet to browse and install |
+| **Anthropic community marketplace** | 🔴 Requires internet. Holds third-party plugins their authors submitted to Anthropic, and Claude Code doesn't add it by default |
 | **LiteLLM self-hosted marketplace** | 🟢 Fully offline once LiteLLM proxy is running locally |
 | **Archive source** (v2.1.224+) | Works from any internal HTTPS host: a plugin zip with an optional SHA-256 pin, no git or npm needed |
+
+To use the community marketplace, run `/plugin marketplace add anthropics/claude-plugins-community`, then install with the `@claude-community` suffix.
 
 **Offline / self-hosted option via LiteLLM:**
 
@@ -214,6 +220,122 @@ To add a self-hosted LiteLLM as a plugin marketplace in Claude Code:
 `claude plugin marketplace add http://your-litellm-proxy.example.com/claude-code/marketplace.json`
 
 If the catalog needs a token, a marketplace `headersHelper` runs a command of yours that mints the request headers (v2.1.238+). Marketplaces hosted on a self-managed GitLab work with bare repository URLs, including nested subgroups (v2.1.232+).
+
+---
+
+## Mods
+
+A mod is a plugin that changes how Claude Code itself looks and behaves. Skills, MCP servers, and `settings.json` hooks work from outside Claude Code. They give Claude text or tools, or they run a script. A mod is JavaScript or TypeScript that runs inside Claude Code, so it can:
+
+- draw a pane beside the transcript or a band above the prompt, with buttons and text fields
+- restyle what Claude Code already draws, such as tool rows and the spinner
+- watch, rewrite, or answer tool calls and prompts before they go ahead
+- add a `/command` that runs your code immediately, without a model turn
+
+Claude Code added mods in v2.1.287 (October 2026), and they're on by default. Through an LLM gateway, as in the workshop setup, they load from v2.1.290. They work in the terminal, the Desktop app's Code tab, and the VS Code extension.
+
+| | Mod | Settings hook | Skill | MCP server |
+| --- | --- | --- | --- | --- |
+| **What it is** | Functions in a plugin that run inside Claude Code | A shell command, HTTP request, or prompt run on a lifecycle event | A `SKILL.md` of instructions Claude reads | An external process that gives Claude tools |
+| **Draws in the interface** | Yes | No | No | No |
+| **You write** | JavaScript or TypeScript | A script and a `settings.json` entry | Markdown | A server in any language |
+| **Pick it when** | You want a pane, a band above the prompt, a custom command, or to rewrite an event | You want to block, allow, or log an event with a script | You keep pasting the same instructions | Claude needs to reach an external system |
+
+Claude Code calls a mod's handlers "hooks" as well. They're separate from the `settings.json` hooks described under [Hooks](/docs/agentic-coding-in-terminal/#hooks), which keep working alongside them.
+
+### Three ways to get a mod
+
+1. **Use a built-in one.** Some Claude Code features are mods already, including the `/diff` pane and the loader that reads `AGENTS.md`. `/plugin` lists them under **Built-in** on the **Installed** tab.
+2. **Ask Claude to write one.** Describe it in an interactive session. Claude works from the built-in `plugin-authoring` skill, which you can also load yourself with `/plugin-authoring`, and writes the mod to `~/.claude/dev-mods/<session-id>/`. Claude Code then asks whether to turn on the mods written in this session. From v2.1.321 it turns them on without asking in auto and bypass modes. The mod reloads at the end of each turn that changes it, so you can ask for a change and try it in the next turn.
+3. **Install one.** A mod installs like any other plugin, with `/plugin install <name>@<marketplace>`. If you install from the shell while a session is open, run `/reload-plugins` in that session.
+
+A mod Claude wrote loads only in the session that made it. To keep it, copy its folder somewhere of your own and start Claude Code with `claude --plugin-dir <folder>`.
+
+### Try it: write a mod, then read what it can reach
+
+This takes about ten minutes and is optional. In a Claude Code session, ask:
+
+```text
+make a mod that shows the current git branch above the prompt
+```
+
+Approve the files and turn the mod on if Claude Code asks. The branch name appears above the prompt box, and `/plugin` lists the mod on its **Installed** tab, where you can also switch it off.
+
+Now look at it the way you'd look at someone else's mod. Ask Claude for the folder it wrote to, then run this in a second terminal:
+
+```bash
+claude plugin validate ~/.claude/dev-mods/<session-id>/<mod-folder>
+```
+
+The `hooks:` line lists the events the mod receives, and the `calls:` line lists what it asks Claude Code to do. A branch display has to run `git` or read a file under `.git`, so expect to see something like `$.process.run` or `$.fs.read`. Read these two lines for any mod before you install it.
+
+### Vet a mod before you install it
+
+> **A mod is code that runs as you.** Claude Code doesn't sandbox it. `/sandbox` isolates the Bash commands Claude runs, and a process that a mod starts runs outside the sandbox. A loaded mod can read and write any file your account can, start programs, and make network requests. It can read environment variables and settings files, see and rewrite every prompt and tool call, approve a tool call before Claude Code asks you, run Claude's tools itself, and make model calls on your key.
+
+In the workshop setup your gateway key is in `~/.claude/settings.json`, where a mod can read it, and the built-in guard doesn't load on an API key or gateway token. That guard, `cc-plugin-sec-default`, stops user-installed mods from overriding deny rules, ask rules, and `PreToolUse` hooks, but it loads only on a machine with managed settings or a `managed-mcp.json` file, or on a Team or Enterprise login. Without it, an installed mod can approve a call that your deny rules, or the safety hooks from the [hooks hands-on](/docs/agentic-coding-in-terminal/#hands-on-add-safety-hooks-10-minutes), would have stopped.
+
+The routine:
+
+1. **Get the files without running them.** Clone the repository and don't install it yet.
+2. **Run `claude plugin validate <folder>`.** It prints which events the mod hooks and which API calls it makes, without loading the mod.
+3. **Read the source anyway.** `validate` lists API calls, and a hook can change an event while passing it along, for example a command or a file path, without making one. `validate` reports nothing for that change.
+4. **Check again after every update.** What a mod can reach changes between versions. The `skins` mod made no file, process, network, or environment calls at 0.1.1. By 0.5.16 it had added an update check that reads a file and fetches a URL, a process call to detect dark mode, and reads of terminal environment variables. Those are ordinary things for a theme to do, but you only learn about them by running `validate` again.
+5. **Know how to turn a mod off.** Disable one mod on the **Installed** tab of `/plugin`, or start one session without installed mods with `claude --safe-mode`. `"disableAllHooks": true` in `~/.claude/settings.json` turns installed mods off everywhere, along with your `settings.json` hooks and custom status line.
+
+This is what step 2 prints for Anthropic's `blast-radius` sample:
+
+```text
+❯ ./blast-radius.mjs hooks: tool.call{tool=Bash}, ui.render{component=Pane}, ui.render{component=AbovePrompt}
+❯ ./blast-radius.mjs gating hook without .catch: tool.call{tool=Bash}
+❯ ./blast-radius.mjs calls: $.clock.now, $.process.run, $.session.cwd, $.ui.close, $.ui.invalidate, $.ui.open, $.ui.resolve, $.ui.toast
+```
+
+| In the output | What it means |
+| --- | --- |
+| `$.fs.read`, `$.fs.write` | Reads or writes files anywhere you can |
+| `$.process.run`, `$.process.spawn` | Starts programs as you |
+| `$.http.fetch` | Makes network requests |
+| `$.env.get`, `$.settings.read` | Reads environment variables and settings, which can hold API keys. An `env reads:` line names each variable |
+| `$.model.complete`, `$.model.fork` | Makes model calls on your key |
+| `$.prompt.submit` | Submits a prompt, and can send it as your own words |
+| `$.tool.call`, `$.mcp.call` | Runs Claude's own tools, such as Bash, or an MCP tool. No permission prompt appears, even under an ask rule, though deny rules still apply (v2.1.321+) |
+| `$.env.set` | Sets an environment variable for Claude Code and every command it starts afterwards. An `env writes:` line names each variable |
+| `tool.call` or `prompt.submit` under `hooks:` | Sees every tool call or prompt and can change it |
+| `tool.check` under `hooks:` | Can approve or deny a tool call before Claude Code asks you |
+| `gating hook without .catch` | If that hook throws or times out before passing the event on, Claude Code skips it and the action goes ahead. A mod that claims to guard something then fails open |
+
+The security page lists [the risks in one place](/docs/security/#mods).
+
+### Notable mods
+
+In November 2026 no mod stood out on Reddit or YouTube as one everyone should install. Most Reddit threads were authors announcing their own mod, many YouTube roundups repeated the same few picks, and the mods recommended most often were Anthropic's own samples. As with the skills list above, these are references for what's possible, and we don't endorse them. Read the **Reach** column first. It's what `claude plugin validate` reported for each repository on 10 November 2026, using Claude Code 2.1.321.
+
+| Mod | What it does | Reach | Install and notes |
+| --- | --- | --- | --- |
+| **blast-radius** (Anthropic sample) | Holds a risky shell command, such as `rm -rf`, `git reset --hard`, a force push, or a migration, and shows what it would change, with Proceed and Cancel buttons | Hooks Bash tool calls and starts `bash` and `git` processes. Makes no file, network, or environment calls | [Source](https://github.com/anthropics/claude-code-playground/tree/main/claude-code/mods/blast-radius). Clone the repository, then from `claude-code/mods` run `claude --plugin-dir ./blast-radius`. Anthropic shares it as-is without support, and its guard hook has no `.catch`. It overlaps the delete hook from the hooks hands-on |
+| **replay-theater** (Anthropic sample) | `/replay` steps through the file edits Claude made in the last turn, one diff at a time | Reads files. Makes no process, network, or environment calls | [Source](https://github.com/anthropics/claude-code-playground/tree/main/claude-code/mods/replay-theater). From the same clone, run `claude --plugin-dir ./replay-theater` |
+| **next-steps** | After each turn, suggests up to three next prompts above the input. Press 1, 2, or 3 to put one in the prompt box as a draft you can edit | Makes one forked model call per turn and fills the prompt box. Makes no file, process, network, or environment calls | [Source](https://github.com/anthropics/claude-plugins-community/tree/main/next-steps), in Anthropic's community marketplace<br><code>/plugin marketplace add anthropics/claude-plugins-community</code><br><code>/plugin install next-steps@claude-community</code><br>Each round of suggestions costs about one short reply on your key |
+| **savvy-progress** | `/agents-info` opens a panel that lists running, finished, and planned subagents with their model, progress, context, cost, and time. It also draws a progress bar for its companion `savvy-flow` plugin | Reads settings and the locale variables `LANG`, `LC_ALL`, and `LC_MESSAGES`, and registers its own tools. Makes no file, process, or network calls | [Source](https://github.com/JohnnyVizz/claude-kit/tree/main/plugins/savvy-progress)<br><code>/plugin marketplace add johnnyvizz/claude-kit</code><br><code>/plugin install savvy-progress@claude-kit</code> |
+| **filetree** | A pane with an IDE-style file tree that shows what Claude is reading and editing, with git status | Has the widest reach of the five. Reads and writes files, starts processes, reads 18 environment variables, and hooks permission checks for edits and shell commands | [Source](https://github.com/data-goblin/claude-code-filetree)<br><code>/plugin marketplace add data-goblin/claude-code-filetree</code><br><code>/plugin install filetree@claude-code-filetree</code><br>Needs v2.1.306 or later and git |
+
+You'll see these recommended as well. Each comes with a catch:
+
+| Mod | What to know first |
+| --- | --- |
+| **token-weather** (Anthropic sample) | Draws a forecast of the context window above the prompt, and reads only session usage. It repeats the context percentage [ccstatusline](/docs/agentic-coding-in-terminal/#1-ccstatusline) already shows |
+| **You should know** (built in) | A side agent that flags something you may have missed. `/plugin` doesn't list it when you connect through an LLM gateway, so you can't use it in the workshop setup |
+| [cache-tax](https://github.com/karanb192/cache-tax) | Asks before a send hits a cold prompt cache and can ping to keep the cache warm during breaks. It makes model calls and no file, process, or network calls. Its README says API-key sessions default to a five-minute cache, so it asks you to set `promptCacheTtl` to `"1h"` first. Every ping costs tokens |
+| [cc-stretch](https://github.com/pro-vi/cc-stretch) | Shortens each reply and expands a phrase in place when you click it. It starts processes and reads the session's messages. Clicks need the fullscreen renderer, which `/tui fullscreen` turns on |
+| [effortless](https://github.com/HeyCubit/effortless) | Sets the reasoning effort for each prompt. A small-model call makes that choice, so every prompt costs an extra request. It makes network requests, writes files, starts processes, and makes model calls. Its repository didn't pass `claude plugin validate` on v2.1.321 when we checked |
+| [skins](https://github.com/hellosverre/claude-skins) | Restyles the transcript with themes. It's cosmetic, and your screen will stop matching the screenshots in these docs |
+
+**Where to look further**
+
+- [Mods overview](https://code.claude.com/docs/en/plugins/mods/overview) and [Create a mod](https://code.claude.com/docs/en/plugins/mods/create) in the official docs, and Anthropic's three-minute [intro video](https://youtu.be/yUuFvL1lK4k).
+- [Anthropic's sample mods](https://github.com/anthropics/claude-code-playground/tree/main/claude-code/mods) and the [source of the built-in mods](https://github.com/anthropics/claude-code/tree/main/mods). Read both before you write your own.
+- [awesome-claude-code-mods](https://github.com/karanb192/awesome-claude-code-mods), a community catalogue that scans public repositories and records what the validator says each mod can read, write, run, or send. Anthropic isn't involved, and the author of cache-tax maintains it.
+- Traversy Media's [Claude Code Mods Explained](https://youtu.be/uizaxuzgEAk), a 23-minute walkthrough.
 
 ---
 
@@ -421,6 +543,7 @@ Restart Claude Code after installing. It is still an opt-in plugin (not enabled 
 | `/superpowers:using-git-worktrees` | Isolate larger work on a separate worktree |
 | `/superpowers:finishing-a-development-branch` | Decide how to integrate completed work |
 | `/superpowers:writing-skills` | Author and test your own skills |
+| `/superpowers:diagnosing-superpowers` | Work out why a Superpowers session went wrong, or gather a bug report for its maintainers |
 
 ### When to use it
 
@@ -558,6 +681,8 @@ For a non-interactive Claude Code install, choose either user-wide or project-lo
 npx @opengsd/gsd-core@1.8.0 --claude --global  # All projects for this user
 npx @opengsd/gsd-core@1.8.0 --claude --local   # Current project only
 ```
+
+The commands stay on 1.8.0 because GSD Core 1.11.0 and later need Node.js 24, and the workshop asks for Node.js 22. On Node.js 24 or newer you can use the current release, which was 1.20.1 in November 2026. It takes the same flags and still has every command used on this page.
 
 Verify inside Claude Code:
 
