@@ -53,6 +53,7 @@ We’ll start with [setup](/docs/setup-guide/) and the foundations on this page,
     - Different frontier models tokenize differently and may be more/less efficient, so for an accurate cost comparison, compare the cost of a completed task and not just the raw per-million-token cost.
     - `/cost` shows the session's prompt-cache hit ratio (v2.1.251+) and, when hits drop, the likely cause, such as a changed system prompt or an idle gap past the cache window (v2.1.260+).
     - Fable's 1M window needs usage credits on Pro and Team plans. Claude Code says so when a long-context request is refused, and credits turned on mid-session apply after a restart (v2.1.268).
+    - API list prices in November 2026, per million input/output tokens: Opus 5.5 $4/$20, Sonnet 5.5 $2/$10, Fable 5.2 $8/$40, and Haiku 5.5 $0.10/$0.50, or five times that on prompts over 100K tokens. All four have a 1M-token context window. On the Anthropic API the `opus`, `sonnet`, `haiku`, and `fable` aliases select these versions. Through a gateway the first three use the models your `settings.json` pins, but `fable` still requests `claude-fable-5-2`. If your gateway uses another name for that model, set `ANTHROPIC_DEFAULT_FABLE_MODEL` to it.
 
 ### Why Claude Code (CC) vs other agentic harnesses?
 
@@ -86,7 +87,7 @@ Before we go deeper, here are some commands / CLI flags that are useful.
 | `/help` | Lists every command available in your setup: built-in, custom, plugin, and MCP-provided |
 | `/init` | Scans the repo and generates a starter `CLAUDE.md`. DO NOT USE THIS. |
 | `/clear` | Wipes conversation history (CLAUDE.md stays loaded). Use when switching tasks or when you find that the context is filling up. This should be your most used command. Always start fresh whenever possible. |
-| `/model [name]` | Switch model mid-session: `opus`, `sonnet`, `fable`, `haiku`, or a full ID like `claude-fable-5-1` |
+| `/model [name]` | Switch model mid-session: `opus`, `sonnet`, `fable`, `haiku`, or a full ID like `claude-fable-5-2` |
 | `/usage` | Shows usage and limits. `/cost` and `/stats` remain available as aliases. |
 | `/resume` | Pick up a previous session. `claude -c` from the shell resumes the most recent. e.g `claude --resume <some-session-id>` |
 | `Esc` | Stop Claude mid-action. |
@@ -187,6 +188,10 @@ For independent changes in the same repository, use [separate Git worktrees](/do
 #### 5. Claude Code History Viewer
 
 [Claude Code History Viewer](https://github.com/jhlee0409/claude-code-history-viewer) lets you browse past sessions and project statistics. Install the MSI from the [latest release](https://github.com/jhlee0409/claude-code-history-viewer/releases). Despite the name, it also reads sessions from tools such as Codex and reports token usage.
+
+#### 6. Mods
+
+Since v2.1.287 a plugin can include a mod, which is code that runs inside Claude Code. That lets it draw a pane beside the transcript or a band above the prompt, restyle tool rows, and intercept tool calls. You can ask Claude to write one for you in a session. Because it runs with your full permissions, read [Mods](/docs/skills-plugins-deep-dive/#mods) before you install one.
     
 ---
 
@@ -199,8 +204,10 @@ Agentic coding tools like Claude Code maintain context across a session, but und
 ### CLAUDE.md and AGENTS.md
 
 - **`CLAUDE.md`** is a special file Claude Code reads automatically when it starts in a project. Use it to encode persistent instructions: coding conventions, architecture decisions, preferred libraries, things Claude should never do, and so on. The contents of this is injected at the start of the conversation, in one of the many system prompts.
-- **`AGENTS.md`** serves a similar purpose for other agent runtimes (e.g. OpenAI Codex). If you're working across multiple agents, keeping the two in sync (for example with a symlink) is good practice.
-- **Claude Code reads `CLAUDE.md`, not `AGENTS.md`, directly.** If another tool already uses `AGENTS.md`, import it from `CLAUDE.md` with `@AGENTS.md` or link the two files with `ln -s AGENTS.md CLAUDE.md`. `/init` reads existing Cursor and Copilot rule files by default; with `CLAUDE_CODE_NEW_INIT=1`, it also incorporates `AGENTS.md` and `.windsurfrules`.
+- **`AGENTS.md`** serves a similar purpose for other agent runtimes (e.g. OpenAI Codex). If you're working across multiple agents, keep one `AGENTS.md` as the file they all share.
+- **Claude Code reads `AGENTS.md` directly when the project has no `CLAUDE.md`** (v2.1.277+, or v2.1.281+ through an LLM gateway or with telemetry off). If the working directory or any directory above it has a `CLAUDE.md`, `.claude/CLAUDE.md`, or `CLAUDE.local.md`, Claude reads that file and skips `AGENTS.md`, even when the only one is a `CLAUDE.local.md` you added for personal notes. To load both, set **Project instructions** in `/config` to `claude-md-and-agents-md`, or put `@AGENTS.md` at the top of `CLAUDE.md`. An existing `ln -s AGENTS.md CLAUDE.md` symlink still works, and Claude reads the content once. When Claude loads `AGENTS.md`, an interactive session prints a line such as `no CLAUDE.md found; AGENTS.md loaded: ...`.
+- `/init` reads existing Cursor and Copilot rule files by default; with `CLAUDE_CODE_NEW_INIT=1`, it also incorporates `AGENTS.md` and `.windsurfrules`.
+- `/doctor prompt-audit` checks your `CLAUDE.md` and `AGENTS.md` files, skills, commands, and subagents for prompting habits written for older models, and proposes fixes for you to confirm (v2.1.283+).
 - Think of these files as your **onboarding doc for the AI**, the same way you'd brief a new contractor on how your codebase works, but not quite. Normally briefs would be done using actual documentation. CLAUDE.md is more for project specific stuff.
 - Good things to put in `CLAUDE.md`:
     - Test framework and how to run tests
@@ -281,6 +288,7 @@ Test it out! Prompt Claude Code to add a feature. Check whether it follows the r
 - If the agent starts "forgetting" earlier decisions or stops following rules in `CLAUDE.md`, it's often a sign the model is way past its smart zone, create a handoff document and continue in a new session
 - With auto-compact off, as in the workshop settings, the context-limit error says so and points at `/config` (v2.1.235+). With it on, Opus and Fable sessions on the 1M window compact shortly before the limit (v2.1.260+), and `CLAUDE_CODE_DISABLE_1M_CONTEXT=1` holds any 1M model to 200K (v2.1.223+).
 - `/context` falls back to a local estimate when the token-counting API is unavailable, which is common through a gateway (v2.1.261+).
+- Idle compaction (v2.1.299+) summarises a conversation of 200K tokens or more after about an hour idle, before its prompt cache expires. It needs auto-compact on and a one-hour prompt cache, and the workshop settings turn it off. See [Keep idle compaction disabled](/docs/setup-guide/#keep-idle-compaction-disabled).
 
 ### Commands for keeping context healthy
 
@@ -320,14 +328,14 @@ The quality of your prompt is the biggest lever you have on output quality. Thes
 - In Claude Code, you can explicitly enter **plan mode** to get a structured breakdown of what it intends to do. Review it, push back, then approve execution.
 - Besides the in-built plan mode, there are other planning skills or workflows that could be used, like [`/grill-with-docs`](https://github.com/mattpocock/skills/tree/main/skills/engineering/grill-with-docs) from Matt Pocock's skills repo.
 - A good plan includes: what files will be changed, what the success condition looks like, and any risks or unknowns.
-- Press `Shift+Tab` to cycle through `default`, `acceptEdits`, and `plan`. If auto mode is available for your account, it appears as a fourth option.
+- Press `Shift+Tab` to cycle permission modes. Sessions start in auto mode (v2.1.283+), so the first press switches to manual (`default`), and the next presses go to `acceptEdits`, `plan`, and back to auto. The status bar shows the active mode, for example `⏸ manual mode on`.
 
 #### Auto Mode & Automation
 
 **Commands for running Claude with fewer interruptions**
 
-- The default "approve every action" flow is safe but slow, while `--dangerously-skip-permissions` is fast but genuinely dangerous. Auto Mode is the middle path.
-- Auto mode appears in the `Shift+Tab` cycle if it is available for your account: `default → acceptEdits → plan → auto`.
+- The "approve every action" flow is safe but slow, while `--dangerously-skip-permissions` is fast but genuinely dangerous. Auto Mode is the middle path.
+- Interactive terminal sessions start in auto mode on every plan and provider, including behind a gateway (v2.1.283+). `claude -p` and Agent SDK runs with no mode set start in manual (`default`) instead (v2.1.302+), so a script that relied on auto mode has to pass `--permission-mode auto`.
     
     ```bash
     # Start a session directly in auto mode
@@ -343,17 +351,17 @@ The quality of your prompt is the biggest lever you have on output quality. Thes
     claude -p "run the migration" --permission-mode auto --permission-prompts none
     ```
 
-To make auto mode the default, put this in `~/.claude/settings.json`:
+To start in a different mode, set `permissions.defaultMode` in `~/.claude/settings.json`. This example returns to manual approval:
 
 ```json
 {
   "permissions": {
-    "defaultMode": "auto"
+    "defaultMode": "default"
   }
 }
 ```
 
-Only user settings can select auto mode, or `bypassPermissions` since v2.1.257, as the default; project and local settings cannot. The separate top-level `autoMode` block configures classifier rules. It does not select the permission mode. `claude auto-mode reset` removes that customization block from user settings.
+Only user settings can select auto mode, or `bypassPermissions` since v2.1.257, as the default; project and local settings cannot. Any settings file can set the other modes. The separate top-level `autoMode` block configures classifier rules. It does not select the permission mode. `claude auto-mode reset` removes that customization block from user settings.
 
 **How it works:**
 
@@ -365,10 +373,20 @@ Only user settings can select auto mode, or `bypassPermissions` since v2.1.257, 
 - A denial tells Claude which rule blocked the action, so it looks for a safer route before stopping to ask you (v2.1.268+)
 - A skill's inline `!` commands follow default-mode permission rules instead of the classifier (v2.1.271+), and messages Claude sends to other sessions pass through the classifier too (v2.1.222+)
 - `/permissions` has an Auto mode tab for the classifier rules (v2.1.246+), and a Bash permission prompt offers "Yes, and switch to auto mode" (v2.1.247+)
+- A hook that returns `"ask"`, like the delete hook in the [hooks hands-on](/docs/agentic-coding-in-terminal/#hands-on-add-safety-hooks-10-minutes), still brings up the permission prompt in auto mode, and the classifier doesn't decide those calls.
+- `/auto-mode-setup` drafts `autoMode.environment` entries from your project and recent sessions, so the classifier knows which hosts and services are yours. You review the draft before Claude Code saves it to user settings.
+
+**Behind an LLM gateway (the workshop setup):**
+
+- Claude Code asks Anthropic's server to review actions as part of the session's own model requests (v2.1.278+), so the review only happens if your gateway passes it through. To check, run `/status` and read the **Auto mode server** row, which shows `Enabled` while the server's checks decide the session's actions.
+- When the server can't review a call and feature-flag fetching is off, as in the workshop settings, Claude Code asks you about the call or denies it. It no longer falls back to its own classifier (v2.1.319+).
+- `CLAUDE_CODE_AUTO_MODE_SERVER=0` skips the server, and Claude Code sends its own classifier requests. They go to Sonnet 5, or to your `ANTHROPIC_DEFAULT_SONNET_MODEL` pin unless that pin names Sonnet 5.5 or Opus 5.5 (v2.1.288+). The workshop settings pin Opus 5.5, so the classifier stays on Sonnet 5, and if your provider can't serve Sonnet 5 it falls back to the session's model.
+- To choose the classifier model yourself, set `CLAUDE_CODE_AUTO_MODE_MODEL` (v2.1.302+) to a model your gateway serves, other than Opus 5, Sonnet 5.5, or Opus 5.5.
+- Before v2.1.317, auto mode failed on every turn when a gateway answered the safety check with a 403 or 422.
 
 **Availability:**
 
-- It is available on all plans, and on Team and Enterprise it is on by default. On the Anthropic API it needs Opus 4.6 or later, Sonnet 4.6 or later, or a Fable model. On Amazon Bedrock, Google Cloud's Agent Platform, and Microsoft Foundry it needs Sonnet 5, Opus 4.7 or later, or a Fable model. Foundry still defaults to Sonnet 4.5, so switch models there first. Admins can disable it across the organization through managed settings (`disableAutoMode: "disable"`). On Bedrock, Vertex, and Foundry the classifier runs locally by default; set `CLAUDE_CODE_AUTO_MODE_SERVER=1` for the server-side one (v2.1.273+).
+- It is available on all plans and providers. On the Anthropic API it needs Opus 4.6 or later, Sonnet 4.6 or later, Haiku 5.5, or a Fable model. On Amazon Bedrock, Google Cloud's Agent Platform, and Microsoft Foundry it needs Sonnet 5 or later, Opus 4.7 or later, Haiku 5.5, or a Fable model. On any other model the session starts in manual mode. Foundry still defaults to Sonnet 4.5, so switch models there first. Admins can disable it across the organization through managed settings (`disableAutoMode: "disable"`). Server-side review is the default on those providers too (v2.1.278+), with the same `CLAUDE_CODE_AUTO_MODE_SERVER=0` opt-out.
 
 
 
@@ -381,6 +399,7 @@ Read More: https://code.claude.com/docs/en/permission-modes#eliminate-prompts-wi
 - For Claude Code:
     - `Esc` once to interrupt the current action.
     - `Esc + Esc` to rewind to previous user inputs.
+    - `Ctrl+Enter` sends the messages you queued while Claude was working, without waiting for the turn to end. Use `Ctrl+X Ctrl+S` in terminals that don't report `Ctrl+Enter`. Shell commands and subagents that are still running move to the background, and Claude reads your messages in the same turn (v2.1.281+).
 
 **`Esc Esc` (or `/rewind`): the rewind menu**
 
@@ -395,6 +414,8 @@ Double-tap `Esc` on an empty input to open the rewind menu. Scroll back with `�
 | **Never mind** | Cancel and return to where you were |
 
 **The "code only" option** is the most useful option for something like trying an aggressive refactor. After discussing it with Claude and trying out the new code and it doesn't work well, you can keep all the diagnostic conversation intact with this option. Replaces a lot of `git stash` gymnastics.
+
+Rewind restores edits Claude made with its file tools. It doesn't undo changes made through Bash, such as `sed -i` (v2.1.309+), a formatter run, or a `git` command, so commit before you try something risky.
 
 **/btw** 
 
@@ -421,7 +442,7 @@ Double-tap `Esc` on an empty input to open the rewind menu. Scroll back with `�
 
 | Command | What it does |
 | --- | --- |
-| `/plan` or `Shift+Tab` | Enter plan mode: Claude becomes read-only and proposes each change for approval |
+| `/plan`, or `Shift+Tab` until the status bar shows plan mode | Enter plan mode: Claude becomes read-only and proposes each change for approval |
 | `claude --permission-mode auto` | Start the session directly in auto mode |
 | `claude --dangerously-skip-permissions` | Skip all permission prompts (dangerous) |
 | `/btw` | Ask a side question without polluting conversation context. |
@@ -462,7 +483,7 @@ These are the tools used most often in the workshop. See the [tools reference](h
 | | `EnterPlanMode` | Switch to read-only planning mode | No |
 | | `EnterWorktree` | Create or enter an isolated git worktree | Yes |
 | | `Skill` | Execute a skill / slash command | Yes |
-| | `TaskCreate/Update/List` | Structured task management. Not offered on Opus 4.8, Sonnet 5, or Fable models (v2.1.233+); set `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` to bring them back | No |
+| | `TaskCreate/Update/List` | Structured task management. By default only Opus 4.7, Sonnet 4.6, Haiku 4.5, and earlier models get these tools (v2.1.268+), so the workshop's Opus 5.5 doesn't; set `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` to bring them back | No |
 | | `CronCreate/Delete/List` | Schedule recurring prompts in-session | No |
 | | `Workflow` | Run reusable JavaScript multi-agent orchestration (see Dynamic Multi-Agent Workflows below) | Yes |
 | | `SendMessage` | Message or resume named subagents, agent-team members, and other Claude Code sessions on your machines (v2.1.224+; Windows v2.1.239+) | No |
@@ -496,6 +517,13 @@ Pre-approve tools via `/permissions` or `settings.json` to reduce prompts:
 
 
 > 💡 An `Edit(...)` rule also grants read access to the same path.
+
+Two newer `permissions` keys set hard limits on top of the rules:
+
+| Key | What it does |
+| --- | --- |
+| `blockWritesOutsideWorkingDirectories` | Makes `Write`, `Edit`, and `NotebookEdit` refuse paths outside the working directories in every permission mode, including `bypassPermissions` (v2.1.314+). It also removes the worktree tools. It doesn't limit shell commands, so use `/sandbox` for those |
+| `denyInsteadOfPrompting` | Denies any call that would wait on a permission prompt and lets the turn continue, which suits sessions nobody is watching (v2.1.319+). Set it in user settings or with `--settings`. A repository can't set it for you |
 
 > 🔗 Full tool reference: [https://code.claude.com/docs/en/tools-reference](https://code.claude.com/docs/en/tools-reference)
 
@@ -603,7 +631,7 @@ Two ways to trigger it:
     the confirmed ones
     ```
 
-2. **Session setting**: `/effort ultracode` uses xhigh reasoning and lets Claude dispatch workflow agents when parts of a task can run independently. It is a session setting, not a model effort level.
+2. **Session setting**: `/effort ultracode` lets Claude plan a workflow for each substantive task in the session, and `/effort ultracode off` turns it off. It doesn't change the effort level (v2.1.284+; earlier versions forced xhigh), but `claude --effort ultracode` still starts a session at xhigh with ultracode on.
 
 Supporting commands:
 
@@ -626,6 +654,8 @@ Read more: [code.claude.com/docs/en/workflows](https://code.claude.com/docs/en/w
 
 - Hooks receive JSON at Claude Code lifecycle events, run your handler, and can return event-specific output. A `PreToolUse` hook can allow, deny, or ask before a tool runs. Unlike instructions in CLAUDE.md, hook checks are enforced by the runtime.
 - Hooks block the current event by default, so keep them quick. A command hook that does not need to affect the current action can set `"async": true`.
+- By default, a `command` or `http` hook that fails lets the action through, whether the cause is a wrong path, a crash, or a timeout. Set `"onFailure": "block"` on the hook to block the action when the hook fails (v2.1.295+). On Windows without Git Bash, a failed `PreToolUse` command hook can block the call even without that setting.
+- These `settings.json` hooks are separate from the hooks a [mod](/docs/skills-plugins-deep-dive/#mods) registers, which are functions that run inside Claude Code. Both kinds run in the same session. On an API-key or gateway setup without managed settings, an installed mod can approve a call that a `PreToolUse` hook here would have stopped.
 - While a `SessionStart`, `UserPromptSubmit`, `PreToolUse`, or `SessionEnd` hook runs, the spinner says so with the elapsed time, and Esc cancels a prompt that is waiting on a `SessionStart` hook (v2.1.271+). On resume, `SessionStart` hooks also receive how stale the session is and the estimated cost to re-cache it (v2.1.251+).
 - Common events include:
     - Once per session: **`SessionStart`**, **`SessionEnd`**
@@ -733,6 +763,20 @@ Show me what's in the .env file
 
 You should see the hook deny the request with a reason like `🛡️ [env-file] Cannot read: .env file contains secrets`.
 
+**Step 3 (optional): make the secrets hook fail closed.** If the path to `protect-secrets.js` is wrong, `node` exits with an error. Claude Code treats that as a non-blocking hook failure and lets every read through unchecked. Add `"onFailure": "block"` to that hook entry (v2.1.295+):
+
+```json
+{
+  "type": "command",
+  "command": "node ~/.claude/hooks-repo/hook-scripts/pre-tool-use/protect-secrets.js",
+  "timeout": 5,
+  "statusMessage": "Checking for secret file access...",
+  "onFailure": "block"
+}
+```
+
+To see it work, rename the script and ask Claude to list the folder. Claude Code blocks the call, and the error includes `failed; blocking because onFailure is "block"`. Rename the script back before you continue, because Claude Code blocks every `Read`, `Edit`, `Write`, and `Bash` call while it's missing.
+
 ## MCP
 
 {{< figure src="/images/mcp-architecture.svg" width="980" height="500" loading="lazy" alt="Claude Code hosts one MCP client per server connection: stdio connects to a local process, while Streamable HTTP connects to a remote server." caption="The same host can connect to both local and remote MCP servers." attr="Adapted from the MCP architecture overview" attrlink="https://modelcontextprotocol.io/docs/learn/architecture" >}}
@@ -778,6 +822,9 @@ Recent changes worth knowing:
 - Error messages no longer print secrets resolved from `${VAR}` placeholders in MCP configs (v2.1.268+).
 - `/cd` picks up the new directory's `.mcp.json` servers right away, behind the usual approval prompt (v2.1.246+).
 - A `headersHelper` in a project `.mcp.json` runs only after you accept the folder's trust dialog, and without inherited credential env vars (v2.1.238+).
+- `/mcp reconnect all` retries every server that failed to connect or needs authentication in one go (v2.1.284+).
+- With a custom `ANTHROPIC_BASE_URL`, Claude Code defers MCP tools behind tool search by default (v2.1.304+). If the gateway rejects that request with a 400 or 422, Claude Code retries without tool search and loads the tools upfront (v2.1.305+).
+- Local (stdio) MCP servers negotiate protocol version 2026-07-28 by default (v2.1.292+). If an older server stops connecting, set `MCP_PROTOCOL_NEGOTIATION=legacy`.
 
 > **For offline environments:** any MCP server that uses `npx` will try to pull the package on first run. Pre-install packages globally with `npm install -g <package>` on a machine with internet, then copy to the offline machine and update config to use the local binary path directly.
 
@@ -806,9 +853,9 @@ use the chrome devtools mcp, open duckduckgo and search for the best claude code
 
 ## Skills and Plugins Reference
 
-The [Skills and Plugins Reference](/docs/skills-plugins-deep-dive/) covers how skills work, plugin installation and marketplaces, security considerations, and individual tools such as document skills, Superpowers, BMAD, GSD, and Codex for Claude Code.
+The [Skills and Plugins Reference](/docs/skills-plugins-deep-dive/) covers how skills work, plugin installation and marketplaces, mods, security considerations, and individual tools such as document skills, Superpowers, BMAD, GSD, and Codex for Claude Code.
 
-Start with [Skills](/docs/skills-plugins-deep-dive/#skills) and [Plugins](/docs/skills-plugins-deep-dive/#plugins), then explore the individual tools.
+Start with [Skills](/docs/skills-plugins-deep-dive/#skills), [Plugins](/docs/skills-plugins-deep-dive/#plugins), and [Mods](/docs/skills-plugins-deep-dive/#mods), then explore the individual tools.
 
 ## More resources
 
@@ -816,7 +863,31 @@ Start with [Skills](/docs/skills-plugins-deep-dive/#skills) and [Plugins](/docs/
 
 > 🔗 [https://github.com/luongnv89/claude-howto](https://github.com/luongnv89/claude-howto)
 
-> 🔗 [https://github.com/rtk-ai/rtk](https://github.com/rtk-ai/rtk): Min-max token counts by using a CLI proxy to remove unnecessary outputs from tool calls
+### Token-saving tools and measured cost
+
+[RTK](https://github.com/rtk-ai/rtk) compresses eligible shell-command output before Claude Code receives it. Caveman shortens the agent's prose while preserving code, commands, and tool calls. Measure billed cost for the whole task, including cached context and additional turns.
+
+Denis Shiryaev's July 2026 JetBrains experiments compared these tools with stock Claude Code on SkillsBench. The results apply to the tested configurations. They do not predict savings for current releases or every coding workload.
+
+| Experiment | Configuration | Reported result |
+| --- | --- | --- |
+| Caveman, forced active in every reply | Claude Code 2.1.200, `claude-sonnet-5`, low effort, Harbor 0.17; 82 clean task pairs | Output tokens fell about 8.5%, from roughly 592,000 to 542,000. The advertised reduction was 65%. |
+| RTK v0.43.0, installed with `rtk init -g` | Claude Code 2.1.201, `claude-sonnet-5`, Harbor 0.18; 80 clean low-effort pairs | Median paired task cost increased 7.6%, p = 0.004. Turns increased 13.8%. |
+| Same RTK setup, high effort | 71 clean task pairs | Median paired task cost changed +0.1%, p = 0.99. The experiment detected no cost benefit. |
+
+The [Caveman report](https://blog.jetbrains.com/ai/2026/07/speak-to-ai-agents-like-cavemen-tosave-tokens/) describes roughly 10% per-task cost savings, but the full-run bill increased from USD 36.39 to USD 40.60. One trial crossed the experiment's long-context pricing threshold, turning the overall saving into a cost increase. A previous run had an outlier in the baseline arm, so the authors did not attribute this behavior to Caveman itself.
+
+Caveman's task scores improved on 8 pairs, worsened on 10, and tied on 64, with a sign-test p-value of 0.82. The RTK tests found no statistically detectable quality difference at either effort level. These tests establish neither equivalent quality nor universal safety, and they do not show that either tool consistently produces worse work.
+
+The [RTK report](https://blog.jetbrains.com/ai/2026/07/rtk-claude-code-token-savings/) describes limits on compression and its effect on billed cost:
+
+- Native Read and Grep calls bypass the Bash hook. In a replay of 83 baseline transcripts, eligible Bash calls accounted for just under one-fifth of tool-result characters.
+- Claude Code already truncates large outputs. RTK's counter compares compressed output with the full raw output, including text the baseline agent would never receive.
+- Actual cost includes differently priced token categories, cached context, and additional turns. The investigators found a broken command rewrite and some rereads, but no single cause explained the cost increase.
+
+RTK's [v0.43.0 README](https://github.com/rtk-ai/rtk/blob/v0.43.0/README.md) documents the native-tool limitation. Later RTK changes and Caveman's newer input-compression and routing components require separate evaluation.
+
+Use Caveman if you prefer its concise narration. Before adopting either tool to reduce spending, run representative tasks repeatedly with the tool on and off. Keep versions and settings fixed. Compare task outcomes, failed runs and retries, turns, latency, token categories, and billed cost. Check both median per-task changes and total spend, including failures.
 
 ## Alternative providers
 

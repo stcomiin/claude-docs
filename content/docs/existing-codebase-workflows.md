@@ -438,6 +438,9 @@ Read these alongside this page:
 | BMAD | [Project Context](https://docs.bmad-method.org/explanation/project-context/) |
 | BMAD | [Commands and Skills](https://docs.bmad-method.org/reference/commands/) |
 | Claude Code | [Skills and Custom Commands](https://code.claude.com/docs/en/slash-commands) |
+| Claude Code | [Code Modernization plugin](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-modernization) |
+
+For upgrading or rewriting a legacy system, Anthropic's Code Modernization plugin is another option (`/plugin install code-modernization@claude-plugins-official`). It assesses and maps the code, extracts the business rules, and writes a plan, and after the build it checks that the new code behaves like the old. It's a separate workflow from GSD and BMAD, so follow its README for the steps.
 
 Related GSD 2 reading: [Brownfield Reality](https://getshitdone.help/solo-guide/brownfield/) and [Context Engineering](https://getshitdone.help/solo-guide/context-engineering/). GSD 2 covers brownfield concepts, but its command syntax and project structure differ from the GSD workflow shown above.
 

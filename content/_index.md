@@ -17,7 +17,7 @@ contents:
     note: agentic coding, installation, CLAUDE.md, context
     url: /docs/agentic-coding-in-terminal/
   - title: Skills & Plugins
-    note: BMAD, GSD, Superpowers, Codex, building your own
+    note: mods, BMAD, GSD, Superpowers, Codex, building your own
     url: /docs/skills-plugins-deep-dive/
   - title: Cheat Sheet
     note: commands, shortcuts, CI flags
