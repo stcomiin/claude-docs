@@ -150,7 +150,6 @@ The convenience of skills comes with real risk.
 - **Skills can include executable scripts**: a `scripts/` directory can contain anything that runs on your machine
 - **Prompt injection via SKILL.md**: malicious instructions can tell the agent to exfiltrate environment variables, API keys, or source code
 - **Supply chain attacks**: a skill you installed from GitHub can be updated by the author at any time after you've added it
-- **No sandbox by default**: unlike MCP servers, skills run with the same permissions as your Claude Code session
 
 **Practices to be followed before installing any community skill:**
 

@@ -203,20 +203,46 @@ Agentic coding tools like Claude Code maintain context across a session, but und
 
 ### CLAUDE.md and AGENTS.md
 
-- **`CLAUDE.md`** is a special file Claude Code reads automatically when it starts in a project. Use it to encode persistent instructions: coding conventions, architecture decisions, preferred libraries, things Claude should never do, and so on. The contents of this is injected at the start of the conversation, in one of the many system prompts.
+- **`CLAUDE.md`** is a special file Claude Code reads automatically when it starts in a project. Use it to encode persistent instructions: coding conventions, architecture decisions, preferred libraries, things Claude should never do, and so on. Claude loads its contents as project instructions in the conversation context.
 - **`AGENTS.md`** serves a similar purpose for other agent runtimes (e.g. OpenAI Codex). If you're working across multiple agents, keep one `AGENTS.md` as the file they all share.
+- **Instruction-file support depends on your Claude Code version.** Versions before v2.1.277 need a `CLAUDE.md` that imports `@AGENTS.md`, or a symlink between the files. See [instruction-file discovery](https://code.claude.com/docs/en/memory) before relying on newer behaviour.
 - **Claude Code reads `AGENTS.md` directly when the project has no `CLAUDE.md`** (v2.1.277+, or v2.1.281+ through an LLM gateway or with telemetry off). If the working directory or any directory above it has a `CLAUDE.md`, `.claude/CLAUDE.md`, or `CLAUDE.local.md`, Claude reads that file and skips `AGENTS.md`, even when the only one is a `CLAUDE.local.md` you added for personal notes. To load both, set **Project instructions** in `/config` to `claude-md-and-agents-md`, or put `@AGENTS.md` at the top of `CLAUDE.md`. An existing `ln -s AGENTS.md CLAUDE.md` symlink still works, and Claude reads the content once. When Claude loads `AGENTS.md`, an interactive session prints a line such as `no CLAUDE.md found; AGENTS.md loaded: ...`.
 - `/init` reads existing Cursor and Copilot rule files by default; with `CLAUDE_CODE_NEW_INIT=1`, it also incorporates `AGENTS.md` and `.windsurfrules`.
 - `/doctor prompt-audit` checks your `CLAUDE.md` and `AGENTS.md` files, skills, commands, and subagents for prompting habits written for older models, and proposes fixes for you to confirm (v2.1.283+).
 - Think of these files as your **onboarding doc for the AI**, the same way you'd brief a new contractor on how your codebase works, but not quite. Normally briefs would be done using actual documentation. CLAUDE.md is more for project specific stuff.
-- Good things to put in `CLAUDE.md`:
-    - Test framework and how to run tests
-    - Linting / formatting rules
-    - Anything the agent keeps getting wrong
-- CLAUDE.md is not the magic pill. In long conversations, instructions tend to not be followed well. Compare the typical length of CLAUDE.md to your typical conversation length (few hundred tokens to 50k tokens)
-- **Do not use /init to initialize the CLAUDE.md**. Automatically generated files are overly verbose and may harm model performance. Only add things specific to your codebase that the agent should be aware of. If something is general knowledge, assume the model knows it. Reinforce in CLAUDE.md only if the model does not remember or repeatedly does something wrong.
-    - If you write one by hand, keep it tight: specific build commands, test runners, and hard constraints only. Skip codebase overviews (agents discover structure on their own just as well, or ask it to use codebase graph DB MCPs covered below)
-    - **Paper that discusses auto-generated context files - Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?** [https://arxiv.org/abs/2602.11988](https://arxiv.org/abs/2602.11988)
+
+Keep `CLAUDE.md` short and specific to your project. Good things to include are:
+
+- The commands needed to build, test and lint the project.
+- Project conventions and constraints the agent wouldn't otherwise know.
+- Instructions for things the agent keeps getting wrong.
+- A short codebase map, if finding the right files takes unnecessary exploration.
+
+For a large codebase, that map could point to the main entry points, explain which part owns a particular responsibility, or identify generated files that shouldn't be edited manually. Avoid copying the entire directory tree or repeating the README. Put detailed explanations in separate documents and link to them.
+
+Use a normal Markdown link for a document the agent should read when needed. For example, you could put this in `CLAUDE.md`:
+
+```markdown
+Before changing how packages depend on each other, read
+[Architecture](docs/architecture.md).
+```
+
+When Claude loads `CLAUDE.md`, it sees this sentence and the link. It does not automatically get the contents of `docs/architecture.md`. If Claude opens that file with its Read tool, the contents then enter context. The instruction tells Claude when to read the file; the link does not force it to do so.
+
+An `@` import works differently:
+
+```text
+@docs/architecture.md
+```
+
+This loads the document's contents into context along with `CLAUDE.md`. Use `@` for instructions you want loaded together, such as a shared `AGENTS.md`. Use normal links for detailed guides that are only needed for certain tasks. Reading those guides when needed is called progressive disclosure. Anthropic's [context engineering guide](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) describes keeping lightweight references and loading the details later.
+
+If you use `/init`, review what it generates before keeping it. Remove obvious descriptions, duplicated information and instructions that don't apply to your project.
+
+The [Evaluating AGENTS.md study](https://arxiv.org/abs/2602.11988) found that generated context files generally increased cost without improving task completion in its benchmarks. Developer-written files had mixed benefits and also increased costs. Those results apply to the repositories and agents tested.
+
+After a few tasks, review your instructions again. Did they prevent a repeated mistake or help the agent find the right code? Keep the useful ones, and remove instructions that are outdated or unnecessary.
+
 - Example of actual CLAUDE.md from Opus 4.6 days
 
 ```markdown
@@ -242,18 +268,22 @@ CLAUDE.md can be organized into these scopes:
 
 | Scope | What it covers | Where it lives |
 | --- | --- | --- |
-| **User** | Preferences across all your projects (e.g. tone, formatting habits) | Global config (~/.claude/claude.md) |
+| **User** | Preferences across all your projects, such as tone and formatting | `~/.claude/CLAUDE.md` |
 | **Project** | Instructions specific to this repo or folder (e.g. stack, conventions) | `CLAUDE.md` in the repo root or subfolders |
-| **Local** | Overrides just for your machine (e.g. local paths, secrets) | `CLAUDE.local.md` |
+| **Local** | Personal project instructions, such as local paths and test preferences | `CLAUDE.local.md` |
 
 Use **project memory** for anything the whole team should share, and commit these files to the repo. Keep shared instructions in the root `CLAUDE.md`; different folders can have their own files, such as `frontend/CLAUDE.md` and `backend/CLAUDE.md`, for folder-specific conventions. When you start Claude Code at the repo root, nested files load only when Claude reads files in those folders, adding to the root instructions. See [how CLAUDE.md files load](https://code.claude.com/docs/en/memory#how-claudemd-files-load).
 
-Use **local memory** for anything personal or environment-specific that shouldn't be committed.
+Use **local memory** for personal project instructions that shouldn't be committed, and add `CLAUDE.local.md` to `.gitignore`. Claude loads this file into model context too. Never put API keys, passwords or other secrets in instruction files.
 
-Claude Code has some built-in skills to manage CLAUDE.md
+Claude Code has optional skills to help manage `CLAUDE.md` through the [claude-md-management plugin](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/claude-md-management). Install it inside Claude Code:
 
-1.  `/claude-md-management:revise-claude-md`  - Run this slash command in a specific session when you find something that should be updated for future sessions
-2. `/claude-md-improver` - Use this slash command when wanting to add general stuff to the CLAUDE.md
+```text
+/plugin install claude-md-management@claude-plugins-official
+```
+
+1. `/claude-md-management:revise-claude-md`. Run this during a session when you find something worth recording in `CLAUDE.md` for future sessions.
+2. `/claude-md-management:claude-md-improver`. Run this to review your `CLAUDE.md` files and suggest general improvements or updates.
 
 #### Hands-on: Craft Your CLAUDE.md (10 minutes)
 
@@ -270,12 +300,12 @@ Test it out! Prompt Claude Code to add a feature. Check whether it follows the r
 
 - LLMs have a finite context window. In long sessions, older conversation turns get summarised ("compacted") to free up context, which is not desirable.
 - What goes into the context? Visualize it - [https://code.claude.com/docs/en/context-window](https://code.claude.com/docs/en/context-window)
-- Do not let conversations get to the point where your conversation needs to be compacted. Always `/clear` around 300k context if possible. Claude models have 1M context now by default but performance still degrades in longer context, no matter how good they say it is.
-- **Do not use the compaction feature in Claude Code**. Compaction is simply passing the chat history to a model and asking it to summarize the history. The session then continues from that summarized conversation, which is lossy and important details gleaned over the session may be stripped out.
+- Check the selected model's context limit rather than using a fixed 300k threshold. The workshop's [Haiku 4.5 has a 200k window](https://openrouter.ai/anthropic/claude-haiku-4.5). Some other models support 1M, but that does not apply to the workshop key. Use `/context` and leave room for the next response and tool results.
+- **Workshop practice: save a handoff and start a fresh conversation before the limit.** Automatic compaction is disabled in the setup examples. Compaction summarizes history and can omit details, so keep requirements, tickets and verification results outside the chat rather than relying on a summary alone.
 - Codex running on OpenAI frontier model handles compaction and long term attention well, unknown if it's due to the harness or the model. Using compaction is fine in Codex from our experience.
 - Optimal Context tips:
     - Always start a **new session** for any new task that is not related to your current session.
-    - Use `/clear` to reset context without restarting (when hitting ~300k context)
+    - Save a handoff before using `/clear` to reset a long conversation. Choose the point from `/context` and your model's limit, not a fixed token count.
     - Keep `CLAUDE.md` tight and relevant: it's loaded at the start of every session, so bloating it costs precious tokens
     - Use the `/handoff` skill from Matt Pocock to generate a handoff document when exceeding the smart zone context limit https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md
     - Or, Just ask it to create a handoff document. 
@@ -296,7 +326,7 @@ Test it out! Prompt Claude Code to add a feature. Check whether it follows the r
 | --- | --- |
 | `/clear` | Wipe conversation entirely. CLAUDE.md stays loaded. Use when switching to an unrelated task |
 | `/context` | Visual grid showing how your context window is allocated |
-| `/compact [focus]` | Compress conversation into a summary. Pass focus instructions to steer what's preserved. **Do not use in Claude Code**. |
+| `/compact [focus]` | Compress conversation into a summary. Pass focus instructions to steer what's preserved.<br><br>**Do not use in Claude Code**.<br>For better results, we recommend creating a handoff document and starting a fresh session instead. Compaction can lose important details from the conversation. |
 
 
 

@@ -59,9 +59,13 @@ Here are some sample rules you can add:
 - Tests must catch breakage. Never weaken them just to make them pass.
 ```
 
-Avoid repeating codebase details in your instructions. The agent can find that information in the code and existing documentation.
+Use what you learned in Lab 2 to decide what belongs in your project instructions. Include conventions, commands and constraints the agent wouldn't otherwise know.
 
-Keep only instructions the agent wouldn't otherwise know, such as custom project conventions. Also include instructions for things the agent keeps forgetting and repeatedly gets wrong, to help prevent the same mistakes in future sessions.
+For a bigger project, a short map of useful entry points can help. Link to detailed documentation rather than copying it into `CLAUDE.md`.
+
+Use a normal Markdown link, such as `[Architecture](docs/architecture.md)`, for a document Claude should read when needed. Claude sees the link, but not the file's contents, until it opens the file. An `@docs/architecture.md` import loads the contents along with `CLAUDE.md`, so use it only when you want that document loaded too.
+
+Also include instructions for things the agent repeatedly gets wrong. Review these after working with the agent, and remove anything that is outdated or isn't helping.
 
 ## Checkpoint
 

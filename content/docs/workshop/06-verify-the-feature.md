@@ -17,7 +17,30 @@ You'll turn the browser checks you performed into a `visual-code-review` skill, 
 
 Keep the app running in your first terminal. In Claude Code, enter `/mcp` and check that `chrome-devtools` is connected. If it isn't, revisit [Connect the browser tools](/docs/workshop/01-get-running/#connect-the-browser-tools).
 
-Use the tickets you completed in Lab 5 and check them against their acceptance criteria.
+Before opening the app, make a short checklist of what you'll verify. Use the completed ticket's acceptance criteria and include existing behaviour that the change could affect.
+
+Ask your agent:
+
+```text
+Read the completed ticket and propose a browser-check checklist.
+For each check, state the starting data, what you'll do and what
+result you expect. Include relevant existing behaviour.
+Don't change files or start the browser checks yet.
+```
+
+Review the checklist before continuing. The expected results should come from the agreed requirements, not just from what the current code does. If something is unclear, settle it before calling the check a pass.
+
+For example:
+
+| Area | What to check |
+| --- | --- |
+| Transactions | Record the current totals, then add an expense of 10. The expense total should increase by 10 and the balance should decrease by 10. |
+| Filters | Apply a category filter. Only matching transactions should appear, while the global totals stay unchanged. |
+| Completed ticket | Check each acceptance criterion for the behaviour you implemented. Include relevant invalid-input, empty-state or reload checks. |
+
+This checklist is a small feature map. It records what the app should do and how you'll check it. Keep it with your report so you can reuse it when creating the verification skill.
+
+Before running the checks, confirm that the browser is showing the app from the project folder or worktree you're changing. If your changes don't appear, check the running server and reload the page before treating it as an app defect.
 
 Replace `TICKET-URL` below with your ticket's URL, for example `https://github.com/USERNAME/expense-tracker-workshop-starter/issues/1`. If you completed more than one ticket, include each URL.
 
@@ -100,6 +123,8 @@ Answer any questions about the checks, then confirm that Claude saved the file. 
 - Each check includes its test data, browser actions and expected result.
 - The checks cover desktop and narrow layouts. The report includes screenshots and pass, fail or blocked results.
 - The skill uses disposable test data and preserves existing records. It reports findings, with separate approval required for code changes, test changes or Git operations.
+
+Include the reviewed checklist and its test data in `visual-code-review`, so another conversation can repeat the checks.
 
 Keep the skill in this one file. Ask the agent to fill in any missing steps.
 
