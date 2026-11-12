@@ -101,6 +101,14 @@ After it succeeds, install Chromium for the workshop's browser tools:
 npx playwright install chromium
 ```
 
+Before changing the app, run its existing regression checks:
+
+```sh
+npm run test:baseline
+```
+
+Playwright starts its own test server on port 5174 and closes it after the run. Resolve installation or baseline failures before moving on, so they aren't confused with defects introduced during the workshop.
+
 ### Run the app
 
 ```sh
@@ -144,6 +152,7 @@ Return to the conversation prompt and leave the session open for the next lab.
 Before moving on, confirm:
 
 - [ ] Your local repository's `origin` points to your own GitHub fork.
+- [ ] `npm run test:baseline` passed before I changed the app.
 - [ ] The app opens at **http://127.0.0.1:5173/**, with its server still running in the first terminal.
 - [ ] Claude Code, or your chosen harness, is open in the same project folder in the second terminal.
 

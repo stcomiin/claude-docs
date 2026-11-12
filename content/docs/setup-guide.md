@@ -12,7 +12,7 @@ Please finish these steps **before** the workshop. Allow about 15–20 minutes. 
 
 ## Setup checklist
 
-- [ ] Node.js v22+ installed
+- [ ] Node.js 22.12 or later within version 22 installed
 - [ ] Git installed
 - [ ] GitHub CLI installed and signed into your GitHub account
 - [ ] A terminal you're comfortable with
@@ -26,15 +26,15 @@ Please finish these steps **before** the workshop. Allow about 15–20 minutes. 
 
 Install these first.
 
-### Node.js (v22 or higher)
+### Node.js 22.12 or later within version 22
 
-Download the current LTS release from [nodejs.org](https://nodejs.org/). It includes npm and meets the Node.js 22+ requirement for Claude Code. The `npx skills` installer in step 3 needs Node.js too.
+Install Node.js 22 from [nodejs.org](https://nodejs.org/). The [workshop starter](https://github.com/stcomiin/expense-tracker-workshop-starter/blob/main/package.json) requires `>=22.12.0 <23`, so don't choose Node.js 24 or a newer major version for these labs. Node.js includes npm and also runs the `npx skills` installer in step 3.
 
-Verify after install:
+Verify in the terminal you'll use for the workshop:
 
 ```bash
-node --version    # Should show v22.x.x or higher
-npm --version     # Should show 10.x.x or higher
+node --version    # Must be v22.12.0 or a later v22 release
+npm --version
 ```
 
 ### Git
@@ -113,9 +113,11 @@ If you want to bring your own key, follow the setup steps below.
     # Verify
     claude --version
     
-    # Upgrade later
+    # Upgrade later, outside the workshop
     npm install -g @anthropic-ai/claude-code@latest
     ```
+
+    Version 2.1.321 is the workshop's previously verified baseline. Check `claude --version` before starting rather than upgrading automatically. Rehearse gateway access, hooks and browser tools before changing the workshop baseline; newer commands in the reference pages may need a later version.
     
 2. **Configure the gateway in `settings.json`**
     
@@ -164,7 +166,6 @@ If you want to bring your own key, follow the setup steps below.
         "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-haiku-4.5",
         "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-haiku-4.5",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-        "CLAUDE_CODE_EFFORT_LEVEL": "max",
         "CLAUDE_CODE_FORK_SUBAGENT": "0",
         "CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
         "CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING": "1",
@@ -179,6 +180,10 @@ If you want to bring your own key, follow the setup steps below.
 
     `promptSuggestionEnabled: false` turns off next-prompt suggestions.
     
+  The [effort level](https://code.claude.com/docs/en/env-vars#variables) does not apply to Haiku 4.5, so the Haiku example leaves out `CLAUDE_CODE_EFFORT_LEVEL`.
+
+  The examples disable automatic compaction for the workshop's handoff exercise. Use `/context` and save a handoff before the model's limit. They also retain local transcripts for 3,650 days; reduce `cleanupPeriodDays` for normal use if you don't need that retention.
+
   On Windows, add `"CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe"` only if Claude Code cannot find Git Bash.
 
  - `CLAUDE_CODE_SUBAGENT_MODEL` is a default rather than an override since v2.1.251: an agent file's own `model:` wins. `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` (v2.1.257+) force applies it to every subagent.

@@ -199,9 +199,9 @@ For repeated / regulated work, the prompt above isn't enough - you want a versio
 
 ### Custom security subagents
 
-Claude Code subagents are Markdown files in `.claude/agents/*.md` (per-project) or `~/.claude/agents/*.md` (global), declared with frontmatter and invoked via `/agents <name>` or auto-delegated by description match. See [docs.claude.com/en/docs/claude-code/sub-agents](https://docs.claude.com/en/docs/claude-code/sub-agents) for the official schema.
+Claude Code subagents are Markdown files in `.claude/agents/*.md` per project or `~/.claude/agents/*.md` for your user account. Ask Claude to use an agent by name, or let it delegate by description. `/agents` prints configuration guidance; it does not invoke a named agent. See [docs.claude.com/en/docs/claude-code/sub-agents](https://docs.claude.com/en/docs/claude-code/sub-agents) for the [official schema](https://code.claude.com/docs/en/sub-agents#supported-frontmatter-fields).
 
-> 🗒️ Why subagents (not skills) for security review? Subagents get their own context window, can be locked to read-only tools, and can use a different model. A locked-down `security-auditor` running on Opus inside a worktree where Claude is otherwise on Sonnet is the cheapest way to get a real second opinion.
+Subagents have separate context windows and can use a different model. The examples below allow only `Read`, `Glob` and `Grep`, without a shell or file-editing tools. A tool allowlist does not isolate filesystem reads. Supply a redacted diff or Git history when the review needs it, and report missing evidence as blocked rather than granting shell access silently.
 
 **Drop this into `.claude/agents/security-auditor.md`:**
 
@@ -209,7 +209,7 @@ Claude Code subagents are Markdown files in `.claude/agents/*.md` (per-project) 
 ---
 name: security-auditor
 description: Use proactively before every PR and whenever the user asks to "security review", "OWASP review", "audit", or "look for vulnerabilities". Read-only - finds issues, does not fix them.
-tools: Read Glob Grep Bash
+tools: Read, Glob, Grep
 model: opus
 ---
 
@@ -246,24 +246,26 @@ Hard rules:
 ---
 name: incident-triage
 description: Use when the user suspects a compromise of their Claude Code session, a leaked credential, or unexpected commits/files. Read-only triage - produces a timeline + blast-radius report.
-tools: Read Glob Grep Bash
+tools: Read, Glob, Grep
 model: sonnet
 ---
 
 You are a read-only incident-response analyst. You have one job: produce
 a triage report in under 15 minutes. Do NOT remediate.
 
-1. **Timeline** - reconstruct from `git log --oneline --all -50`,
-   `git reflog`, file mtimes on `.claude/`, `~/.claude/`, `.env*`. Quote
-   commit SHAs and timestamps.
-2. **IOCs** - search for: `curl ... | sh`, `eval`, base64-decoded
-   commands, unfamiliar SSH keys in `~/.ssh/`, new hooks in
-   `.claude/settings.json`, new MCP servers in `~/.claude/mcp-servers.json`,
-   unsigned skills in `~/.claude/skills/`.
-3. **Blast radius** - for each: clean / compromised / unknown:
-   `.env` files, SSH keys, GitHub PAT (check `gh auth status`),
-   cloud creds (`env | grep -iE 'AWS|GCP|AZURE|ANTHROPIC' | sed 's/=.*/=REDACTED/'`),
-   recent prod deploys.
+1. **Timeline** - ask for redacted `git log --oneline --all -50`,
+   `git reflog` and relevant file timestamps if the user hasn't supplied
+   them. You have no shell tool. Quote commit SHAs and timestamps from
+   the supplied evidence; mark missing evidence as blocked.
+2. **IOCs** - inspect supplied files for `curl ... | sh`, `eval`,
+   base64-decoded commands, new hooks in `.claude/settings.json`, MCP
+   entries in project `.mcp.json` or user `~/.claude.json`, and
+   unfamiliar skills in `~/.claude/skills/`. Don't reproduce tokens
+   or other secrets from configuration files.
+3. **Blast radius** - assess `.env` files, SSH keys, GitHub credentials,
+   cloud credentials and recent deployments using redacted metadata
+   the user supplies. Never request credential values or open private
+   keys. Report clean, compromised or unknown only as the evidence allows.
 4. **Next steps** - output `SEVERITY: …`, `CONTAINMENT: …`, `NOTIFY: …`
    in three lines so the user can act immediately.
 
@@ -313,7 +315,7 @@ Instead of context-switching to a vendor UI, wire the scanner into Claude Code a
 | **Nuclei MCP** | Runs ProjectDiscovery's 8000+ DAST templates from a Claude session against staging URLs. | Community wrapper - see [addcontent/nuclei-mcp](https://github.com/addcontent/nuclei-mcp) for the install pattern. | None |
 | **Snyk** | SCA, SAST, IaC, container scanning. Snyk has an official Claude-Code integration, but the exact install command moves around - fetch the current pattern from [docs.snyk.io](https://docs.snyk.io/) under "Claude Code". | (see docs) | `SNYK_TOKEN` |
 
-> ⚠️ **Treat MCP servers as Layer-2 attack surface.** Each server you add can read tool inputs and outputs in this session; a malicious or compromised server can prompt-inject Claude. Pin to official sources, prefer the `docker run -i --rm` invocations (no persistent state), and audit `~/.claude/mcp-servers.json` periodically.
+> ⚠️ **Treat MCP servers as Layer-2 attack surface.** Each server you add can read tool inputs and outputs in this session; a malicious or compromised server can prompt-inject Claude. Pin to official sources, prefer the `docker run -i --rm` invocations (no persistent state), and review project `.mcp.json` and user or local-scope MCP entries in `~/.claude.json` periodically.
 
 **Install these three first:** Semgrep MCP (free, broad SAST) + GitHub MCP (CodeQL/Dependabot/secret-scanning surface for your own repo) + CVE MCP (live NVD lookups during review).
 
@@ -547,11 +549,12 @@ jobs:
           semgrep scan --config p/ci --error --quiet
 
       - name: Trivy (SCA + IaC)
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .
           severity: CRITICAL,HIGH
+          exit-code: '1'
           format: sarif
           output: trivy.sarif
 
