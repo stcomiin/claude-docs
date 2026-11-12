@@ -70,6 +70,20 @@ What makes this dangerous is how little it takes to land in a session you trust.
 
 Recent releases narrowed some of these paths. Skills synced from a claude.ai account cannot run `!` commands or expand `@` files on your machine, and they no longer shadow local commands (v2.1.228+). Marketplace names containing control or invisible characters are rejected (v2.1.247+), and `"owner/*"` entries in `strictKnownMarketplaces` and `blockedMarketplaces` allow or block every repository under an organisation (v2.1.223+). A catalog entry's `headersHelper` command is shown and confirmed before it runs (v2.1.238+). For pinned, reviewable installs, the `archive` plugin source takes a zip over HTTPS with a SHA-256 pin (v2.1.224+), and `claude plugin install --accept-command <sha256>` accepts exactly the command a `--json` dry run displayed (v2.1.271+).
 
+### Mods
+
+Mods (v2.1.287+) are plugins whose code runs inside Claude Code. The [Mods section of Skills & Plugins](/docs/skills-plugins-deep-dive/#mods) covers what they are and how to vet one. The risks are:
+
+- A mod isn't sandboxed. It runs as you and can reach your files, processes, network, environment variables, and `settings.json`, which holds the gateway token in the workshop setup. `/sandbox` isolates the Bash commands Claude runs, and anything a mod starts runs outside it.
+- Permission rules apply to Claude's tool calls, and a mod's own file, process, and network calls skip them. With `Read(.env)` denied, a mod can still read that file through its own file API, or start a program that does. A `WebFetch` deny rule or `CLAUDE_CODE_DISABLE_WEB_FETCH` doesn't stop a mod's network requests, and since v2.1.288 `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` doesn't either. A mod can also run Claude's tools itself through `$.tool.call` and `$.mcp.call`. Those calls raise no permission prompt, even under an ask rule, though deny rules still apply (v2.1.321+).
+- Claude Code has a built-in guard that stops user-installed mods from overriding deny rules, ask rules, and `PreToolUse` hooks. It loads only on a machine with managed settings or a `managed-mcp.json` file, or on a Team or Enterprise login. The workshop setup has none of these, so a mod can approve a call that your rules or hooks would have stopped, and in auto mode a call that a mod approves also skips the classifier.
+- A mod can't redraw the permission prompt, but it can restyle most other parts of the interface. That includes the dialog Claude uses to ask you a question, so a mod can change the wording of a question before you see it.
+- `claude plugin validate` lists the calls a mod makes to the mods API. A mod that only alters what it passes along, such as a command, a wallet address, or a transcript row, makes no such call, so `validate` shows nothing for it. Pluto Security's [write-up](https://pluto.security/blog/claude-code-function-hooks-security/), tested on an early-access build, and Dash Security's [proof of concept](https://dash.security/blog/claude-mods-the-new-attack-surface-built-in) both demonstrate this. Neither reports a malicious mod in the wild, and a search of Reddit and YouTube in November 2026 turned up no report of one.
+- A cloned repository can bring a plugin with it, because a plugin folder under a project's `.claude/skills/` loads once you accept the workspace trust dialog for that folder. Before you trust an unfamiliar repo, look for a `hooks/hooks.json` that names `modules`, which is how a plugin declares a mod.
+- When Claude writes a mod in auto or bypass mode, Claude Code turns it on without asking you (v2.1.321+). In manual and accept-edits modes it asks first, and in `dontAsk` mode the mod doesn't load.
+
+To turn mods off, disable one in `/plugin`, start a session with `claude --safe-mode`, or set `"disableAllHooks": true` in user settings. That setting also stops your `settings.json` hooks. For a team, the managed setting `allowManagedModsOnly` limits loading to the organisation's own mods.
+
 ### Claude Code & MCP CVEs (2025–2026)
 
 | Vulnerability | What broke | Read |
@@ -88,14 +102,19 @@ Recent releases narrowed some of these paths. Skills synced from a claude.ai acc
 | **CVE-2026-40068** - Git worktree spoofing bypassed trust | Crafted worktree metadata could make an untrusted repository look trusted, allowing code to run when the project opened. Fixed in v2.1.84 (April 2026). | [GHSA-q5hj-mxqh-vv77](https://github.com/advisories/GHSA-q5hj-mxqh-vv77) |
 | **CVE-2026-54316** - WebFetch could exfiltrate through an allowed domain | A request to a pre-approved Hugging Face domain could carry data out of the session. Fixed in v2.1.163 (June 2026). Allowlisting a domain does not make it a safe destination for sensitive data. | [GHSA-fg94-h982-f3mm](https://github.com/advisories/GHSA-fg94-h982-f3mm) |
 | **CVE-2026-55607** - Worktree path confusion bypassed the sandbox | Claude Code could resolve a Git worktree against the wrong sandbox path, letting commands write and run code outside the sandbox. Versions from v2.1.38 up to, but not including, v2.1.163 were affected; v2.1.163 fixed the issue. | [GHSA-7835-87q9-rgvv](https://github.com/advisories/GHSA-7835-87q9-rgvv) |
+| **CVE-2026-86063** - Plugin install didn't verify the hash pin | The plugin install flow checked out a marketplace's pinned commit SHA without confirming that the result matched it. An attacker who controlled the plugin's repository could create a branch named like the SHA and have that code installed in place of the reviewed commit. Fixed in v2.1.179; advisory published October 2026. | [GHSA-pq7j-f95f-qfcv](https://github.com/advisories/GHSA-pq7j-f95f-qfcv) |
+| **CVE-2026-88968** - Edit tool race wrote outside the workspace | On macOS, code running inside the Bash sandbox could swap a workspace directory for a symlink between the Edit tool's path check and its write, and so overwrite a file outside the workspace. It needed attacker-controlled code in the sandbox first, such as a malicious repository or dependency script. Fixed in v2.1.251; advisory published November 2026. | [GHSA-5xjx-9qx6-jcrv](https://github.com/advisories/GHSA-5xjx-9qx6-jcrv) |
 
-> GitHub published 14 Claude Code advisories between February and July 2026, and none between then and 2026-09-17. This table highlights the cases most relevant to the workshop. See the [complete package-filtered list](https://github.com/advisories?query=ecosystem%3Anpm+affects%3A%40anthropic-ai%2Fclaude-code), and keep Claude Code current. Native installations update automatically. For npm installations, run `npm install -g @anthropic-ai/claude-code@latest`.
+> GitHub published 14 Claude Code advisories between February and July 2026, and two more in October and November 2026 (checked 2026-11-10). This table highlights the cases most relevant to the workshop. See the [complete package-filtered list](https://github.com/advisories?query=ecosystem%3Anpm+affects%3A%40anthropic-ai%2Fclaude-code), and keep Claude Code current. Native installations update automatically. For npm installations, run `npm install -g @anthropic-ai/claude-code@latest`.
 
 ### Sandbox, permissions, and Anthropic's own guidance
 
 - `/sandbox` enables OS-level **filesystem and network isolation** (seatbelt on macOS, bubblewrap on Linux/WSL2). Anthropic's docs are explicit that **both layers are required together** - without network isolation a compromised agent exfils your SSH keys; without filesystem isolation it backdoors the binary that opens the network for it next time. Configure granularity with `sandbox.filesystem.{allowRead, denyRead, allowWrite, denyWrite}` in `settings.json`. Use `/sandbox` whenever you'd otherwise reach for `--dangerously-skip-permissions`.
 - Sandbox changes since July 2026: credential files can be masked so commands read a sentinel while the proxy substitutes the real value on egress (`mode: "mask"`, Linux and WSL, v2.1.221+), with JWT-aware and AWS SigV4 masking options (v2.1.224+). Commands typed at the `!` prompt run outside the sandbox even in strict mode (v2.1.260+). The sandboxed Bash prompt no longer lists allowed hosts, so Claude asks per host instead of assuming an unlisted host is blocked (v2.1.243+). In auto mode each command can carry its own `allowed_domains`, opened for that command alone (v2.1.271+).
 - `--permission-mode` accepts `default`, `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions`. Pin a project to `plan` or `default` for first contact with unfamiliar code; `acceptEdits` only inside scoped worktrees; `bypassPermissions` only inside a sandbox. Since v2.1.257 a `defaultMode` of `bypassPermissions` in a project or local settings file is ignored, like `auto`; set it in user settings or pass the flag. For untrusted input, `--restricted` removes the command-running tools and `WebFetch`, keeps file tools inside the working directory, refuses bypass, and ignores settings files (v2.1.248+); `--permission-prompts none` makes an unattended run deny anything that would prompt (v2.1.259+).
+- An interactive session starts in `auto` unless you configure a mode (v2.1.283+), so pinning a project to `plan` or `default` now needs an explicit `permissions.defaultMode`.
+- `permissions.blockWritesOutsideWorkingDirectories` makes `Write`, `Edit`, and `NotebookEdit` refuse paths outside the working directories in every mode, including bypass, though it doesn't limit shell commands (v2.1.314+). `permissions.denyInsteadOfPrompting` denies any call that would wait on a prompt, which suits sessions nobody is watching (v2.1.319+, user or managed settings). To make a `command` or `http` hook fail closed, set `"onFailure": "block"` on it, and Claude Code blocks the action when the hook can't start, crashes, or times out (v2.1.295+).
+- Opus 5.5, the workshop model, runs with safety classifiers that mostly flag cybersecurity and biology content. If a security review prompt gets flagged, Claude Code re-runs the request on another model. The [setup guide](/docs/setup-guide/#claude-code) covers what happens then and how to control it.
 - Claude Code's own [security guide](https://code.claude.com/docs/en/security) lists the platform's built-in safeguards: permission system, command blocklist, network-request approval, isolated context windows, fail-closed pattern matching, encrypted credential storage. Read it once.
 - Anthropic's [Responsible Scaling Policy](https://www.anthropic.com/responsible-scaling-policy) (v3.x) and [Usage Policy](https://www.anthropic.com/legal/aup) sit above per-product controls - relevant for regulated deployments.
 
@@ -180,9 +199,9 @@ For repeated / regulated work, the prompt above isn't enough - you want a versio
 
 ### Custom security subagents
 
-Claude Code subagents are Markdown files in `.claude/agents/*.md` (per-project) or `~/.claude/agents/*.md` (global), declared with frontmatter and invoked via `/agents <name>` or auto-delegated by description match. See [docs.claude.com/en/docs/claude-code/sub-agents](https://docs.claude.com/en/docs/claude-code/sub-agents) for the official schema.
+Claude Code subagents are Markdown files in `.claude/agents/*.md` per project or `~/.claude/agents/*.md` for your user account. Ask Claude to use an agent by name, or let it delegate by description. `/agents` prints configuration guidance; it does not invoke a named agent. See [docs.claude.com/en/docs/claude-code/sub-agents](https://docs.claude.com/en/docs/claude-code/sub-agents) for the [official schema](https://code.claude.com/docs/en/sub-agents#supported-frontmatter-fields).
 
-> 🗒️ Why subagents (not skills) for security review? Subagents get their own context window, can be locked to read-only tools, and can use a different model. A locked-down `security-auditor` running on Opus inside a worktree where Claude is otherwise on Sonnet is the cheapest way to get a real second opinion.
+Subagents have separate context windows and can use a different model. The examples below allow only `Read`, `Glob` and `Grep`, without a shell or file-editing tools. A tool allowlist does not isolate filesystem reads. Supply a redacted diff or Git history when the review needs it, and report missing evidence as blocked rather than granting shell access silently.
 
 **Drop this into `.claude/agents/security-auditor.md`:**
 
@@ -190,7 +209,7 @@ Claude Code subagents are Markdown files in `.claude/agents/*.md` (per-project) 
 ---
 name: security-auditor
 description: Use proactively before every PR and whenever the user asks to "security review", "OWASP review", "audit", or "look for vulnerabilities". Read-only - finds issues, does not fix them.
-tools: Read Glob Grep Bash
+tools: Read, Glob, Grep
 model: opus
 ---
 
@@ -227,24 +246,26 @@ Hard rules:
 ---
 name: incident-triage
 description: Use when the user suspects a compromise of their Claude Code session, a leaked credential, or unexpected commits/files. Read-only triage - produces a timeline + blast-radius report.
-tools: Read Glob Grep Bash
+tools: Read, Glob, Grep
 model: sonnet
 ---
 
 You are a read-only incident-response analyst. You have one job: produce
 a triage report in under 15 minutes. Do NOT remediate.
 
-1. **Timeline** - reconstruct from `git log --oneline --all -50`,
-   `git reflog`, file mtimes on `.claude/`, `~/.claude/`, `.env*`. Quote
-   commit SHAs and timestamps.
-2. **IOCs** - search for: `curl ... | sh`, `eval`, base64-decoded
-   commands, unfamiliar SSH keys in `~/.ssh/`, new hooks in
-   `.claude/settings.json`, new MCP servers in `~/.claude/mcp-servers.json`,
-   unsigned skills in `~/.claude/skills/`.
-3. **Blast radius** - for each: clean / compromised / unknown:
-   `.env` files, SSH keys, GitHub PAT (check `gh auth status`),
-   cloud creds (`env | grep -iE 'AWS|GCP|AZURE|ANTHROPIC' | sed 's/=.*/=REDACTED/'`),
-   recent prod deploys.
+1. **Timeline** - ask for redacted `git log --oneline --all -50`,
+   `git reflog` and relevant file timestamps if the user hasn't supplied
+   them. You have no shell tool. Quote commit SHAs and timestamps from
+   the supplied evidence; mark missing evidence as blocked.
+2. **IOCs** - inspect supplied files for `curl ... | sh`, `eval`,
+   base64-decoded commands, new hooks in `.claude/settings.json`, MCP
+   entries in project `.mcp.json` or user `~/.claude.json`, and
+   unfamiliar skills in `~/.claude/skills/`. Don't reproduce tokens
+   or other secrets from configuration files.
+3. **Blast radius** - assess `.env` files, SSH keys, GitHub credentials,
+   cloud credentials and recent deployments using redacted metadata
+   the user supplies. Never request credential values or open private
+   keys. Report clean, compromised or unknown only as the evidence allows.
 4. **Next steps** - output `SEVERITY: …`, `CONTAINMENT: …`, `NOTIFY: …`
    in three lines so the user can act immediately.
 
@@ -294,7 +315,7 @@ Instead of context-switching to a vendor UI, wire the scanner into Claude Code a
 | **Nuclei MCP** | Runs ProjectDiscovery's 8000+ DAST templates from a Claude session against staging URLs. | Community wrapper - see [addcontent/nuclei-mcp](https://github.com/addcontent/nuclei-mcp) for the install pattern. | None |
 | **Snyk** | SCA, SAST, IaC, container scanning. Snyk has an official Claude-Code integration, but the exact install command moves around - fetch the current pattern from [docs.snyk.io](https://docs.snyk.io/) under "Claude Code". | (see docs) | `SNYK_TOKEN` |
 
-> ⚠️ **Treat MCP servers as Layer-2 attack surface.** Each server you add can read tool inputs and outputs in this session; a malicious or compromised server can prompt-inject Claude. Pin to official sources, prefer the `docker run -i --rm` invocations (no persistent state), and audit `~/.claude/mcp-servers.json` periodically.
+> ⚠️ **Treat MCP servers as Layer-2 attack surface.** Each server you add can read tool inputs and outputs in this session; a malicious or compromised server can prompt-inject Claude. Pin to official sources, prefer the `docker run -i --rm` invocations (no persistent state), and review project `.mcp.json` and user or local-scope MCP entries in `~/.claude.json` periodically.
 
 **Install these three first:** Semgrep MCP (free, broad SAST) + GitHub MCP (CodeQL/Dependabot/secret-scanning surface for your own repo) + CVE MCP (live NVD lookups during review).
 
@@ -528,11 +549,12 @@ jobs:
           semgrep scan --config p/ci --error --quiet
 
       - name: Trivy (SCA + IaC)
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .
           severity: CRITICAL,HIGH
+          exit-code: '1'
           format: sarif
           output: trivy.sarif
 
@@ -617,6 +639,21 @@ The same applies to Claude Code itself. Between 2.1.221 and 2.1.274 (August to S
 - A `permissions.ask` rule was skipped in auto mode when the command sat inside a compound command or subshell (v2.1.257).
 - Plugin commands declared in a marketplace entry could point outside the plugin directory (v2.1.251).
 - MCP secrets resolved from `${VAR}` placeholders, and tokens embedded in git source URLs, appeared in error output (v2.1.268 and v2.1.274).
+
+Releases 2.1.275 to 2.1.321 (September to November 2026) fixed these, also with no advisory or CVE:
+
+- Feature-flag, startup, fast-mode, profile, and feedback requests to Anthropic carried the API key configured for a third-party gateway (v2.1.299). The workshop uses a gateway key too, though `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` already turns off the feature-flag, fast-mode, and feedback requests.
+- A Bash permission bypass where a crafted environment prefix hid part of a command from permission checks, and a sandbox escape when creating a worktree (v2.1.319).
+- A read-only Bash command could run outside the sandbox without a permission prompt, and deny rules did not apply to the file that a `cp` or `mv` into a directory writes (v2.1.321).
+- Sandboxed Bash commands on macOS and Linux ran the shell's startup files outside the sandbox before each command (v2.1.309).
+- A sandboxed command could write into a `--plugin-dir` folder, whose code Claude Code reloads and runs outside the sandbox (v2.1.299).
+- `PreToolUse` hook approvals and auto mode skipped the permission prompt for file reads from network (UNC) paths (v2.1.292).
+- A `sed` command could skip the permission check in accept-edits and auto mode (v2.1.319).
+- `acceptEdits`, allow rules, and auto mode approved a write through a symlinked path that landed outside the working tree (v2.1.280).
+- `Read` deny rules didn't apply to files reached through a symlink when @-mentioned or selected in the IDE (v2.1.289), or to image paths pasted into the prompt (v2.1.290).
+- A dangerous `rm` inside a `bash -c` or `sh -c` script ran without a prompt in `bypassPermissions` mode or under a shell allow rule (v2.1.288).
+- `claude --bg` started a background session, and ran its project hooks, in a directory that had not passed the workspace trust prompt (v2.1.281).
+- MCP OAuth requests sent secrets such as refresh tokens to another host when a server redirected them (v2.1.321).
 
 Keep Claude Code current: compare `claude --version` with the [changelog](https://code.claude.com/docs/en/changelog) and install the vetted version with npm as shown in the [setup guide](/docs/setup-guide/#claude-code).
 

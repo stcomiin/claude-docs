@@ -12,7 +12,7 @@ Please finish these steps **before** the workshop. Allow about 15–20 minutes. 
 
 ## Setup checklist
 
-- [ ] Node.js v22+ installed
+- [ ] Node.js 22.12 or later within version 22 installed
 - [ ] Git installed
 - [ ] GitHub CLI installed and signed into your GitHub account
 - [ ] A terminal you're comfortable with
@@ -26,15 +26,15 @@ Please finish these steps **before** the workshop. Allow about 15–20 minutes. 
 
 Install these first.
 
-### Node.js (v22 or higher)
+### Node.js 22.12 or later within version 22
 
-Download the current LTS release from [nodejs.org](https://nodejs.org/). It includes npm and meets the Node.js 22+ requirement for Claude Code. The `npx skills` installer in step 3 needs Node.js too.
+Install Node.js 22 from [nodejs.org](https://nodejs.org/). The [workshop starter](https://github.com/stcomiin/expense-tracker-workshop-starter/blob/main/package.json) requires `>=22.12.0 <23`, so don't choose Node.js 24 or a newer major version for these labs. Node.js includes npm and also runs the `npx skills` installer in step 3.
 
-Verify after install:
+Verify in the terminal you'll use for the workshop:
 
 ```bash
-node --version    # Should show v22.x.x or higher
-npm --version     # Should show 10.x.x or higher
+node --version    # Must be v22.12.0 or a later v22 release
+npm --version
 ```
 
 ### Git
@@ -70,32 +70,32 @@ C:\Program Files\Git\bin\bash.exe
 
 ## 2. Install and configure
 
-### Get an API key
+### Getting Your API Key
 
-You need a key from the provider used for the workshop.
+You'll need an API key from your chosen provider.
 
-#### Option A: LiteLLM proxy
+> ℹ️ **For workshop participants:** We will provide your API key. Watch for a follow-up email from us.
 
-If your organization provides a LiteLLM proxy, or you run one yourself:
+If you want to bring your own key, follow the setup steps below.
 
-1. Open the LiteLLM admin page at `https://your-litellm-proxy.example.com/ui`.
-2. Select **Virtual Keys**, then **Create new key**.
-3. Choose your team, give the key a name, and leave the other fields at their defaults.
-4. Create the key and save it somewhere secure. You can regenerate it later from the same page.
-5. Use **Logs** for request details such as token counts and time to first token. Use **Usage** for totals.
+#### OpenRouter setup steps
 
-#### Option B: OpenRouter
+[OpenRouter](https://openrouter.ai/) provides unified access to Claude, GPT, Gemini, and many other models through a single API key.
 
-[OpenRouter](https://openrouter.ai/) routes requests to Claude, GPT, Gemini, and other model providers through one API key.
-
-1. Sign up at [openrouter.ai](https://openrouter.ai/).
-2. Open [Keys](https://openrouter.ai/keys) and create an API key.
-3. Add credits under [Credits](https://openrouter.ai/credits).
-4. Save the key; it starts with `sk-or-`.
-
-Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses `https://openrouter.ai/api/v1`.
+1. Skip to [Claude Code installation section](#claude-code) if you already have an OpenRouter key (`sk-or-xxxxxx`).
+2. Sign up at [openrouter.ai](https://openrouter.ai/)
+3. Go to [Keys](https://openrouter.ai/keys) and create an API key
+4. Add credits under [Credits](https://openrouter.ai/credits)
+5. Your base URL will be `https://openrouter.ai/api`
+6. Note your API key — it starts with `sk-or-`
 
 ### Claude Code
+
+{{< callout type="warning" >}}
+**For Info PC participants only.** If you are joining from one of the other PCs, bring your own Claude subscription or API key instead of the workshop key.
+
+**The workshop OpenRouter key gives you Haiku only.** The only Claude model available with the key we email you is **Claude Haiku 4.5**. Any other model shown below — Opus 5.5, Opus 5, Sonnet 5, or Fable 5 — will **not** work with the provided key. Set the model to Haiku in your config, and switch with `/model haiku` inside Claude Code.
+{{< /callout >}}
 
 1. **Install with npm**
     
@@ -108,14 +108,16 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
     
     ```bash
     # Install globally
-    npm install -g @anthropic-ai/claude-code@2.1.290 # minimum version for idleCompaction
+    npm install -g @anthropic-ai/claude-code@2.1.321 # verified 2026-11-10
     
     # Verify
     claude --version
     
-    # Upgrade later
+    # Upgrade later, outside the workshop
     npm install -g @anthropic-ai/claude-code@latest
     ```
+
+    Version 2.1.321 is the workshop's previously verified baseline. Check `claude --version` before starting rather than upgrading automatically. Rehearse gateway access, hooks and browser tools before changing the workshop baseline; newer commands in the reference pages may need a later version.
     
 2. **Configure the gateway in `settings.json`**
     
@@ -123,18 +125,18 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
     
     Merge the settings below into your existing file. Keep any other settings and existing `env` entries. `idleCompaction` is a top-level Boolean, not an environment variable.
 
-    **LiteLLM proxy:**
+    **LiteLLM proxy (Use Openrouter section below for the workshop):**
     
     ```json
     {
       "env": {
         "ANTHROPIC_BASE_URL": "https://your-litellm-proxy.example.com",
         "ANTHROPIC_AUTH_TOKEN": "sk-your-api-key",
-        "ANTHROPIC_MODEL": "claude-opus-4-8[1m]",
-        "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-8[1m]",
-        "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-opus-4-8[1m]",
-        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-opus-4-8[1m]",
-        "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-4-8[1m]",
+        "ANTHROPIC_MODEL": "claude-opus-5-5[1m]",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5-5[1m]",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-opus-5-5[1m]",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-opus-5-5[1m]",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "claude-opus-5-5[1m]",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
         "CLAUDE_CODE_EFFORT_LEVEL": "max",
         "CLAUDE_CODE_FORK_SUBAGENT": "0",
@@ -151,20 +153,19 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
 
     `promptSuggestionEnabled: false` turns off next-prompt suggestions.
     
-    **OpenRouter:**
+    **OpenRouter (use this for the workshop):**
     
     ```json
     {
       "env": {
         "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
         "ANTHROPIC_AUTH_TOKEN": "sk-or-your-openrouter-key",
-        "ANTHROPIC_MODEL": "anthropic/claude-opus-4-8[1m]",
-        "ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic/claude-opus-4-8[1m]",
-        "ANTHROPIC_DEFAULT_SONNET_MODEL": "anthropic/claude-opus-4-8[1m]",
-        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-opus-4-8[1m]",
-        "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-opus-4-8[1m]",
+        "ANTHROPIC_MODEL": "anthropic/claude-haiku-4.5",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic/claude-haiku-4.5",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "anthropic/claude-haiku-4.5",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "anthropic/claude-haiku-4.5",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "anthropic/claude-haiku-4.5",
         "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-        "CLAUDE_CODE_EFFORT_LEVEL": "max",
         "CLAUDE_CODE_FORK_SUBAGENT": "0",
         "CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
         "CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING": "1",
@@ -179,10 +180,18 @@ Claude Code uses `https://openrouter.ai/api`. The Codex configuration below uses
 
     `promptSuggestionEnabled: false` turns off next-prompt suggestions.
     
+  The [effort level](https://code.claude.com/docs/en/env-vars#variables) does not apply to Haiku 4.5, so the Haiku example leaves out `CLAUDE_CODE_EFFORT_LEVEL`.
+
+  The examples disable automatic compaction for the workshop's handoff exercise. Use `/context` and save a handoff before the model's limit. They also retain local transcripts for 3,650 days; reduce `cleanupPeriodDays` for normal use if you don't need that retention.
+
   On Windows, add `"CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe"` only if Claude Code cannot find Git Bash.
 
  - `CLAUDE_CODE_SUBAGENT_MODEL` is a default rather than an override since v2.1.251: an agent file's own `model:` wins. `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` (v2.1.257+) force applies it to every subagent.
  - `CLAUDE_CODE_FORK_SUBAGENT=0` turns off subagent forking, which has been on by default since v2.1.232. A forked subagent inherits the whole conversation which is context bloat. With forking off, subagents start from only the brief they are given.
+ - The LiteLLM example pins every model slot to Claude Opus 5.5 (the workshop OpenRouter example uses Claude Haiku 4.5, the only model on the workshop key). Opus 5.5 needs Claude Code v2.1.280 or later. Your gateway has to serve the model under the name you put here. With LiteLLM that's the deployment name on your proxy, and OpenRouter lists the model as `anthropic/claude-opus-5.5` but also resolves the hyphenated spelling used above. Keep the `[1m]` suffix even though Opus 5.5 has a 1M-token context window without it, because Claude Code holds a model name it doesn't recognise to 200K unless the name ends in `[1m]`.
+ - Opus 5.5 runs with safety classifiers that mostly flag cybersecurity and biology content, and security work is the most likely trigger in this workshop. Claude Code re-runs a flagged request on Opus 4.8 (cybersecurity) or Opus 5 (biology) and keeps the session on that model until you run `/model`, so the re-run fails if your gateway doesn't serve those models. To be asked before a switch, open `/config` and set **Switch models when a message is flagged** to **Ask each time**. To turn switching off, set `CLAUDE_CODE_DISABLE_REFUSAL_FALLBACK=1`.
+ - A new interactive session starts in auto mode on every provider unless you set `permissions.defaultMode` (v2.1.283+). [Auto Mode & Automation](/docs/agentic-coding-in-terminal/#auto-mode--automation) covers how auto mode behaves behind a gateway. To approve each action yourself, press `Shift+Tab` once in the session, or add `"permissions": { "defaultMode": "default" }` to this file.
+ - `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1` also turns off feature-flag fetching, so `/skill-doctor`, the advisor tool, and the built-in "You should know" mod don't work with these settings.
 
 
 #### Keep idle compaction disabled
@@ -193,7 +202,7 @@ Idle compaction is separate from [automatic compaction near the context limit](h
 
 In the [user settings file](https://code.claude.com/docs/en/settings#settings-files-and-who-they-affect), this preference applies to all your projects on that machine. Project, local, command-line, or managed settings can override it. To change it interactively on v2.1.302 or later, run `/config` and turn off **Idle compaction**. That row saves to user settings and may be hidden when another settings source overrides it.
 
-### Codex CLI (Optional)
+### (Optional, not needed for this workshop) Codex CLI
 
 1. **Install with npm**
 
@@ -272,7 +281,7 @@ In the [user settings file](https://code.claude.com/docs/en/settings#settings-fi
 
     Keep API keys out of `http_headers`. Codex reads the variable named by `env_key` and sends it as the provider credential. Do not add context-window or compaction limits unless your gateway needs values that differ from the model metadata.
 
-4. Run `codex` in the same terminal, then use `/model`. With OpenRouter, choose a provider-qualified ID such as `openai/gpt-5.6-sol`, `openai/gpt-5.6-terra`, or `openai/gpt-5.6-luna`. With LiteLLM, use the deployment name configured on your proxy. Sol is for complex, open-ended work, Terra for everyday development, and Luna for clear, repeatable tasks. Max gives one agent more time to reason; Ultra can delegate independent parts to subagents on eligible accounts.
+4. Run `codex` in the same terminal, then use `/model`. With OpenRouter, choose a provider-qualified ID such as `openai/gpt-6.1-sol`, `openai/gpt-6.1-terra`, or `openai/gpt-6-luna`. The older GPT-5.6 IDs such as `openai/gpt-5.6-sol` still resolve. With LiteLLM, use the deployment name configured on your proxy. Sol is for complex, open-ended work, Terra for everyday development, and Luna for clear, repeatable tasks. Max gives one agent more time to reason; Ultra can delegate independent parts to subagents on eligible accounts.
 
 ---
 
@@ -331,7 +340,9 @@ If you get stuck on any step:
 
 1. Copy the error message
 2. Paste it into Claude or ChatGPT and ask for help.
-3. Check `claude --version`. Versions 2.1.265 through 2.1.267 fail every turn with HTTP 400 through third-party Anthropic-compatible endpoints such as LiteLLM and OpenRouter (fixed in 2.1.268). The pinned version above is past that range.
+3. Check `claude --version`. Versions 2.1.265 through 2.1.267 (fixed in 2.1.268) and 2.1.275 (fixed in 2.1.276) fail every turn with HTTP 400 through third-party Anthropic-compatible endpoints such as LiteLLM and OpenRouter. The pinned version above is past both.
+4. If the gateway says the model doesn't exist, it isn't serving the model under the name in your `settings.json`. Check the model list in the LiteLLM UI or on OpenRouter, or ask whoever runs the proxy which name to use.
+5. If Claude asks about most actions or refuses them, your gateway probably isn't passing auto mode's safety review through. To check, run `/status` and read the **Auto mode server** row. Press `Shift+Tab` to switch to manual mode, then see [Auto Mode & Automation](/docs/agentic-coding-in-terminal/#auto-mode--automation).
 
 ---
 

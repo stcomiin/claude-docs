@@ -11,6 +11,28 @@ You will use the `grill-with-docs` skill to trigger your agent to conduct an int
 
 For the purposes of this workshop, we will be using [Matt Pocock's Skill For Real Engineers](https://github.com/mattpocock/skills) to drive our spec-driven development. For your own development, other approaches like [GSD](https://github.com/open-gsd/gsd-core), [BMaD Method](https://github.com/bmad-code-org/bmad-method), [OpenSpec](https://github.com/Fission-AI/openspec), [Spec Kit](https://github.com/github/spec-kit) and [Superpowers](https://github.com/obra/superpowers) can also be considered.
 
+## Before you begin
+
+Configure Matt Pocock's engineering skills once for your fork. Installing the plugin alone doesn't configure its issue tracker or domain-document locations. The current `to-spec` and `to-tickets` skills expect this setup.
+
+Replace `YOUR-USERNAME` with the account that owns your fork. Check that your fork has an **Issues** tab. If it doesn't, run this in a temporary terminal:
+
+```sh
+gh repo edit YOUR-USERNAME/expense-tracker-workshop-starter --enable-issues
+```
+
+In Claude Code, enter:
+
+```text
+/mattpocock-skills:setup-matt-pocock-skills Configure GitHub Issues for
+YOUR-USERNAME/expense-tracker-workshop-starter, my own fork, not upstream.
+Verify the repository first. Show the proposed instruction, tracker,
+domain-document and label changes, and wait for my approval before
+applying them. Don't create issues, commits or pull requests.
+```
+
+Review the destination and approve only the setup changes you want. The skill records the tracker in `docs/agents/issue-tracker.md` and the domain-document layout in `docs/agents/domain.md`, then links them from your existing `CLAUDE.md` or `AGENTS.md`. It may also configure triage labels. See the [setup skill's instructions](https://github.com/mattpocock/skills/blob/main/skills/engineering/setup-matt-pocock-skills/SKILL.md).
+
 ## Step 1: Start the interview
 
 > **Required concept:** Read [Skills](/docs/skills-plugins-deep-dive/#skills).
@@ -23,7 +45,7 @@ Use Matt Pocock's `grill-with-docs` skill to work through the feature requiremen
 
 Answer the agent's questions. If a recommendation doesn't match what you want, say so. If you're unsure about an option, ask the agent to explain it before deciding.
 
-The skill may record agreed terms in `CONTEXT.md`, a glossary of project terms. Review any documentation it writes.
+The skill may record agreed terms in `GLOSSARY.md` and qualifying decisions in `docs/adr/`. Review any documentation it writes. Older installations used `CONTEXT.md`; the setup skill can offer to migrate that legacy name.
 
 Keep discussing anything that's unclear. Once you and the agent agree on what to build and what to leave out, you're ready to write the specification.
 
@@ -31,7 +53,7 @@ Keep discussing anything that's unclear. Once you and the agent agree on what to
 
 Stay in the same conversation so the agent can use the decisions from your interview.
 
-The `to-spec` skill normally publishes to the project's issue tracker. We haven't configured that integration yet. For now, ask it to draft the specification for review:
+The `to-spec` skill normally publishes to the issue tracker configured above. For this review, explicitly ask it to show the draft in chat without publishing:
 
 ```text
 /mattpocock-skills:to-spec Draft the specification with testable acceptance criteria. Show it in chat. Don't configure the issue tracker or publish anything yet.
@@ -51,21 +73,17 @@ After reviewing the specification, you'll use the `/to-tickets` skill to convert
 
 > **Required concept:** Read [Working with GitHub](/docs/agentic-coding-in-terminal/#working-with-github).
 
-Use GitHub Issues in your own fork, not the workshop repository. Replace `YOUR-USERNAME` below with the account that owns your fork.
-
-Check that your fork has an **Issues** tab. If it's missing, open a temporary terminal and run:
-
-```sh
-gh repo edit YOUR-USERNAME/expense-tracker-workshop-starter --enable-issues
-```
-
-Return to your interview conversation and enter:
+Use the same GitHub fork you configured before the interview, not the workshop repository. Return to your interview conversation and enter:
 
 ```text
 /mattpocock-skills:to-tickets Use the reviewed specification.
 Use GitHub Issues for issue tracking. Create only 2 or 3 issues
 in my fork, not the upstream repository. Check my fork's owner
 and repository name, and pass that repository explicitly with --repo.
+
+Show which ticket covers each acceptance criterion, and flag any gaps.
+Include the specification's out-of-scope items in the relevant tickets.
+Wait for my approval before publishing.
 ```
 
 For this workshop, we'll group the specifications into 2 or 3 issues in the interest of time. This is just a workshop limit and shouldn't be a constraint in your own projects.
@@ -78,6 +96,7 @@ After publication, open the returned links and check the tickets in GitHub.
 
 ## Checkpoint
 
+- [ ] The engineering skills are configured to use GitHub Issues in my own fork.
 - [ ] I've reviewed the specification, including its acceptance criteria and what we agreed to leave out.
 - [ ] My fork has 2 or 3 published issues that match the specification.
 - [ ] I understand what each issue delivers and which issues depend on others.
