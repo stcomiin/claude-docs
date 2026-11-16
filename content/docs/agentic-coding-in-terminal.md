@@ -311,6 +311,16 @@ The quality of your prompt is the biggest lever you have on output quality. Thes
 - [Provide specific context](https://code.claude.com/docs/en/best-practices#provide-specific-context-in-your-prompts). Including an explicit success condition (passing tests, a specific output, a diff that meets a criterion) lets the agent self-verify and reduces back-and-forth.
 
 
+### Adapt prompts when switching models
+
+Do not assume a prompt or effort setting tuned for one model will work unchanged on another. In [this Reddit discussion](https://www.reddit.com/r/ClaudeCode/comments/1xxsqu4/after_burning_tokens_with_fable_52_i_appreciate/), users reported both early stopping and excessive delegation with Fable 5.2. These are anecdotes, not a model ranking. The original comparison also used different effort levels for Fable and Opus.
+
+- Read the new model's prompting guide, then test a representative task in a fresh conversation. Keep the task and success criteria fixed; compare passing checks, review effort, elapsed time, and total cost including subagents. Tune effort separately for each model.
+- State whether you want a plan or implementation. For implementation, name the allowed edits, required checks, and actions that still need approval. Ask the agent to finish those steps or report a concrete blocker, rather than merely suggest what to do next.
+- Review inherited `CLAUDE.md`, skills, and delegation instructions when behavior changes. Specify when subagents are useful and which models they should use; check actual usage rather than assuming the prompt enforces a spending limit.
+
+[Anthropic's Fable 5.2 prompting guide](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-2) gives model-specific examples. Its code-ownership prompt can encourage refactoring, but Anthropic also reports higher token use and unsolicited changes. Do not add it to a narrowly scoped fix. Review the actual diff, not just the agent's summary, and keep permission controls in place.
+
 ### Modes
 
 #### Planning
